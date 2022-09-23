@@ -16,6 +16,7 @@ public class GroupSchedule {
     @Column(nullable = false)
     private String name;
 
+
     private String weekday;
     private String startTime;
     private String finishTime;

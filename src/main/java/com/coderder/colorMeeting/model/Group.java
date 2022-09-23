@@ -19,7 +19,7 @@ public class Group {
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name="group_id")
-    private Collection<GroupSchedule> groupSchedulesList;
+    private Collection<PersonalSchedule> personalSchedulesList;
 
     @OneToMany(mappedBy = "group")
     private Set<GroupMembers> groupMembersSet;

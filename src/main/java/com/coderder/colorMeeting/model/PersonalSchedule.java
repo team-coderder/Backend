@@ -1,13 +1,14 @@
 package com.coderder.colorMeeting.model;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 public class PersonalSchedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @ManyToOne(targetEntity = Member.class, fetch = FetchType.LAZY)
     @JoinColumn(name="member_id")
@@ -15,9 +16,14 @@ public class PersonalSchedule {
 
     @Column(nullable = false)
     private String name;
+
+    @Column()
     private String memo;
+    @Column()
     private String weekday;
+    @Column()
     private String startTime;
+    @Column()
     private String finishTime;
 
 }
