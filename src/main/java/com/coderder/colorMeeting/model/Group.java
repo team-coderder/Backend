@@ -1,27 +1,32 @@
 package com.coderder.colorMeeting.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 
 @Entity
+@Getter
+@Setter
 public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "group_id")
-    private int id;
+    private Long id;
 
     @Column(nullable = false)
     private String name;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name="group_id")
-    private Collection<PersonalSchedule> personalSchedulesList;
+    @OneToMany(mappedBy = "group")
+    private List<PersonalSchedule> personalSchedulesList;
 
     @OneToMany(mappedBy = "group")
-    private Set<GroupMembers> groupMembersSet;
+    private List<GroupMembers> groupMembersList;
 
 }
