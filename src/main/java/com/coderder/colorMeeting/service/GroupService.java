@@ -26,14 +26,13 @@ public class GroupService {
 //                .groupScheduleList(null)
                 .build();
         groupRepository.save(group);
-        return ResponseDto.success("그룹 저장 완료");
+        return ResponseDto.success("그룹 저장이 완료되었습니다.");
     }
 
     @Transactional
     public ResponseDto<?> updateGroup(Long groupId, GroupRequestDto requestDto) {
 
         Group group = isPresent(groupId);
-
         if (group == null) {
             throw new GroupNotFoundException();
         }
@@ -44,8 +43,22 @@ public class GroupService {
                 .name(group.getName())
                 .build();
 
-        return ResponseDto.success(response);
+//        return ResponseDto.success(response);
+        return ResponseDto.success("그룹 수정이 완료되었습니다.");
     }
+
+    @Transactional
+    public ResponseDto<?> deleteGroup(Long groupId) {
+
+        Group group = isPresent(groupId);
+        if (group == null) {
+            throw new GroupNotFoundException();
+        }
+        groupRepository.delete(group);
+
+        return ResponseDto.success("그룹 삭제가 완료되었습니다.");
+    }
+
 
     private Group isPresent(Long groupId) {
         Optional<Group> group = groupRepository.findById(groupId);

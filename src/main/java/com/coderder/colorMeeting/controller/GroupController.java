@@ -25,4 +25,10 @@ public class GroupController {
                         @RequestParam Long groupId, @RequestBody GroupRequestDto requestDto) {
         return groupService.updateGroup(groupId, requestDto);
     }
+
+    @RequestMapping(method = RequestMethod.DELETE)
+    public ResponseDto<?> deleteGroup( // @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                       @RequestParam Long groupId) {
+        return groupService.deleteGroup(groupId);
+    }
 }
