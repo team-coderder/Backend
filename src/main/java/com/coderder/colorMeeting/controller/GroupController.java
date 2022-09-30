@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/group")
 public class GroupController {
 
     private final GroupService groupService;
@@ -30,5 +30,11 @@ public class GroupController {
     public ResponseDto<?> deleteGroup( // @AuthenticationPrincipal UserDetailsImpl userDetails,
                                        @RequestParam Long groupId) {
         return groupService.deleteGroup(groupId);
+    }
+
+    @RequestMapping(value = "/members", method = RequestMethod.GET)
+    public ResponseDto<?> getGroupMembers( // @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestParam Long groupId) {
+        return groupService.getGroupMembers(groupId);
     }
 }
