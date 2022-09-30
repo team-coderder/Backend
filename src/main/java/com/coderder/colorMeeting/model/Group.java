@@ -25,10 +25,13 @@ public class Group {
     @Column(nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "group")
-    private List<PersonalSchedule> personalSchedulesList;
+//    @OneToMany(mappedBy = "group")
+//    private List<PersonalSchedule> personalSchedulesList;
 
     @OneToMany(mappedBy = "group")
     private List<GroupMembers> groupMembersList;
 
+    public void updateName(String name) {
+        this.name = name;
+    }
 }
