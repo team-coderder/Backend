@@ -19,7 +19,6 @@ public enum ErrorCode {
     // 관리자가 아닌데 수정, 삭제 요청 등 권한 오류
     NOT_AUTHORIZED("NOT_AUTHORIZED", "권한이 없습니다.");
 
-
     private final String code;
     private final String message;
 }
