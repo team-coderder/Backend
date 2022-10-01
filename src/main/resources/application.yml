@@ -1,37 +1,37 @@
-spring:
-  profiles:
-    include: db-username,db-url,db-password
-  jpa:
-    hibernate:
-      ddl-aute: update
-    properties:
-      hibernate:
-        format_sql: true
-        show_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-      logging:
-        level:
-          org:
-            hibernate:
-              SQL: debug
-    show-sql: true
-
-
-
-
 #spring:
-#  # 스프링 앱과 h2와 연결하겠음
-#  datasource:
-#    url: jdbc:h2:tcp://localhost/~/colorMeeting
-#    username: sa
-#    password:
-#    driver-class-name: org.h2.Driver
+#  profiles:
+#    include: db-username,db-url,db-password
 #  jpa:
-#    hibernate: # jpa connection pool은 hibernate를 활용하겠음
-#      ddl-auto: create
+#    hibernate:
+#      ddl-aute: update
 #    properties:
 #      hibernate:
-#        show_sql: true
 #        format_sql: true
-#logging.level:
-#  org.hibernate.SQL: debug
+#        show_sql: true
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+#      logging:
+#        level:
+#          org:
+#            hibernate:
+#              SQL: debug
+#    show-sql: true
+
+
+
+
+spring:
+  # 스프링 앱과 h2와 연결하겠음
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/colorMeeting
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate: # jpa connection pool은 hibernate를 활용하겠음
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+logging.level:
+  org.hibernate.SQL: debug

@@ -10,7 +10,7 @@ import javax.persistence.*;
 @IdClass(GroupMemberId.class)
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupMembers {
+public class GroupMember {
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
