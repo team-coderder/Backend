@@ -7,6 +7,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Builder
+@IdClass(GroupMemberId.class)
 @NoArgsConstructor
 @AllArgsConstructor
 public class GroupMembers {
