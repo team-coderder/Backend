@@ -36,5 +36,12 @@ out/
 ### VS Code ###
 .vscode/
 
+### db 설정 파일
+#application-db-url.properties
+#application-db-username.properties
+#application-db-password.properties
+
+
+=======
 ### Application-00.properties ###
 application-**.properties

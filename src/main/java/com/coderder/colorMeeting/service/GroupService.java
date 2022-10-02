@@ -8,7 +8,7 @@ import com.coderder.colorMeeting.dto.response.GroupResponseDto;
 import com.coderder.colorMeeting.dto.response.ResponseDto;
 import com.coderder.colorMeeting.exception.GroupNotFoundException;
 import com.coderder.colorMeeting.model.Group;
-import com.coderder.colorMeeting.model.GroupMembers;
+import com.coderder.colorMeeting.model.GroupMember;
 import com.coderder.colorMeeting.model.Member;
 import com.coderder.colorMeeting.repository.GroupRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class GroupService {
     public ResponseDto<?> createGroup(GroupRequestDto requestDto) {
         Group group = Group.builder()
                 .name(requestDto.getName())
-                .groupMembersList(null)
+                .groupMemberList(null)
 //                .groupScheduleList(null)
                 .build();
         groupRepository.save(group);
@@ -77,8 +77,8 @@ public class GroupService {
         List<GroupMemberDto> members = new ArrayList<>();
 
         // GroupMembers라는 객체에서 각 멤버들에 대한 정보 추출하기
-        List<GroupMembers> groupMembers = group.getGroupMembersList();
-        for (GroupMembers groupMember : groupMembers) {
+        List<GroupMember> groupMembers = group.getGroupMemberList();
+        for (GroupMember groupMember : groupMembers) {
             Member member = groupMember.getMember();
             GroupMemberDto groupMemberDto = GroupMemberDto.builder()
                     .memberId(member.getId())
@@ -112,7 +112,7 @@ public class GroupService {
         List<Long> memberIds = requestDto.getMemberIds();
         List<Member> members = new ArrayList<>();
 
-        List<GroupMembers> groupMembers = group.getGroupMembersList();
+        List<GroupMember> groupMembers = group.getGroupMemberList();
         for (Long memberId : memberIds) {
 //            // Group에 넣기 위해 member 객체 찾아 넣기
 //            Member member = ...
