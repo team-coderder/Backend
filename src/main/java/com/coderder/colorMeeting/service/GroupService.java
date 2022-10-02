@@ -1,5 +1,6 @@
 package com.coderder.colorMeeting.service;
 
+import com.coderder.colorMeeting.dto.request.GroupMemberRequestDto;
 import com.coderder.colorMeeting.dto.request.GroupRequestDto;
 import com.coderder.colorMeeting.dto.response.GroupMemberDto;
 import com.coderder.colorMeeting.dto.response.GroupMembersResponseDto;
@@ -94,6 +95,34 @@ public class GroupService {
                 .build();
 
         return ResponseDto.success(response);
+    }
+
+    // 그룹에 유저 추가하기 - Member 구현 완료 후 구현 가능
+    @Transactional
+    public ResponseDto<?> addMember(GroupMemberRequestDto requestDto) {
+        Group group = isPresent(requestDto.getGroupId());
+        if (group == null) {
+            throw new GroupNotFoundException();
+        }
+
+        // Group에 넣기 위해 member 객체 찾아 넣기
+//        Member member = ...
+
+        // 그룹에 새로 넣을 members 리스트
+        List<Long> memberIds = requestDto.getMemberIds();
+        List<Member> members = new ArrayList<>();
+
+        List<GroupMembers> groupMembers = group.getGroupMembersList();
+        for (Long memberId : memberIds) {
+//            // Group에 넣기 위해 member 객체 찾아 넣기
+//            Member member = ...
+//            members.add(member);
+//            // group에 넣을 GroupMember로 변환하기
+//            GroupMembers groupMembers1 = GroupMembers.builder().build();
+//        }
+//        group.updateMembers(members);
+        }
+        return ResponseDto.success(null);
     }
 
     private Group isPresent(Long groupId) {

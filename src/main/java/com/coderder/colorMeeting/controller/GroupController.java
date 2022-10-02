@@ -1,5 +1,6 @@
 package com.coderder.colorMeeting.controller;
 
+import com.coderder.colorMeeting.dto.request.GroupMemberRequestDto;
 import com.coderder.colorMeeting.dto.request.GroupRequestDto;
 import com.coderder.colorMeeting.dto.response.ResponseDto;
 import com.coderder.colorMeeting.service.GroupService;
@@ -36,5 +37,10 @@ public class GroupController {
     public ResponseDto<?> getGroupMembers( // @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestParam Long groupId) {
         return groupService.getGroupMembers(groupId);
+    }
+
+    @RequestMapping(value = "/members", method = RequestMethod.PATCH)
+    public ResponseDto<?> addMember(@RequestBody GroupMemberRequestDto requestDto) {
+        return groupService.addMember(requestDto);
     }
 }

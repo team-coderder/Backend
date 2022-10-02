@@ -34,4 +34,8 @@ public class Group {
     public void updateName(String name) {
         this.name = name;
     }
+
+    public void updateMembers(List<GroupMembers> groupMembers) {
+        this.groupMembersList = groupMembers;
+    }
 }
