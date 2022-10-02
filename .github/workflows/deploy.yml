@@ -34,6 +34,30 @@ jobs:
         distribution: 'temurin'
         java-version: '11'
 
+    # application-db-url.properties 생성하기
+    - name: make application-db-url.properties
+      run: |
+        cd ./src/main/resources
+        touch ./application-db-url.properties
+        echo "${{ secrets.DB_URL_PROPERTIES }}" > ./application-db-url.properties
+      shell: bash
+
+    # application-db-username.properties 생성하기
+    - name: make application-db-username.properties
+      run: |
+        cd ./src/main/resources
+        touch ./application-db-username.properties
+        echo "${{ secrets.DB_USERNAME_PROPERTIES }}" > ./application-db-username.properties
+      shell: bash
+
+    # application-db-password.properties 생성하기
+    - name: make application-db-password.properties
+      run: |
+        cd ./src/main/resources
+        touch ./application-db-password.properties
+        echo "${{ secrets.DB_PASSWORD_PROPERTIES }}" > ./application-db-password.properties
+      shell: bash
+
     # (3) Gradle build (Test 제외)
     - name: Build with Gradle
       uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee

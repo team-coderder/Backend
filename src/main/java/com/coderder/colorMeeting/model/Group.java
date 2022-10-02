@@ -26,9 +26,9 @@ public class Group {
     private String name;
 
     @OneToMany(mappedBy = "group")
-    private List<PersonalSchedule> personalSchedulesList;
+    private List<GroupSchedule> groupScheduleList;
 
     @OneToMany(mappedBy = "group")
-    private List<GroupMembers> groupMembersList;
+    private List<GroupMember> groupMemberList;
 
 }
