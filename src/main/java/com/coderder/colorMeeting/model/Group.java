@@ -1,5 +1,4 @@
 package com.coderder.colorMeeting.model;
-
 import lombok.*;
 
 import javax.persistence.*;
@@ -8,8 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-
-@Entity
+@Entity(name = "groups")
 @Getter
 @Setter
 @Builder
@@ -25,11 +23,10 @@ public class Group {
     @Column(nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
     private List<GroupSchedule> groupScheduleList;
 
-
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
     private List<GroupMember> groupMemberList;
 
     public void updateName(String name) {
