@@ -7,10 +7,14 @@ import com.coderder.colorMeeting.dto.response.GroupMembersResponseDto;
 import com.coderder.colorMeeting.dto.response.GroupResponseDto;
 import com.coderder.colorMeeting.dto.response.ResponseDto;
 import com.coderder.colorMeeting.exception.GroupNotFoundException;
+import com.coderder.colorMeeting.exception.MemberNotFoundException;
 import com.coderder.colorMeeting.model.Group;
 import com.coderder.colorMeeting.model.GroupMember;
+import com.coderder.colorMeeting.model.GroupRole;
 import com.coderder.colorMeeting.model.Member;
+import com.coderder.colorMeeting.repository.GroupMemberRepository;
 import com.coderder.colorMeeting.repository.GroupRepository;
+import com.coderder.colorMeeting.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +28,8 @@ import java.util.Optional;
 public class GroupService {
 
     private final GroupRepository groupRepository;
+    private final MemberRepository memberRepository;
+    private final GroupMemberRepository groupMemberRepository;
 
     @Transactional
     public ResponseDto<?> createGroup(GroupRequestDto requestDto) {
@@ -33,7 +39,7 @@ public class GroupService {
 //                .groupScheduleList(null)
                 .build();
         groupRepository.save(group);
-        return ResponseDto.success("그룹 저장이 완료되었습니다.");
+        return ResponseDto.success("그룹(groupId : " + group.getId() +") 저장이 완료되었습니다.");
     }
 
     @Transactional
@@ -50,8 +56,7 @@ public class GroupService {
                 .name(group.getName())
                 .build();
 
-//        return ResponseDto.success(response);
-        return ResponseDto.success("그룹 수정이 완료되었습니다.");
+        return ResponseDto.success("그룹(groupId : " + group.getId() +") 수정이 완료되었습니다.");
     }
 
     @Transactional
@@ -63,7 +68,7 @@ public class GroupService {
         }
         groupRepository.delete(group);
 
-        return ResponseDto.success("그룹 삭제가 완료되었습니다.");
+        return ResponseDto.success("그룹(groupId : " + group.getId() + ") 삭제가 완료되었습니다.");
     }
 
     @Transactional
@@ -105,24 +110,31 @@ public class GroupService {
             throw new GroupNotFoundException();
         }
 
-        // Group에 넣기 위해 member 객체 찾아 넣기
-//        Member member = ...
-
-        // 그룹에 새로 넣을 members 리스트
+        // Group에 넣기 위해 member 객체 찾아 리스트에 모아두기
         List<Long> memberIds = requestDto.getMemberIds();
         List<Member> members = new ArrayList<>();
-
-        List<GroupMember> groupMembers = group.getGroupMemberList();
         for (Long memberId : memberIds) {
-//            // Group에 넣기 위해 member 객체 찾아 넣기
-//            Member member = ...
-//            members.add(member);
-//            // group에 넣을 GroupMember로 변환하기
-//            GroupMembers groupMembers1 = GroupMembers.builder().build();
-//        }
-//        group.updateMembers(members);
+            Member member = memberRepository.find(memberId);
+            if (member == null) {
+                throw new MemberNotFoundException();
+            }
+            members.add(member);
         }
-        return ResponseDto.success(null);
+
+        List<GroupMember> groupMemberList = group.getGroupMemberList();
+        int before = groupMemberList.size();
+        for (Member member : members) {
+            // group에 넣을 GroupMember로 변환하기
+            GroupMember groupMember = GroupMember.builder()
+                    .group(group)
+                    .member(member)
+                    .groupRole((groupMemberList.size() == 0) ? GroupRole.LEADER : GroupRole.FOLLOWER)
+                    .build();
+            groupMemberRepository.save(groupMember);
+            groupMemberList.add(groupMember);
+        }
+        int cnt = groupMemberList.size() - before;
+    return ResponseDto.success("그룹(groupId : " + group.getId() +")에 멤버 " + cnt + "명 추가가 완료되었습니다.");
     }
 
     private Group isPresent(Long groupId) {

@@ -15,6 +15,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    public ResponseEntity<?> memberNotFoundExceptionHandler(MemberNotFoundException exception) {
+        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.MEMBER_NOT_FOUND), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<?> invalidGroupNameExceptionHandler(InvalidGroupNameException exception) {
         return new ResponseEntity<>(ResponseDto.fail(ErrorCode.INVALID_GROUP_NAME), HttpStatus.BAD_REQUEST);
     }

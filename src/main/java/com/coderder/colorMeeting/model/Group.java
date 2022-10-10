@@ -33,7 +33,7 @@ public class Group {
         this.name = name;
     }
 
-    public void updateMembers(List<GroupMember> groupMembers) {
-        this.groupMemberList = groupMembers;
-    }
+//    public void updateGroupMemberList(List<GroupMember> groupMembers) {
+//        this.groupMemberList = groupMembers;
+//    }
 }
