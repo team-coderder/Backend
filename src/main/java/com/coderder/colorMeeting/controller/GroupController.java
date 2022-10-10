@@ -16,31 +16,31 @@ public class GroupController {
     private final GroupService groupService;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseDto<?> createGroup( // @AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<?> createGroup( // @AuthenticationPrincipal UserDetailsImpl userDetails,
                                          @RequestBody GroupRequestDto requestDto) {
-        return groupService.createGroup(requestDto);
+        return ResponseEntity.ok().body(groupService.createGroup(requestDto));
     }
 
     @RequestMapping(method = RequestMethod.PATCH)
-    public ResponseDto<?> updateGroup( // @AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<?> updateGroup( // @AuthenticationPrincipal UserDetailsImpl userDetails,
                         @RequestParam Long groupId, @RequestBody GroupRequestDto requestDto) {
-        return groupService.updateGroup(groupId, requestDto);
+        return ResponseEntity.ok().body(groupService.updateGroup(groupId, requestDto));
     }
 
     @RequestMapping(method = RequestMethod.DELETE)
-    public ResponseDto<?> deleteGroup( // @AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<?> deleteGroup( // @AuthenticationPrincipal UserDetailsImpl userDetails,
                                        @RequestParam Long groupId) {
-        return groupService.deleteGroup(groupId);
+        return ResponseEntity.ok().body(groupService.deleteGroup(groupId));
     }
 
     @RequestMapping(value = "/members", method = RequestMethod.GET)
-    public ResponseDto<?> getGroupMembers( // @AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<?> getGroupMembers( // @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestParam Long groupId) {
-        return groupService.getGroupMembers(groupId);
+        return ResponseEntity.ok().body(groupService.getGroupMembers(groupId));
     }
 
     @RequestMapping(value = "/members", method = RequestMethod.PATCH)
-    public ResponseDto<?> addMember(@RequestBody GroupMemberRequestDto requestDto) {
-        return groupService.addMember(requestDto);
+    public ResponseEntity<?> addMember(@RequestBody GroupMemberRequestDto requestDto) {
+        return ResponseEntity.ok().body(groupService.addMember(requestDto));
     }
 }
