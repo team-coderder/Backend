@@ -1,5 +1,6 @@
 package com.coderder.colorMeeting.exception;
 
+import com.coderder.colorMeeting.dto.response.ResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -8,19 +9,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(GroupNotFoundException.class)
-    public ResponseEntity<?> groupNotFoundExceptionHandler() {
-        return ResponseEntity.notFound().build();
+    @ExceptionHandler
+    public ResponseEntity<?> groupNotFoundExceptionHandler(GroupNotFoundException exception) {
+        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.GROUP_NOT_FOUND), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(InvalidGroupNameException.class)
-    public ResponseEntity<?> invalidGroupNameExceptionHandler() {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    @ExceptionHandler
+    public ResponseEntity<?> invalidGroupNameExceptionHandler(InvalidGroupNameException exception) {
+        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.INVALID_GROUP_NAME), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(NotAuthorizedException.class)
-    public ResponseEntity<?> notAuthorizedExceptionHandler() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    @ExceptionHandler
+    public ResponseEntity<?> notAuthorizedExceptionHandler(NotAuthorizedException exception) {
+        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.NOT_AUTHORIZED), HttpStatus.UNAUTHORIZED);
     }
 
 }

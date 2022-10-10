@@ -15,6 +15,7 @@ public enum ErrorCode {
 
     // Group 관련 오류
     GROUP_NOT_FOUND("GROUP_NOT_FOUND", "해당 그룹을 찾을 수 없습니다."),
+    INVALID_GROUP_NAME("INVALID_GROUP_NAME", "유효하지 않은 그룹 이름입니다."),
 
     // 관리자가 아닌데 수정, 삭제 요청 등 권한 오류
     NOT_AUTHORIZED("NOT_AUTHORIZED", "권한이 없습니다.");
