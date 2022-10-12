@@ -2,10 +2,7 @@ package com.coderder.colorMeeting.model;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 @Entity(name = "groups")
 @Getter
@@ -13,21 +10,21 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Group {
+public class Team {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "group_id")
+    @Column(name = "team_id")
     private Long id;
 
     @Column(nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
-    private List<GroupSchedule> groupScheduleList;
+    @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
+    private List<TeamSchedule> teamScheduleList;
 
-    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
-    private List<GroupMember> groupMemberList;
+    @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
+    private List<TeamMember> teamMemberList;
 
     public void updateName(String name) {
         this.name = name;

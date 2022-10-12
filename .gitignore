@@ -41,7 +41,5 @@ out/
 #application-db-username.properties
 #application-db-password.properties
 
-
-=======
 ### Application-00.properties ###
 application-**.properties
