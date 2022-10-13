@@ -30,8 +30,8 @@ public class Member {
     private String nickname;
 
     @OneToMany(mappedBy = "member")
-    private List<PersonalSchedule> personalSchedulesList;
+    private List<PersonalSchedule> personalScheduleList;
 
     @OneToMany(mappedBy = "member")
-    private List<GroupMembers> groupMembersSet;
+    private List<GroupMember> groupMemberSet;
 }
