@@ -8,9 +8,9 @@ import com.coderder.colorMeeting.dto.response.GroupResponseDto;
 import com.coderder.colorMeeting.dto.response.ResponseDto;
 import com.coderder.colorMeeting.exception.GroupNotFoundException;
 import com.coderder.colorMeeting.exception.MemberNotFoundException;
-import com.coderder.colorMeeting.model.Group;
-import com.coderder.colorMeeting.model.GroupMember;
-import com.coderder.colorMeeting.model.GroupRole;
+import com.coderder.colorMeeting.model.Team;
+import com.coderder.colorMeeting.model.TeamMember;
+import com.coderder.colorMeeting.model.TeamRole;
 import com.coderder.colorMeeting.model.Member;
 import com.coderder.colorMeeting.repository.GroupMemberRepository;
 import com.coderder.colorMeeting.repository.GroupRepository;
@@ -33,48 +33,48 @@ public class GroupService {
 
     @Transactional
     public ResponseDto<?> createGroup(GroupRequestDto requestDto) {
-        Group group = Group.builder()
+        Team team = Team.builder()
                 .name(requestDto.getName())
-                .groupMemberList(null)
+                .teamMemberList(null)
 //                .groupScheduleList(null)
                 .build();
-        groupRepository.save(group);
-        return ResponseDto.success("그룹(groupId : " + group.getId() +") 저장이 완료되었습니다.");
+        groupRepository.save(team);
+        return ResponseDto.success("그룹(groupId : " + team.getId() +") 저장이 완료되었습니다.");
     }
 
     @Transactional
     public ResponseDto<?> updateGroup(Long groupId, GroupRequestDto requestDto) {
 
-        Group group = isPresent(groupId);
-        if (group == null) {
+        Team team = isPresent(groupId);
+        if (team == null) {
             throw new GroupNotFoundException();
         }
-        group.updateName(requestDto.getName());
+        team.updateName(requestDto.getName());
 
         GroupResponseDto response = GroupResponseDto.builder()
-                .groupId(group.getId())
-                .name(group.getName())
+                .groupId(team.getId())
+                .name(team.getName())
                 .build();
 
-        return ResponseDto.success("그룹(groupId : " + group.getId() +") 수정이 완료되었습니다.");
+        return ResponseDto.success("그룹(groupId : " + team.getId() +") 수정이 완료되었습니다.");
     }
 
     @Transactional
     public ResponseDto<?> deleteGroup(Long groupId) {
 
-        Group group = isPresent(groupId);
-        if (group == null) {
+        Team team = isPresent(groupId);
+        if (team == null) {
             throw new GroupNotFoundException();
         }
-        groupRepository.delete(group);
+        groupRepository.delete(team);
 
-        return ResponseDto.success("그룹(groupId : " + group.getId() + ") 삭제가 완료되었습니다.");
+        return ResponseDto.success("그룹(groupId : " + team.getId() + ") 삭제가 완료되었습니다.");
     }
 
     @Transactional
     public ResponseDto<?> getGroupMembers(Long groupId) {
-        Group group = isPresent(groupId);
-        if (group == null) {
+        Team team = isPresent(groupId);
+        if (team == null) {
             throw new GroupNotFoundException();
         }
 
@@ -82,14 +82,14 @@ public class GroupService {
         List<GroupMemberDto> members = new ArrayList<>();
 
         // GroupMembers라는 객체에서 각 멤버들에 대한 정보 추출하기
-        List<GroupMember> groupMembers = group.getGroupMemberList();
-        for (GroupMember groupMember : groupMembers) {
-            Member member = groupMember.getMember();
+        List<TeamMember> teamMembers = team.getTeamMemberList();
+        for (TeamMember teamMember : teamMembers) {
+            Member member = teamMember.getMember();
             GroupMemberDto groupMemberDto = GroupMemberDto.builder()
                     .memberId(member.getId())
                     .username(member.getUsername())
                     .nickname(member.getNickname())
-                    .groupRole(String.valueOf(groupMember.getGroupRole()))
+                    .groupRole(String.valueOf(teamMember.getTeamRole()))
                     .build();
             members.add(groupMemberDto);
         }
@@ -105,8 +105,8 @@ public class GroupService {
     // 그룹에 유저 추가하기 - Member 구현 완료 후 구현 가능
     @Transactional
     public ResponseDto<?> addMember(GroupMemberRequestDto requestDto) {
-        Group group = isPresent(requestDto.getGroupId());
-        if (group == null) {
+        Team team = isPresent(requestDto.getGroupId());
+        if (team == null) {
             throw new GroupNotFoundException();
         }
 
@@ -121,24 +121,24 @@ public class GroupService {
             members.add(member);
         }
 
-        List<GroupMember> groupMemberList = group.getGroupMemberList();
-        int before = groupMemberList.size();
+        List<TeamMember> teamMemberList = team.getTeamMemberList();
+        int before = teamMemberList.size();
         for (Member member : members) {
             // group에 넣을 GroupMember로 변환하기
-            GroupMember groupMember = GroupMember.builder()
-                    .group(group)
+            TeamMember teamMember = TeamMember.builder()
+                    .team(team)
                     .member(member)
-                    .groupRole((groupMemberList.size() == 0) ? GroupRole.LEADER : GroupRole.FOLLOWER)
+                    .teamRole((teamMemberList.size() == 0) ? TeamRole.LEADER : TeamRole.FOLLOWER)
                     .build();
-            groupMemberRepository.save(groupMember);
-            groupMemberList.add(groupMember);
+            groupMemberRepository.save(teamMember);
+            teamMemberList.add(teamMember);
         }
-        int cnt = groupMemberList.size() - before;
-    return ResponseDto.success("그룹(groupId : " + group.getId() +")에 멤버 " + cnt + "명 추가가 완료되었습니다.");
+        int cnt = teamMemberList.size() - before;
+    return ResponseDto.success("그룹(groupId : " + team.getId() +")에 멤버 " + cnt + "명 추가가 완료되었습니다.");
     }
 
-    private Group isPresent(Long groupId) {
-        Optional<Group> group = groupRepository.findById(groupId);
+    private Team isPresent(Long groupId) {
+        Optional<Team> group = groupRepository.findById(groupId);
         return group.orElse(null);
     }
 }

@@ -11,7 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class GroupMemberId implements Serializable {
-    private Long group;
+public class TeamMemberId implements Serializable {
+    private Long team;
     private Long member;
 }

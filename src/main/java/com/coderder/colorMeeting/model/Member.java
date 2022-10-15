@@ -3,9 +3,7 @@ package com.coderder.colorMeeting.model;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -33,5 +31,5 @@ public class Member {
     private List<PersonalSchedule> personalScheduleList;
 
     @OneToMany(mappedBy = "member")
-    private List<GroupMember> groupMemberSet;
+    private List<TeamMember> teamMemberSet;
 }

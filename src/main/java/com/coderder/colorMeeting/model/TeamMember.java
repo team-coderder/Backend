@@ -7,15 +7,15 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Builder
-@IdClass(GroupMemberId.class)
+@IdClass(TeamMemberId.class)
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupMember {
+public class TeamMember {
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="group_id")
-    private Group group;
+    @JoinColumn(name="team_id")
+    private Team team;
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
@@ -23,5 +23,5 @@ public class GroupMember {
     private Member member;
 
     @Enumerated(EnumType.STRING)
-    private GroupRole groupRole;
+    private TeamRole teamRole;
 }
