@@ -6,6 +6,7 @@ import com.coderder.colorMeeting.dto.response.TeamMemberDto;
 import com.coderder.colorMeeting.dto.response.TeamMembersResponseDto;
 import com.coderder.colorMeeting.dto.response.TeamResponseDto;
 import com.coderder.colorMeeting.dto.response.ResponseDto;
+import com.coderder.colorMeeting.exception.TeamMemberNotFoundException;
 import com.coderder.colorMeeting.exception.TeamNotFoundException;
 import com.coderder.colorMeeting.exception.MemberNotFoundException;
 import com.coderder.colorMeeting.model.Team;
@@ -17,6 +18,7 @@ import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -110,31 +112,24 @@ public class TeamService {
             throw new TeamNotFoundException();
         }
 
-        // Team에 넣기 위해 member 객체 찾아 리스트에 모아두기
         List<Long> memberIds = requestDto.getMemberIds();
-        List<Member> members = new ArrayList<>();
+        int cnt = 0;
         for (Long memberId : memberIds) {
             Member member = isPresentMember(memberId);
             if (member == null) {
                 throw new MemberNotFoundException();
             }
-            members.add(member);
+            if (teamMemberRepository.findByMemberAndTeam(member, team) == null) {
+                TeamMember teamMember = TeamMember.builder()
+                        .member(member)
+                        .team(team)
+                        .teamRole(TeamRole.FOLLOWER)
+                        .build();
+                teamMemberRepository.save(teamMember);
+                cnt++;
+            }
         }
 
-        List<TeamMember> teamMemberList = team.getTeamMemberList();
-        int before = teamMemberList.size();
-        for (Member member : members) {
-            // team에 넣을 TeamMember로 변환하기
-            TeamMember teamMember = TeamMember.builder()
-                    .team(team)
-                    .member(member)
-                    .teamRole((teamMemberList.size() == 0) ? TeamRole.LEADER : TeamRole.FOLLOWER)
-                    .build();
-            teamMemberRepository.save(teamMember);
-            teamMemberList.add(teamMember);
-        }
-
-        int cnt = teamMemberList.size() - before;
     return ResponseDto.success("그룹(teamId : " + team.getId() +")에 멤버 " + cnt + "명 추가가 완료되었습니다.");
     }
 
@@ -154,6 +149,55 @@ public class TeamService {
         return ResponseDto.success(myTeams);
     }
 
+    public ResponseDto<?> leaveTeam(Long teamId) {
+
+        // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
+        Member me = isPresentMember(1L);
+        if (me == null) {
+            throw new MemberNotFoundException();
+        }
+
+        Team team = isPresentTeam(teamId);
+        if (team == null) {
+            throw new TeamNotFoundException();
+        }
+
+        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(me, team);
+        if (teamMember == null) {
+            throw new TeamMemberNotFoundException();
+        }
+        teamMemberRepository.delete(teamMember);
+
+        return ResponseDto.success("그룹(teamId : " + team.getId() +")에서 탈퇴 완료되었습니다.");
+    }
+
+    public ResponseDto<?> memberOut(TeamMemberRequestDto requestDto) {
+
+        Team team = isPresentTeam(requestDto.getTeamId());
+        if (team == null) {
+            throw new TeamNotFoundException();
+        }
+
+        List<Long> memberIds = requestDto.getMemberIds();
+        int cnt = 0;
+        for (Long memberId : memberIds) {
+
+            Member member = isPresentMember(memberId);
+            if (member == null) {
+                throw new MemberNotFoundException();
+            }
+
+            TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
+            if (teamMember == null) {
+                throw new TeamMemberNotFoundException();
+            }
+
+            teamMemberRepository.delete(teamMember);
+            cnt++;
+        }
+        return ResponseDto.success("그룹(teamId : " + team.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료되었습니다.");
+    }
+
     private Team isPresentTeam(Long teamId) {
         Optional<Team> team = teamRepository.findById(teamId);
         return team.orElse(null);
@@ -163,5 +207,4 @@ public class TeamService {
         Optional<Member> member = memberRepository.findById(memberId);
         return member.orElse(null);
     }
-
 }

@@ -20,6 +20,9 @@ public enum ErrorCode {
     // 회원 관련 오류
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND", "회원을 찾을 수 없습니다."),
 
+    // TeamMember 관련 오류
+    TEAM_MEMBER_NOT_FOUND("TEAM_MEMBER_NOT_FOUND", "해당 그룹(팀)에서 회원을 조회할 수 없습니다. 해당 그룹(팀)의 회원이 아닙니다."),
+
     // 관리자가 아닌데 수정, 삭제 요청 등 권한 오류
     NOT_AUTHORIZED("NOT_AUTHORIZED", "권한이 없습니다.");
 

@@ -29,4 +29,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ResponseDto.fail(ErrorCode.NOT_AUTHORIZED), HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler
+    public ResponseEntity<?> teamMemberNotFoundExceptionHandler(TeamMemberNotFoundException exception) {
+        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.TEAM_MEMBER_NOT_FOUND), HttpStatus.NOT_FOUND);
+    }
+
 }

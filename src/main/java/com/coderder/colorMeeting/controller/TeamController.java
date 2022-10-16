@@ -43,10 +43,20 @@ public class TeamController {
         return ResponseEntity.ok().body(teamService.addMember(requestDto));
     }
 
+    @RequestMapping(value = "/members", method = RequestMethod.DELETE)
+    public ResponseEntity<?> memberOut(@RequestBody TeamMemberRequestDto requestDto) {
+        return ResponseEntity.ok().body(teamService.memberOut(requestDto));
+    }
+
     @RequestMapping(value = "/myteams", method = RequestMethod.GET)
-    public ResponseEntity<?> getMyTeams() {
+    public ResponseEntity<?> getMyTeams(// @AuthenticationPrincipal UserDetailsImpl userDetails
+                                        ) {
         return ResponseEntity.ok().body(teamService.getMyTeams());
     }
 
-
+    @RequestMapping(value = "/myteam", method = RequestMethod.DELETE)
+    public ResponseEntity<?> leaveTeam(// @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                       @RequestParam Long teamId) {
+        return ResponseEntity.ok().body(teamService.leaveTeam(teamId));
+    }
 }
