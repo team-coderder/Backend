@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class GroupMemberRequestDto {
-    private Long groupId;
+public class TeamMemberRequestDto {
+    private Long teamId;
     private List<Long> memberIds;
 }

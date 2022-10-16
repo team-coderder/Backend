@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler
-    public ResponseEntity<?> groupNotFoundExceptionHandler(GroupNotFoundException exception) {
-        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.GROUP_NOT_FOUND), HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> groupNotFoundExceptionHandler(TeamNotFoundException exception) {
+        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.TEAM_NOT_FOUND), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler
@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<?> invalidGroupNameExceptionHandler(InvalidGroupNameException exception) {
-        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.INVALID_GROUP_NAME), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.INVALID_TEAM_NAME), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler

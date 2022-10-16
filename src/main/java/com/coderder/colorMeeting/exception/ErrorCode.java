@@ -13,9 +13,9 @@ public enum ErrorCode {
     // 예기치 못한 에러
     UNKNOWN_ERROR("UNKNOWN_ERROR", "예기치 못한 오류가 발생하였습니다."),
 
-    // Group 관련 오류
-    GROUP_NOT_FOUND("GROUP_NOT_FOUND", "해당 그룹을 찾을 수 없습니다."),
-    INVALID_GROUP_NAME("INVALID_GROUP_NAME", "유효하지 않은 그룹 이름입니다."),
+    // Team 관련 오류
+    TEAM_NOT_FOUND("TEAM_NOT_FOUND", "해당 그룹(팀)을 찾을 수 없습니다."),
+    INVALID_TEAM_NAME("INVALID_TEAM_NAME", "유효하지 않은 그룹(팀) 이름입니다."),
 
     // 회원 관련 오류
     MEMBER_NOT_FOUND("MEMBER_NOT_FOUND", "회원을 찾을 수 없습니다."),
