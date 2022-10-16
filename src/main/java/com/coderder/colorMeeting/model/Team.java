@@ -1,4 +1,5 @@
 package com.coderder.colorMeeting.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -20,17 +21,15 @@ public class Team {
     @Column(nullable = false)
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
     private List<TeamSchedule> teamScheduleList;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
     private List<TeamMember> teamMemberList;
 
     public void updateName(String name) {
         this.name = name;
     }
-
-//    public void updateGroupMemberList(List<GroupMember> groupMembers) {
-//        this.groupMemberList = groupMembers;
-//    }
 }

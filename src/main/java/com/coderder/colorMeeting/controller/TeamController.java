@@ -42,4 +42,11 @@ public class TeamController {
     public ResponseEntity<?> addMember(@RequestBody TeamMemberRequestDto requestDto) {
         return ResponseEntity.ok().body(teamService.addMember(requestDto));
     }
+
+    @RequestMapping(value = "/myteams", method = RequestMethod.GET)
+    public ResponseEntity<?> getMyTeams() {
+        return ResponseEntity.ok().body(teamService.getMyTeams());
+    }
+
+
 }

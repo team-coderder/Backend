@@ -45,7 +45,7 @@ public class TeamService {
     @Transactional
     public ResponseDto<?> updateTeam(Long teamId, TeamRequestDto requestDto) {
 
-        Team team = isPresent(teamId);
+        Team team = isPresentTeam(teamId);
         if (team == null) {
             throw new TeamNotFoundException();
         }
@@ -62,7 +62,7 @@ public class TeamService {
     @Transactional
     public ResponseDto<?> deleteTeam(Long teamId) {
 
-        Team team = isPresent(teamId);
+        Team team = isPresentTeam(teamId);
         if (team == null) {
             throw new TeamNotFoundException();
         }
@@ -73,7 +73,7 @@ public class TeamService {
 
     @Transactional
     public ResponseDto<?> getTeamMembers(Long teamId) {
-        Team team = isPresent(teamId);
+        Team team = isPresentTeam(teamId);
         if (team == null) {
             throw new TeamNotFoundException();
         }
@@ -105,7 +105,7 @@ public class TeamService {
     // 그룹에 유저 추가하기 - Member 구현 완료 후 구현 가능
     @Transactional
     public ResponseDto<?> addMember(TeamMemberRequestDto requestDto) {
-        Team team = isPresent(requestDto.getTeamId());
+        Team team = isPresentTeam(requestDto.getTeamId());
         if (team == null) {
             throw new TeamNotFoundException();
         }
@@ -114,7 +114,7 @@ public class TeamService {
         List<Long> memberIds = requestDto.getMemberIds();
         List<Member> members = new ArrayList<>();
         for (Long memberId : memberIds) {
-            Member member = memberRepository.find(memberId);
+            Member member = isPresentMember(memberId);
             if (member == null) {
                 throw new MemberNotFoundException();
             }
@@ -133,12 +133,35 @@ public class TeamService {
             teamMemberRepository.save(teamMember);
             teamMemberList.add(teamMember);
         }
+
         int cnt = teamMemberList.size() - before;
     return ResponseDto.success("그룹(teamId : " + team.getId() +")에 멤버 " + cnt + "명 추가가 완료되었습니다.");
     }
 
-    private Team isPresent(Long teamId) {
+    public ResponseDto<?> getMyTeams() {
+
+        // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
+        Member me = isPresentMember(1L);
+        if (me == null) {
+            throw new MemberNotFoundException();
+        }
+
+        List<Team> myTeams = new ArrayList<>();
+        List<TeamMember> teamMembers = teamMemberRepository.getAllByMember(me);
+        for (TeamMember teamMember : teamMembers) {
+            myTeams.add(teamMember.getTeam());
+        }
+        return ResponseDto.success(myTeams);
+    }
+
+    private Team isPresentTeam(Long teamId) {
         Optional<Team> team = teamRepository.findById(teamId);
         return team.orElse(null);
     }
+
+    private Member isPresentMember(Long memberId) {
+        Optional<Member> member = memberRepository.findById(memberId);
+        return member.orElse(null);
+    }
+
 }
