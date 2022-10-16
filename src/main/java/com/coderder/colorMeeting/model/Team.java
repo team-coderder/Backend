@@ -4,7 +4,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.List;
 
-@Entity(name = "groups")
+@Entity(name = "team")
 @Getter
 @Setter
 @Builder
