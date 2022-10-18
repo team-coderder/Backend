@@ -3,7 +3,8 @@
 🔗 **[팀 노션](https://www.notion.so/coderder/Coderder-f4aec4bc4da242349797c0d6ebf9e766)**
 
 
-<br />
+<br><br>
+
 
 ## 👥 팀 소개
 #### `Backend`
@@ -15,7 +16,10 @@
  <a href="https://github.com/OhJungJin" target="_blank"><img height="40"  src="https://img.shields.io/static/v1?label=React&message=임지우 &color=61dafb&style=for-the-badge&>"/></a>
  <a href="https://github.com/zi-zzang" target="_blank"><img height="40"  src="https://img.shields.io/static/v1?label=React&message=권영재 &color=61dafb&style=for-the-badge&>"/></a>
 
-<br />
+
+<br><br>
+
+
 
 ## 🗓 프로젝트 기간
 
@@ -23,7 +27,10 @@
 
 - 2차 배포 : 미정
 
-<br />
+
+<br><br>
+
+
 
 ## 📜 기술스택
 |분류|기술|
@@ -36,7 +43,9 @@
 |CI/CD|<img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=for-the-badge&logo=GitHub Actions&logoColor=white"> <img src="https://img.shields.io/badge/codedeploy-6DB33F?style=for-the-badge&logo=codedeploy&logoColor=white">|
 
 
-<br />
+<br><br>
+
+
 
 ## 🏰 아키텍쳐
 <details>
@@ -44,7 +53,10 @@
     <img src="https://user-images.githubusercontent.com/100582309/196345657-eaf613d7-01bc-4118-8df8-b08198704d5f.png"> 
 </details>
 
-<br />
+
+<br><br>
+
+
 
 ## 📕 ER 다이어그램     
     
@@ -54,9 +66,9 @@
 </details>
 
 
+<br><br>
 
 
-<br />
 
 ## ✨ 기술적인 도전
 
