@@ -5,9 +5,9 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class GroupMemberDto {
+public class TeamMemberDto {
     private Long memberId;
     private String username;
     private String nickname;
-    private String groupRole;
+    private String teamRole;
 }
