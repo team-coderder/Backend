@@ -11,15 +11,15 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupSchedule {
+public class TeamSchedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="group_id")
-    private Group group;
+    @JoinColumn(name="team_id")
+    private Team team;
 
     @Column(nullable = false)
     private String name;

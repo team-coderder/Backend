@@ -3,6 +3,6 @@ package com.coderder.colorMeeting.dto.request;
 import lombok.Getter;
 
 @Getter
-public class GroupRequestDto {
+public class TeamRequestDto {
     private String name;
 }
