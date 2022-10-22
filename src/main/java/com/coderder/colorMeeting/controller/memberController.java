@@ -10,12 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/member")
 public class memberController {
 
-    // 모든 사람이 접근 가능한 페이지
-    @GetMapping("home")
-    public String home() {
-        return "home";
-    }
-
     // 로그인한 사람만 접근 가능한 페이지
 
 
