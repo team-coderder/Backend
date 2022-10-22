@@ -32,7 +32,7 @@ public class WebSecurityConfig {
 
                 // 로그인한 유저만 /api/**에 접근할 수 있다
                 .authorizeRequests()
-                .antMatchers("/api/**")
+                .antMatchers("/api/member/**")
                 .access("hasRole('ROLE_USER')")
                 .anyRequest().permitAll();
 
