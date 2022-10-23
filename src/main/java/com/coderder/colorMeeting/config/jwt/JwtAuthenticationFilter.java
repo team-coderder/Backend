@@ -1,10 +1,9 @@
 package com.coderder.colorMeeting.config.jwt;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
-import com.coderder.colorMeeting.model.User;
+import com.coderder.colorMeeting.model.UserTest;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,18 +35,18 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             // ObjectMapper는 json을 파싱한다
             // User.class를 넣으면 username, password 외에 기타 정보도 다 가져온다. loginDto를 추가로 만들자
             ObjectMapper om = new ObjectMapper();
-            User user = om.readValue(request.getInputStream(), User.class);
+            UserTest userTest = om.readValue(request.getInputStream(), UserTest.class);
 
             // 2) 토큰을 만들고 로그인을 시도한다
             // am.authenticate()는 토큰의 파라메터(getUsername, getPassword)를 차례대로 검증한다
             UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+                    new UsernamePasswordAuthenticationToken(userTest.getUsername(), userTest.getPassword());
             Authentication authentication =
                     authenticationManager.authenticate(authenticationToken);
 
             // 로깅
             PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-            System.out.println("Authentication : "+principalDetails.getUser().getUsername());
+            System.out.println("Authentication : "+principalDetails.getUserTest().getUsername());
 
             // 3) authenticate를 성공하면 authentication을 만든다.
             // attemptAuthentication의 리턴값은 session 영역에 저장된다.
@@ -75,8 +74,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String jwtToken = JWT.create()
                 .withSubject(principalDetailis.getUsername()) // 토큰 이름. 크게 의미 없음
                 .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME)) // 만료시간
-                .withClaim("id", principalDetailis.getUser().getId()) // payload : id. pk
-                .withClaim("username", principalDetailis.getUser().getUsername()) // payload : username. pk
+                .withClaim("id", principalDetailis.getUserTest().getId()) // payload : id. pk
+                .withClaim("username", principalDetailis.getUserTest().getUsername()) // payload : username. pk
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET)); // 검증값
 
         response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken); // 헤더key, value

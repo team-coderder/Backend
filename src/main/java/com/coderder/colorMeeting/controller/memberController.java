@@ -1,9 +1,8 @@
 package com.coderder.colorMeeting.controller;
 
-import com.coderder.colorMeeting.model.User;
-import com.coderder.colorMeeting.repository.UserRepository;
+import com.coderder.colorMeeting.config.auth.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -11,21 +10,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/member")
 public class memberController {
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     // 로그인한 사람만 접근 가능한 페이지
+    @GetMapping("user")
+    public String user(Authentication authentication) {
+        PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
+        System.out.println("principal : "+principal.getUserTest().getId());
+        System.out.println("principal : "+principal.getUserTest().getUsername());
+        System.out.println("principal : "+principal.getUserTest().getPassword());
 
+        return "로그인한 사람만 접근 가능한 페이지";
+    }
 
     // 관리자만 접근 가능한 페이지
 
 
-    // 회원가입
-    @PostMapping("join")
-    public String join(@RequestBody User user) {
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user.setRoles("ROLE_USER");
-        userRepository.save(user);
-        return "회원가입완료";
-    }
 }

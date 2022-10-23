@@ -1,17 +1,14 @@
 package com.coderder.colorMeeting.config;
 
 import com.coderder.colorMeeting.config.jwt.JwtAuthenticationFilter;
-import com.coderder.colorMeeting.repository.UserRepository;
+import com.coderder.colorMeeting.repository.UserTestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.SecurityFilterChain;
 
 @EnableWebSecurity
 @Configuration
@@ -19,7 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserTestRepository userTestRepository;
 
     @Autowired
     private CorsConfig corsConfig;

@@ -1,6 +1,6 @@
 package com.coderder.colorMeeting.config.auth;
 
-import com.coderder.colorMeeting.model.User;
+import com.coderder.colorMeeting.model.UserTest;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,16 +11,16 @@ import java.util.Collection;
 @Data
 public class PrincipalDetails implements UserDetails {
 
-    private User user;
+    private UserTest userTest;
 
-    public PrincipalDetails(User user) {
-        this.user = user;
+    public PrincipalDetails(UserTest userTest) {
+        this.userTest = userTest;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-        user.getRoleList().forEach(r -> {
+        userTest.getRoleList().forEach(r -> {
             authorities.add(()->{ return r;});
         });
         return authorities;
@@ -28,12 +28,12 @@ public class PrincipalDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return userTest.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return userTest.getUsername();
     }
 
     @Override

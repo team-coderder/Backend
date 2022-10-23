@@ -1,7 +1,7 @@
 package com.coderder.colorMeeting.config.auth;
 
-import com.coderder.colorMeeting.model.User;
-import com.coderder.colorMeeting.repository.UserRepository;
+import com.coderder.colorMeeting.model.UserTest;
+import com.coderder.colorMeeting.repository.UserTestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,14 +12,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PrincipalDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserTestRepository userTestRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         System.out.println("PrincipalDetailsService : 진입");
-        User user = userRepository.findByUsername(username);
+        UserTest userTest = userTestRepository.findByUsername(username);
 
         // session.setAttribute("loginUser", user);
-        return new PrincipalDetails(user);
+        return new PrincipalDetails(userTest);
     }
 }

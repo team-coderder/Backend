@@ -12,7 +12,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class User {
+public class UserTest {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
