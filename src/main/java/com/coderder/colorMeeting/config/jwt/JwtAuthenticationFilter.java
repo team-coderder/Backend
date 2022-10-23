@@ -1,6 +1,8 @@
 package com.coderder.colorMeeting.config.jwt;
 
 import ch.qos.logback.core.net.SyslogOutputStream;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
 import com.coderder.colorMeeting.model.User;
 import com.fasterxml.jackson.core.exc.StreamReadException;
@@ -18,6 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Date;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -43,8 +46,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                     authenticationManager.authenticate(authenticationToken);
 
             // 로깅
-            PrincipalDetails principalDetailis = (PrincipalDetails) authentication.getPrincipal();
-            System.out.println("Authentication : "+principalDetailis.getUser().getUsername());
+            PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+            System.out.println("Authentication : "+principalDetails.getUser().getUsername());
 
             // 3) authenticate를 성공하면 authentication을 만든다.
             // attemptAuthentication의 리턴값은 session 영역에 저장된다.
@@ -67,6 +70,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult)
             throws IOException, ServletException {
-        super.successfulAuthentication(request, response, chain, authResult);
+        PrincipalDetails principalDetailis = (PrincipalDetails) authResult.getPrincipal();
+
+        String jwtToken = JWT.create()
+                .withSubject(principalDetailis.getUsername()) // 토큰 이름. 크게 의미 없음
+                .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME)) // 만료시간
+                .withClaim("id", principalDetailis.getUser().getId()) // payload : id. pk
+                .withClaim("username", principalDetailis.getUser().getUsername()) // payload : username. pk
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET)); // 검증값
+
+        response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken); // 헤더key, value
+
     }
 }
