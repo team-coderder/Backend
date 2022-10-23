@@ -18,14 +18,14 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private CorsConfig corsConfig;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
         http
                 // csrf().disable() : jwt 구현 전까지 POST 등의 요청에 403 에러를 방지하기 위한 임시 설정 ----------- 민진
                 .addFilter(corsConfig.corsFilter())
@@ -42,8 +42,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .access("hasRole('ROLE_USER')")
                 .anyRequest().permitAll();
 
-
-
-        return http.build();
     }
 }
