@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 
 @Entity
@@ -12,6 +13,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class PersonalSchedule {
 
     @Id
@@ -26,8 +28,8 @@ public class PersonalSchedule {
     private String name;
 
     private String weekday;
-    private LocalDateTime startTime;
-    private LocalDateTime finishTime;
+    private LocalTime startTime;
+    private LocalTime finishTime;
     private String memo;
-
+    private Long groupScheduleId;
 }
