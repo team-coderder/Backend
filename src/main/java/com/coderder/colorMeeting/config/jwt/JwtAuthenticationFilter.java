@@ -1,0 +1,72 @@
+package com.coderder.colorMeeting.config.jwt;
+
+import ch.qos.logback.core.net.SyslogOutputStream;
+import com.coderder.colorMeeting.config.auth.PrincipalDetails;
+import com.coderder.colorMeeting.model.User;
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@RequiredArgsConstructor
+public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+
+    private final AuthenticationManager authenticationManager;
+
+    // DB에 저장된 값과 일치하는가?
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+        throws AuthenticationException {
+
+        try {
+            // 1) request에서 username, password 받아오기
+            // ObjectMapper는 json을 파싱한다
+            // User.class를 넣으면 username, password 외에 기타 정보도 다 가져온다. loginDto를 추가로 만들자
+            ObjectMapper om = new ObjectMapper();
+            User user = om.readValue(request.getInputStream(), User.class);
+
+            // 2) 토큰을 만들고 로그인을 시도한다
+            // am.authenticate()는 토큰의 파라메터(getUsername, getPassword)를 차례대로 검증한다
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+            Authentication authentication =
+                    authenticationManager.authenticate(authenticationToken);
+
+            // 로깅
+            PrincipalDetails principalDetailis = (PrincipalDetails) authentication.getPrincipal();
+            System.out.println("Authentication : "+principalDetailis.getUser().getUsername());
+
+            // 3) authenticate를 성공하면 authentication을 만든다.
+            // attemptAuthentication의 리턴값은 session 영역에 저장된다.
+            // 권한 관리를 위해 session에 저장한다. 권한 관리를 안 하면 굳이 세션에 저장하지 않아도 된다.
+            return authentication;
+
+        } catch (StreamReadException e) {
+            e.printStackTrace();
+        } catch (DatabindException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    };
+
+    // attemptAuthentication 다음에 실행되는 함수
+    // jwt 토큰을 만들어서 request 요청한 사용자에게 jwt 토큰을 응답해준다
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult)
+            throws IOException, ServletException {
+        super.successfulAuthentication(request, response, chain, authResult);
+    }
+}
