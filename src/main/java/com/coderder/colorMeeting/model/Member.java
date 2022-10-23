@@ -1,11 +1,10 @@
 package com.coderder.colorMeeting.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -29,9 +28,11 @@ public class Member {
     @Column(nullable = false)
     private String nickname;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "member")
     private List<PersonalSchedule> personalScheduleList;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "member")
-    private List<GroupMember> groupMemberSet;
+    private List<TeamMember> teamMemberSet;
 }

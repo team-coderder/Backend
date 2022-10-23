@@ -1,6 +1,6 @@
 package com.coderder.colorMeeting.model;
 
-public enum GroupRole {
+public enum TeamRole {
     LEADER,
     FOLLOWER
 }
