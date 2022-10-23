@@ -2,9 +2,11 @@ package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamRequestDto;
+import com.coderder.colorMeeting.dto.response.ResponseMessage;
 import com.coderder.colorMeeting.dto.response.TeamMemberDto;
 import com.coderder.colorMeeting.dto.response.TeamMembersResponseDto;
 import com.coderder.colorMeeting.dto.response.TeamResponseDto;
+import com.coderder.colorMeeting.exception.BadRequestException;
 import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.Team;
 import com.coderder.colorMeeting.model.TeamMember;
@@ -66,7 +68,7 @@ public class TeamService {
     }
 
     @Transactional
-    public String deleteTeam(Long teamId) {
+    public ResponseMessage deleteTeam(Long teamId) {
 
         Team team = isPresentTeam(teamId);
         if (team == null) {
@@ -74,7 +76,7 @@ public class TeamService {
         }
         teamRepository.delete(team);
 
-        return "그룹(teamId : " + team.getId() + ") 삭제 완료";
+        return new ResponseMessage("그룹(teamId : " + team.getId() + ") 삭제 완료");
     }
 
     @Transactional
@@ -110,7 +112,7 @@ public class TeamService {
 
     // 그룹에 유저 추가하기 - Member 구현 완료 후 구현 가능
     @Transactional
-    public String addMember(TeamMemberRequestDto requestDto) {
+    public ResponseMessage addMember(TeamMemberRequestDto requestDto) {
         Team team = isPresentTeam(requestDto.getTeamId());
         if (team == null) {
             throw new NotFoundException(TEAM_NOT_FOUND);
@@ -134,7 +136,7 @@ public class TeamService {
             }
         }
 
-    return "그룹(teamId : " + team.getId() +")에 멤버 " + cnt + "명 추가 완료";
+    return new ResponseMessage("그룹(teamId : " + team.getId() +")에 멤버 " + cnt + "명 추가 완료");
     }
 
     public List<TeamResponseDto> getMyTeams() {
@@ -158,7 +160,7 @@ public class TeamService {
         return response;
     }
 
-    public String leaveTeam(Long teamId) {
+    public ResponseMessage leaveTeam(Long teamId) {
 
         // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
         Member me = isPresentMember(1L);
@@ -173,14 +175,14 @@ public class TeamService {
 
         TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(me, team);
         if (teamMember == null) {
-            throw new NotFoundException(TEAM_MEMBER_NOT_FOUND);
+            throw new BadRequestException(TEAM_MEMBER_NOT_FOUND);
         }
         teamMemberRepository.delete(teamMember);
 
-        return "그룹(teamId : " + team.getId() +")에서 탈퇴 완료";
+        return new ResponseMessage("그룹(teamId : " + team.getId() +")에서 탈퇴 완료");
     }
 
-    public String memberOut(TeamMemberRequestDto requestDto) {
+    public ResponseMessage memberOut(TeamMemberRequestDto requestDto) {
 
         Team team = isPresentTeam(requestDto.getTeamId());
         if (team == null) {
@@ -198,13 +200,13 @@ public class TeamService {
 
             TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
             if (teamMember == null) {
-                throw new NotFoundException(TEAM_MEMBER_NOT_FOUND);
+                throw new BadRequestException(TEAM_MEMBER_NOT_FOUND);
             }
 
             teamMemberRepository.delete(teamMember);
             cnt++;
         }
-        return "그룹(teamId : " + team.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료";
+        return new ResponseMessage("그룹(teamId : " + team.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료");
     }
 
     private Team isPresentTeam(Long teamId) {

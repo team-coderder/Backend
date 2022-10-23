@@ -59,4 +59,5 @@ public class TeamController {
                                        @RequestParam Long teamId) {
         return ResponseEntity.ok().body(teamService.leaveTeam(teamId));
     }
+
 }
