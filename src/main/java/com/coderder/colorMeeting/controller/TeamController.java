@@ -60,4 +60,8 @@ public class TeamController {
         return ResponseEntity.ok().body(teamService.leaveTeam(teamId));
     }
 
+    @RequestMapping(value = "/invite", method = RequestMethod.POST)
+    public ResponseEntity<?> inviteMember(@RequestBody TeamMemberRequestDto requestDto) {
+        return ResponseEntity.ok().body(teamService.inviteMember(requestDto));
+    }
 }
