@@ -5,10 +5,7 @@ import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.dto.response.TeamMemberDto;
 import com.coderder.colorMeeting.dto.response.TeamMembersResponseDto;
 import com.coderder.colorMeeting.dto.response.TeamResponseDto;
-import com.coderder.colorMeeting.dto.response.ResponseDto;
-import com.coderder.colorMeeting.exception.TeamMemberNotFoundException;
-import com.coderder.colorMeeting.exception.TeamNotFoundException;
-import com.coderder.colorMeeting.exception.MemberNotFoundException;
+import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.Team;
 import com.coderder.colorMeeting.model.TeamMember;
 import com.coderder.colorMeeting.model.TeamRole;
@@ -18,12 +15,13 @@ import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static com.coderder.colorMeeting.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +53,7 @@ public class TeamService {
 
         Team team = isPresentTeam(teamId);
         if (team == null) {
-            throw new TeamNotFoundException();
+            throw new NotFoundException(TEAM_NOT_FOUND);
         }
         team.updateName(requestDto.getName());
 
@@ -72,7 +70,7 @@ public class TeamService {
 
         Team team = isPresentTeam(teamId);
         if (team == null) {
-            throw new TeamNotFoundException();
+            throw new NotFoundException(TEAM_NOT_FOUND);
         }
         teamRepository.delete(team);
 
@@ -83,7 +81,7 @@ public class TeamService {
     public TeamMembersResponseDto getTeamMembers(Long teamId) {
         Team team = isPresentTeam(teamId);
         if (team == null) {
-            throw new TeamNotFoundException();
+            throw new NotFoundException(TEAM_NOT_FOUND);
         }
 
         // response에 쓰일 멤버 리스트 Dto 생성
@@ -115,7 +113,7 @@ public class TeamService {
     public String addMember(TeamMemberRequestDto requestDto) {
         Team team = isPresentTeam(requestDto.getTeamId());
         if (team == null) {
-            throw new TeamNotFoundException();
+            throw new NotFoundException(TEAM_NOT_FOUND);
         }
 
         List<Long> memberIds = requestDto.getMemberIds();
@@ -123,7 +121,7 @@ public class TeamService {
         for (Long memberId : memberIds) {
             Member member = isPresentMember(memberId);
             if (member == null) {
-                throw new MemberNotFoundException();
+                throw new NotFoundException(MEMBER_NOT_FOUND);
             }
             if (teamMemberRepository.findByMemberAndTeam(member, team) == null) {
                 TeamMember teamMember = TeamMember.builder()
@@ -144,7 +142,7 @@ public class TeamService {
         // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
         Member me = isPresentMember(1L);
         if (me == null) {
-            throw new MemberNotFoundException();
+            throw new NotFoundException(MEMBER_NOT_FOUND);
         }
 
         List<TeamResponseDto> response = new ArrayList<>();
@@ -165,17 +163,17 @@ public class TeamService {
         // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
         Member me = isPresentMember(1L);
         if (me == null) {
-            throw new MemberNotFoundException();
+            throw new NotFoundException(MEMBER_NOT_FOUND);
         }
 
         Team team = isPresentTeam(teamId);
         if (team == null) {
-            throw new TeamNotFoundException();
+            throw new NotFoundException(TEAM_NOT_FOUND);
         }
 
         TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(me, team);
         if (teamMember == null) {
-            throw new TeamMemberNotFoundException();
+            throw new NotFoundException(TEAM_MEMBER_NOT_FOUND);
         }
         teamMemberRepository.delete(teamMember);
 
@@ -186,7 +184,7 @@ public class TeamService {
 
         Team team = isPresentTeam(requestDto.getTeamId());
         if (team == null) {
-            throw new TeamNotFoundException();
+            throw new NotFoundException(TEAM_NOT_FOUND);
         }
 
         List<Long> memberIds = requestDto.getMemberIds();
@@ -195,12 +193,12 @@ public class TeamService {
 
             Member member = isPresentMember(memberId);
             if (member == null) {
-                throw new MemberNotFoundException();
+                throw new NotFoundException(MEMBER_NOT_FOUND);
             }
 
             TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
             if (teamMember == null) {
-                throw new TeamMemberNotFoundException();
+                throw new NotFoundException(TEAM_MEMBER_NOT_FOUND);
             }
 
             teamMemberRepository.delete(teamMember);
