@@ -231,7 +231,7 @@ public class TeamService {
                 throw new BadRequestException(ALREADY_TEAM_MEMBER);
             }
 
-            Invitation invitation = isPresentInvitation(member, team);
+            Invitation invitation = invitationDoubleCheck(member, team);
             if (invitation != null) {
                 throw new BadRequestException(ALREADY_INVITED);
             }
@@ -260,6 +260,40 @@ public class TeamService {
         return new ResponseMessage("그룹(teamId : " + team.getId() +")에 멤버 " + cnt + "명 초대 완료");
     }
 
+    public ResponseMessage acceptInvitation(Long invitationId) {
+
+        Invitation invitation = isPresentInvitation(invitationId);
+        if (invitation == null) {
+            throw new NotFoundException(INVITATION_NOT_FOUND);
+        }
+
+        Team team = isPresentTeam(invitation.getFromTeam().getId());
+        if (team == null) {
+            throw new NotFoundException(TEAM_NOT_FOUND);
+        }
+
+        Member member = isPresentMember(invitation.getToMember().getId());
+        if (member == null) {
+            throw new NotFoundException(MEMBER_NOT_FOUND);
+        }
+
+//        // 나한테 보낸 초대장이 아닐 경우
+//        if (invitation.getToMember() != me) {
+//            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
+//        }
+
+        TeamMember teamMember = TeamMember.builder()
+                .team(invitation.getFromTeam())
+                .member(invitation.getToMember())
+                .teamRole(TeamRole.FOLLOWER)
+                .build();
+
+        teamMemberRepository.save(teamMember);
+        invitationRepository.delete(invitation);
+
+        return new ResponseMessage("그룹(teamId : " + invitation.getFromTeam().getId() +")의 초대장 수락 완료");
+    }
+
     private Team isPresentTeam(Long teamId) {
         Optional<Team> team = teamRepository.findById(teamId);
         return team.orElse(null);
@@ -275,8 +309,13 @@ public class TeamService {
         return teamMember;
     }
 
-    private Invitation isPresentInvitation(Member member, Team team) {
+    private Invitation invitationDoubleCheck(Member member, Team team) {
         Invitation invitation = invitationRepository.findByToMemberAndFromTeam(member, team);
         return invitation;
+    }
+
+    private Invitation isPresentInvitation(Long invitationId) {
+        Optional<Invitation> invitation = invitationRepository.findById(invitationId);
+        return invitation.orElse(null);
     }
 }
