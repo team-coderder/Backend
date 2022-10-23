@@ -34,18 +34,24 @@ public class TeamService {
     private final TeamMemberRepository teamMemberRepository;
 
     @Transactional
-    public ResponseDto<?> createTeam(TeamRequestDto requestDto) {
+    public TeamResponseDto createTeam(TeamRequestDto requestDto) {
         Team team = Team.builder()
                 .name(requestDto.getName())
                 .teamMemberList(null)
 //                .teamScheduleList(null)
                 .build();
         teamRepository.save(team);
-        return ResponseDto.success("그룹(teamId : " + team.getId() +") 저장이 완료되었습니다.");
+
+        TeamResponseDto response = TeamResponseDto.builder()
+                .teamId(team.getId())
+                .name(team.getName())
+                .build();
+
+        return response;
     }
 
     @Transactional
-    public ResponseDto<?> updateTeam(Long teamId, TeamRequestDto requestDto) {
+    public TeamResponseDto updateTeam(Long teamId, TeamRequestDto requestDto) {
 
         Team team = isPresentTeam(teamId);
         if (team == null) {
@@ -58,11 +64,11 @@ public class TeamService {
                 .name(team.getName())
                 .build();
 
-        return ResponseDto.success("그룹(teamId : " + team.getId() +") 수정이 완료되었습니다.");
+        return response;
     }
 
     @Transactional
-    public ResponseDto<?> deleteTeam(Long teamId) {
+    public String deleteTeam(Long teamId) {
 
         Team team = isPresentTeam(teamId);
         if (team == null) {
@@ -70,11 +76,11 @@ public class TeamService {
         }
         teamRepository.delete(team);
 
-        return ResponseDto.success("그룹(teamId : " + team.getId() + ") 삭제가 완료되었습니다.");
+        return "그룹(teamId : " + team.getId() + ") 삭제 완료";
     }
 
     @Transactional
-    public ResponseDto<?> getTeamMembers(Long teamId) {
+    public TeamMembersResponseDto getTeamMembers(Long teamId) {
         Team team = isPresentTeam(teamId);
         if (team == null) {
             throw new TeamNotFoundException();
@@ -101,12 +107,12 @@ public class TeamService {
                 .teamMembers(members)
                 .build();
 
-        return ResponseDto.success(response);
+        return response;
     }
 
     // 그룹에 유저 추가하기 - Member 구현 완료 후 구현 가능
     @Transactional
-    public ResponseDto<?> addMember(TeamMemberRequestDto requestDto) {
+    public String addMember(TeamMemberRequestDto requestDto) {
         Team team = isPresentTeam(requestDto.getTeamId());
         if (team == null) {
             throw new TeamNotFoundException();
@@ -130,10 +136,10 @@ public class TeamService {
             }
         }
 
-    return ResponseDto.success("그룹(teamId : " + team.getId() +")에 멤버 " + cnt + "명 추가가 완료되었습니다.");
+    return "그룹(teamId : " + team.getId() +")에 멤버 " + cnt + "명 추가 완료";
     }
 
-    public ResponseDto<?> getMyTeams() {
+    public List<TeamResponseDto> getMyTeams() {
 
         // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
         Member me = isPresentMember(1L);
@@ -141,15 +147,20 @@ public class TeamService {
             throw new MemberNotFoundException();
         }
 
-        List<Team> myTeams = new ArrayList<>();
+        List<TeamResponseDto> response = new ArrayList<>();
         List<TeamMember> teamMembers = teamMemberRepository.getAllByMember(me);
         for (TeamMember teamMember : teamMembers) {
-            myTeams.add(teamMember.getTeam());
+            Team team = teamMember.getTeam();
+
+            response.add(TeamResponseDto.builder()
+                    .teamId(team.getId())
+                    .name(team.getName())
+                    .build());
         }
-        return ResponseDto.success(myTeams);
+        return response;
     }
 
-    public ResponseDto<?> leaveTeam(Long teamId) {
+    public String leaveTeam(Long teamId) {
 
         // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
         Member me = isPresentMember(1L);
@@ -168,10 +179,10 @@ public class TeamService {
         }
         teamMemberRepository.delete(teamMember);
 
-        return ResponseDto.success("그룹(teamId : " + team.getId() +")에서 탈퇴 완료되었습니다.");
+        return "그룹(teamId : " + team.getId() +")에서 탈퇴 완료";
     }
 
-    public ResponseDto<?> memberOut(TeamMemberRequestDto requestDto) {
+    public String memberOut(TeamMemberRequestDto requestDto) {
 
         Team team = isPresentTeam(requestDto.getTeamId());
         if (team == null) {
@@ -195,7 +206,7 @@ public class TeamService {
             teamMemberRepository.delete(teamMember);
             cnt++;
         }
-        return ResponseDto.success("그룹(teamId : " + team.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료되었습니다.");
+        return "그룹(teamId : " + team.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료";
     }
 
     private Team isPresentTeam(Long teamId) {
