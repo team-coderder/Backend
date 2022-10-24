@@ -1,7 +1,9 @@
 package com.coderder.colorMeeting.service;
 
+import com.coderder.colorMeeting.dto.request.ScheduleRequestDto;
 import com.coderder.colorMeeting.dto.response.ScheduleBlockDto;
 import com.coderder.colorMeeting.model.PersonalSchedule;
+import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.PersonalScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,22 @@ public class ScheduleServiceImpl implements ScheduleService{
     @Autowired
     private PersonalScheduleRepository personalScheduleRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     public void insertScheduleBlock(PersonalSchedule personalSchedule){
+        personalScheduleRepository.save(personalSchedule);
+    }
+
+    @Override
+    public void insertScheduleBlock(ScheduleRequestDto scheduleRequestDto) {
+        PersonalSchedule personalSchedule = PersonalSchedule.builder()
+                .name(scheduleRequestDto.getName())
+                .weekday(scheduleRequestDto.getWeekday())
+                .startTime(scheduleRequestDto.getStartTime())
+                .finishTime(scheduleRequestDto.getFinishTime())
+                .member(memberRepository.findById(scheduleRequestDto.getUserId()).get())
+                .build();
         personalScheduleRepository.save(personalSchedule);
     }
 
@@ -36,5 +53,11 @@ public class ScheduleServiceImpl implements ScheduleService{
             blockDtoList.add(tmpBlock);
         }
         return blockDtoList;
+    }
+
+    @Override
+    public List<ScheduleBlockDto> getBlockListByGroupId(String groupId) {
+        
+        return null;
     }
 }
