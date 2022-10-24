@@ -32,12 +32,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin().disable()
                 .httpBasic().disable()
 
-                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
                 // 로그인한 유저만 /api/**에 접근할 수 있다
+                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
                 .authorizeRequests()
                 .antMatchers("/api/member/**")
                 .access("hasRole('ROLE_USER')")
                 .anyRequest().permitAll();
-
     }
 }
