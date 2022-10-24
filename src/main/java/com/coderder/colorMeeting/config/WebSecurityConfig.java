@@ -1,6 +1,7 @@
 package com.coderder.colorMeeting.config;
 
 import com.coderder.colorMeeting.config.jwt.JwtAuthenticationFilter;
+import com.coderder.colorMeeting.config.jwt.JwtAuthorizationFilter;
 import com.coderder.colorMeeting.repository.UserTestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +33,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin().disable()
                 .httpBasic().disable()
 
-                // 로그인한 유저만 /api/**에 접근할 수 있다
+                // 필터
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager()))
+
+                // 로그인한 유저만 /api/**에 접근할 수 있다
                 .authorizeRequests()
                 .antMatchers("/api/member/**")
                 .access("hasRole('ROLE_USER')")
