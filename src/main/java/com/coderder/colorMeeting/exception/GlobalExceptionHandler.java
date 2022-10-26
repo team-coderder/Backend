@@ -4,34 +4,24 @@ import com.coderder.colorMeeting.dto.response.ResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler
-    public ResponseEntity<?> groupNotFoundExceptionHandler(TeamNotFoundException exception) {
-        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.TEAM_NOT_FOUND), HttpStatus.NOT_FOUND);
+    public ResponseEntity<?>notFoundExceptionHandler(NotFoundException exception) {
+        return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler
-    public ResponseEntity<?> memberNotFoundExceptionHandler(MemberNotFoundException exception) {
-        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.MEMBER_NOT_FOUND), HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> invalidGroupNameExceptionHandler(BadRequestException exception) {
+        return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
-    public ResponseEntity<?> invalidGroupNameExceptionHandler(InvalidGroupNameException exception) {
-        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.INVALID_TEAM_NAME), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> unAuthorizedExceptionHandler(UnAuthorizedException exception) {
+        return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode()), HttpStatus.UNAUTHORIZED);
     }
-
-    @ExceptionHandler
-    public ResponseEntity<?> notAuthorizedExceptionHandler(NotAuthorizedException exception) {
-        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.NOT_AUTHORIZED), HttpStatus.UNAUTHORIZED);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<?> teamMemberNotFoundExceptionHandler(TeamMemberNotFoundException exception) {
-        return new ResponseEntity<>(ResponseDto.fail(ErrorCode.TEAM_MEMBER_NOT_FOUND), HttpStatus.NOT_FOUND);
-    }
-
 }
