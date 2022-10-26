@@ -3,7 +3,9 @@ package com.coderder.colorMeeting.config.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
+import com.coderder.colorMeeting.model.Member;
 import com.coderder.colorMeeting.model.UserTest;
+import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.UserTestRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,12 +22,13 @@ import java.io.IOException;
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     // 의존성 주
-    private UserTestRepository userTestRepository;
+//    private UserTestRepository userTestRepository;
+    private MemberRepository memberRepository;
 
     public JwtAuthorizationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
         System.out.println("인증이나 권한이 필요한 주소 요청이 됨");
-        this.userTestRepository = userTestRepository;
+        this.memberRepository = memberRepository;
     }
 
     // 인증 필터
@@ -48,7 +51,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 .getClaim("username").asString();
 
         if(username != null) {
-            UserTest userEntity = userTestRepository.findByUsername(username);
+            Member userEntity = memberRepository.findByUsername(username);
 
             // 권한 처리
             PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
