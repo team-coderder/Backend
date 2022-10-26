@@ -23,6 +23,8 @@ public class MemberService {
         // 스프링 시큐리티에서 수행해주는 것으로 확인함
 
         // username 중복체크하기
+        // service에 validateDuplicatedUsername 메서드 구현하려 했으나
+        // 스프링 시큐리티에서 수행해주는 것으로 확인
 
         // 디폴트값 넣어주기 (암호화한 비밀번호, 권한 디폴트값)
         System.out.println("회원가입 시작");
@@ -41,4 +43,5 @@ public class MemberService {
 
         return "회원가입 완료";
     }
+
 }
