@@ -30,13 +30,7 @@ public class defaultController {
     // 회원가입
     @PostMapping("/join")
     public String join(@RequestBody MemberJoinRequestDto requestDto) {
-
-//        System.out.println("회원가입 시작");
-//        System.out.println("username : " + member.getUsername());
-//        System.out.println("password : " + member.getPassword());
-//        member.setPassword(bCryptPasswordEncoder.encode(member.getPassword()));
-//        member.setRoles("ROLE_USER");
-//        memberRepository.save(member);
+        // 로그인 되어 있으면 돌려보내기 : 스프링 시큐리티에서 해줌!
         return memberService.join(requestDto);
     }
 }

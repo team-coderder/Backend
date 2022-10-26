@@ -19,6 +19,8 @@ public class MemberService {
 
     public String join(MemberJoinRequestDto requestDto) {
         // 로그인되어 있으면 돌려보내기
+        // 컨트롤러에서 request.header 체크하여 수행하려 했으나
+        // 스프링 시큐리티에서 수행해주는 것으로 확인함
 
         // username 중복체크하기
 
