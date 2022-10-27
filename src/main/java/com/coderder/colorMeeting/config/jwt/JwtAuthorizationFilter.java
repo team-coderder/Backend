@@ -21,14 +21,13 @@ import java.io.IOException;
 
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
-    // 의존성 주
-//    private UserTestRepository userTestRepository;
+    // 의존성 주입
     private MemberRepository memberRepository;
 
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager) {
+    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, MemberRepository memberRepository) {
         super(authenticationManager);
-        System.out.println("인증이나 권한이 필요한 주소 요청이 됨");
-        this.memberRepository = memberRepository;
+        System.out.println("======== jwt authorization filter =======");
+        this.memberRepository = this.memberRepository;
     }
 
     // 인증 필터
@@ -38,7 +37,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
         // header에서 jwt토큰을 가져온다
         String header = request.getHeader(JwtProperties.HEADER_STRING);
-        System.out.println("jwt header : " + header);
+        System.out.println("======== jwt authorization filter ======= jwt header : " + header);
         if(header == null || !header.startsWith(JwtProperties.TOKEN_PREFIX)) {
             chain.doFilter(request, response); // 아무 내용도 없는 필터
             return;

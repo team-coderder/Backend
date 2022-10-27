@@ -53,9 +53,21 @@ public class MemberService {
         return responseDto;
     }
 
-    public List<Member> getMembers(String partOfNickname) {
+    public List<MemberResponseDto> getMembers(String partOfNickname) {
         List<Member> memberList = memberRepository.findByNicknameContaining(partOfNickname);
-        return memberList;
+
+        // TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하기
+        List<MemberResponseDto> memberResponseDtoList = new ArrayList<>();
+
+        for (Member member : memberList) {
+            MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+                    .username(member.getUsername())
+                    .nickname(member.getNickname())
+                    .build();
+            memberResponseDtoList.add(memberResponseDto);
+        }
+
+        return memberResponseDtoList;
     }
 
 }

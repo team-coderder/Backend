@@ -2,6 +2,7 @@ package com.coderder.colorMeeting.config;
 
 import com.coderder.colorMeeting.config.jwt.JwtAuthenticationFilter;
 import com.coderder.colorMeeting.config.jwt.JwtAuthorizationFilter;
+import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.UserTestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private UserTestRepository userTestRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
     private CorsConfig corsConfig;
@@ -35,7 +36,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // 필터
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))
-                .addFilter(new JwtAuthorizationFilter(authenticationManager()))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager(), memberRepository))
 
                 // 로그인한 유저만 /api/**에 접근할 수 있다
                 .authorizeRequests()
