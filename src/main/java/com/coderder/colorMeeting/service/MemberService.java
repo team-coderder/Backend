@@ -1,14 +1,18 @@
 package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.dto.request.MemberJoinRequestDto;
-import com.coderder.colorMeeting.dto.response.MemberJoinDto;
+import com.coderder.colorMeeting.dto.response.MemberResponseDto;
+import com.coderder.colorMeeting.dto.response.MemberSetResponseDto;
 import com.coderder.colorMeeting.dto.response.TeamMemberDto;
 import com.coderder.colorMeeting.model.Member;
+import com.coderder.colorMeeting.model.TeamMember;
 import com.coderder.colorMeeting.repository.MemberRepository;
-import com.coderder.colorMeeting.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +21,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public String join(MemberJoinRequestDto requestDto) {
+    public MemberResponseDto join(MemberJoinRequestDto requestDto) {
         // 로그인되어 있으면 돌려보내기
         // 컨트롤러에서 request.header 체크하여 수행하려 했으나
         // 스프링 시큐리티에서 수행해주는 것으로 확인함
@@ -41,7 +45,17 @@ public class MemberService {
         // 저장하기
         memberRepository.save(member);
 
-        return "회원가입 완료";
+        MemberResponseDto responseDto = MemberResponseDto.builder()
+                .username(requestDto.getUsername())
+                .nickname(requestDto.getNickname())
+                .build();
+
+        return responseDto;
+    }
+
+    public List<Member> getMembers(String partOfNickname) {
+        List<Member> memberList = memberRepository.findByNicknameContaining(partOfNickname);
+        return memberList;
     }
 
 }

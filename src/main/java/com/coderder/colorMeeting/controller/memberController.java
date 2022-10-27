@@ -1,7 +1,9 @@
 package com.coderder.colorMeeting.controller;
 
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
+import com.coderder.colorMeeting.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/member")
 public class memberController {
 
+    private final MemberService memberService;
 
     // 로그인한 사람만 접근 가능한 페이지
     @GetMapping("user")
@@ -23,6 +26,10 @@ public class memberController {
     }
 
     // 관리자만 접근 가능한 페이지
+
+
+
+    // 내 정보 조회하기
 
 
 }
