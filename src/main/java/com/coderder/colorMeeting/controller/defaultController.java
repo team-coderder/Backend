@@ -35,7 +35,15 @@ public class defaultController {
 
     // 유저 검색
     @RequestMapping(value="/search", method = RequestMethod.GET)
-    public ResponseEntity<?> getMembers(@RequestParam("query") String partOfNickname) {
+    public ResponseEntity<?> getMembers(@RequestParam("nickname") String partOfNickname) {
         return ResponseEntity.ok().body(memberService.getMembers(partOfNickname));
     }
+
+    // 내 정보 조회하기
+
+    // jwt 토큰에서 내 아이디 파싱하기
+
+    // 아이디로 내 정보 검색하기
+
+    // 쏴주기
 }

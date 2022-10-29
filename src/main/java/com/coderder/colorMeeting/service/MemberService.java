@@ -61,6 +61,7 @@ public class MemberService {
 
         for (Member member : memberList) {
             MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+                    .id(member.getId())
                     .username(member.getUsername())
                     .nickname(member.getNickname())
                     .build();
