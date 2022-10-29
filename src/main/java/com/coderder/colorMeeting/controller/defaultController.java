@@ -35,8 +35,13 @@ public class defaultController {
 
     // 유저 검색
     @RequestMapping(value="/search", method = RequestMethod.GET)
-    public ResponseEntity<?> getMembers(@RequestParam("nickname") String partOfNickname) {
-        return ResponseEntity.ok().body(memberService.getMembers(partOfNickname));
+    public ResponseEntity<?> getMembersByNickname(@RequestParam("nickname") String partOfNickname) {
+        return ResponseEntity.ok().body(memberService.getMembersByNickname(partOfNickname));
+    }
+
+    @RequestMapping(value="/search/username", method = RequestMethod.GET)
+    public ResponseEntity<?> getMembersByUsername(@RequestParam("username") String exactUsername) {
+        return ResponseEntity.ok().body(memberService.getMembersByUsername(exactUsername));
     }
 
     // 내 정보 조회하기

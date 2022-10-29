@@ -29,10 +29,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final AuthenticationManager authenticationManager;
 
     // DB에 저장된 값과 일치하는가?
+    @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
         throws AuthenticationException {
 
         try {
+            System.out.println("============== attempt Authentication starts ===============");
             // 1) request에서 username, password 받아오기
             // ObjectMapper는 json을 파싱한다
             // User.class를 넣으면 username, password 외에 기타 정보도 다 가져온다. loginDto를 추가로 만들자
@@ -48,7 +50,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
             // 로깅
             PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-            System.out.println("Authentication : "+principalDetails.getMember().getUsername());
+            System.out.println("================== Authentication : "+principalDetails.getMember().getUsername() + " ==================");
+            System.out.println("============== attempt Authentication ends ===============");
 
             // 3) authenticate를 성공하면 authentication을 만든다.
             // attemptAuthentication의 리턴값은 session 영역에 저장된다.
@@ -71,6 +74,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult)
             throws IOException, ServletException {
+        System.out.println("============== successful Authentication starts ===============");
+        System.out.println(JwtProperties.getSECRET());
+
         PrincipalDetails principalDetailis = (PrincipalDetails) authResult.getPrincipal();
 
         String jwtToken = JWT.create()
@@ -81,6 +87,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .sign(Algorithm.HMAC512(JwtProperties.getSECRET())); // 검증값
 
         response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken); // 헤더key, value
+
+        System.out.println("============== successful Authentication ends ===============");
 
     }
 }

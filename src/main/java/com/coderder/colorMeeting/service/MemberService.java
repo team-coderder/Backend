@@ -59,7 +59,7 @@ public class MemberService {
         return responseDto;
     }
 
-    public List<MemberResponseDto> getMembers(String partOfNickname) {
+    public List<MemberResponseDto> getMembersByNickname(String partOfNickname) {
         List<Member> memberList = memberRepository.findByNicknameContaining(partOfNickname);
 
         // TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하기
@@ -105,5 +105,11 @@ public class MemberService {
         } else {
             return false;
         }
+    }
+
+    public Member getMembersByUsername(String exactUsername) {
+        Member member = memberRepository.findByUsername(exactUsername);
+
+        return member;
     }
 }
