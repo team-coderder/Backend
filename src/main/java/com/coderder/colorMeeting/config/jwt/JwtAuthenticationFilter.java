@@ -78,7 +78,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME)) // 만료시간
                 .withClaim("id", principalDetailis.getMember().getId()) // payload : id. pk
                 .withClaim("username", principalDetailis.getMember().getUsername()) // payload : username. pk
-                .sign(Algorithm.HMAC512(JwtProperties.SECRET)); // 검증값
+                .sign(Algorithm.HMAC512(JwtProperties.getSECRET())); // 검증값
 
         response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken); // 헤더key, value
 
