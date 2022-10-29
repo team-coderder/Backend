@@ -40,6 +40,7 @@ public class defaultController {
     }
 
     // 내 정보 조회하기
+    @RequestMapping(value="/mypage", method= RequestMethod.GET)
     public ResponseEntity<?> getMyInformation(@RequestParam("memberId") Long memberId) {
         return ResponseEntity.ok().body(memberService.getMyInformation(memberId));
     }

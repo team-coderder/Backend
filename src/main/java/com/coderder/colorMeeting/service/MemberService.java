@@ -2,6 +2,7 @@ package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.dto.request.MemberJoinRequestDto;
 import com.coderder.colorMeeting.dto.response.MemberResponseDto;
+import com.coderder.colorMeeting.exception.ErrorResponse;
 import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.Member;
 import com.coderder.colorMeeting.repository.MemberRepository;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.coderder.colorMeeting.exception.ErrorCode.MEMBER_NOT_FOUND;
+import static com.coderder.colorMeeting.exception.ErrorCode.USERNAME_ALREADY_EXISTS;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +30,10 @@ public class MemberService {
         // 스프링 시큐리티에서 수행해주는 것으로 확인함
 
         // username 중복체크하기
-        // service에 validateDuplicatedUsername 메서드 구현하려 했으나
-        // 스프링 시큐리티에서 수행해주는 것으로 확인
+        boolean duplicatedUsername = checkDuplicatedUsername(requestDto.getUsername());
+        if ( duplicatedUsername == true ) {
+            throw new ErrorResponse(USERNAME_ALREADY_EXISTS);
+        }
 
         // 디폴트값 넣어주기 (암호화한 비밀번호, 권한 디폴트값)
         System.out.println("회원가입 시작");
@@ -44,11 +48,12 @@ public class MemberService {
                 .build();
 
         // 저장하기
-        memberRepository.save(member);
+        Member savedMember = memberRepository.save(member);
 
         MemberResponseDto responseDto = MemberResponseDto.builder()
-                .username(requestDto.getUsername())
-                .nickname(requestDto.getNickname())
+                .id(savedMember.getId())
+                .username(savedMember.getUsername())
+                .nickname(savedMember.getNickname())
                 .build();
 
         return responseDto;
@@ -91,5 +96,14 @@ public class MemberService {
     private Member isPresentMember(Long memberId) {
         Optional<Member> member = memberRepository.findById(memberId);
         return member.orElse(null);
+    }
+
+    private boolean checkDuplicatedUsername(String username) {
+        Member member = memberRepository.findByUsername(username);
+        if (member != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
