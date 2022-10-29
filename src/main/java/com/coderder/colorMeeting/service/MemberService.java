@@ -2,10 +2,8 @@ package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.dto.request.MemberJoinRequestDto;
 import com.coderder.colorMeeting.dto.response.MemberResponseDto;
-import com.coderder.colorMeeting.dto.response.MemberSetResponseDto;
-import com.coderder.colorMeeting.dto.response.TeamMemberDto;
+import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.Member;
-import com.coderder.colorMeeting.model.TeamMember;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static com.coderder.colorMeeting.exception.ErrorCode.MEMBER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -71,4 +72,24 @@ public class MemberService {
         return memberResponseDtoList;
     }
 
+    public MemberResponseDto getMyInformation(Long memberId) {
+
+        Member member = isPresentMember(memberId);
+        if (member == null) {
+            throw new NotFoundException(MEMBER_NOT_FOUND);
+        }
+
+        MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+                .id(member.getId())
+                .username(member.getUsername())
+                .nickname(member.getNickname())
+                .build();
+
+        return memberResponseDto;
+    }
+
+    private Member isPresentMember(Long memberId) {
+        Optional<Member> member = memberRepository.findById(memberId);
+        return member.orElse(null);
+    }
 }

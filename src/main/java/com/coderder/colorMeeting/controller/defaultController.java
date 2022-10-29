@@ -40,8 +40,9 @@ public class defaultController {
     }
 
     // 내 정보 조회하기
-
-    // jwt 토큰에서 내 아이디 파싱하기
+    public ResponseEntity<?> getMyInformation(@RequestParam("memberId") Long memberId) {
+        return ResponseEntity.ok().body(memberService.getMyInformation(memberId));
+    }
 
     // 아이디로 내 정보 검색하기
 
