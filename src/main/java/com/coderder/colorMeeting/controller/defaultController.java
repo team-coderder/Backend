@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class defaultController {
 
-//    private final UserTestRepository userTestRepository;
     private final MemberService memberService;
 
     // 모든 사람이 접근 가능한 페이지
@@ -29,28 +28,8 @@ public class defaultController {
     // 회원가입
     @PostMapping("/join")
     public MemberResponseDto join(@RequestBody MemberJoinRequestDto requestDto) {
-        // 로그인 되어 있으면 돌려보내기 : 스프링 시큐리티에서 해줌!
+        // 로그인 되어 있으면 돌려보내기 : 스프링 시큐리티에서 안 해줌. 로직 추가해야 함.
         return memberService.join(requestDto);
     }
 
-    // 유저 검색
-    @RequestMapping(value="/search", method = RequestMethod.GET)
-    public ResponseEntity<?> getMembersByNickname(@RequestParam("nickname") String partOfNickname) {
-        return ResponseEntity.ok().body(memberService.getMembersByNickname(partOfNickname));
-    }
-
-    @RequestMapping(value="/search/username", method = RequestMethod.GET)
-    public ResponseEntity<?> getMembersByUsername(@RequestParam("username") String exactUsername) {
-        return ResponseEntity.ok().body(memberService.getMembersByUsername(exactUsername));
-    }
-
-    // 내 정보 조회하기
-    @RequestMapping(value="/mypage", method= RequestMethod.GET)
-    public ResponseEntity<?> getMyInformation(@RequestParam("memberId") Long memberId) {
-        return ResponseEntity.ok().body(memberService.getMyInformation(memberId));
-    }
-
-    // 아이디로 내 정보 검색하기
-
-    // 쏴주기
 }
