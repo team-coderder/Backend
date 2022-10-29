@@ -2,6 +2,7 @@ package com.coderder.colorMeeting.config;
 
 import com.coderder.colorMeeting.config.jwt.JwtAuthenticationFilter;
 import com.coderder.colorMeeting.config.jwt.JwtAuthorizationFilter;
+import com.coderder.colorMeeting.config.jwt.JwtProperties;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.UserTestRepository;
 import lombok.RequiredArgsConstructor;
