@@ -32,7 +32,13 @@ public enum ErrorCode {
     NO_PERMISSION_FOR_THIS_REQUEST("NO_PERMISSION_FOR_THIS_REQUEST", "해당 요청에 대한 권한이 없습니다."),
 
     // 로그인 관련 오류
-    LOGIN_REQUIRED("LOGIN_REQUIRED", "로그인이 필요합니다.");
+    LOGIN_REQUIRED("LOGIN_REQUIRED", "로그인이 필요합니다."),
+
+    
+    NOT_AUTHORIZED("NOT_AUTHORIZED", "권한이 없습니다."),
+
+    // 회원가입 로직 : 중복 아이디
+    USERNAME_ALREADY_EXISTS("USERNAME_ALREADY_EXISTS", "이미 존재하는 유저입니다");
 
     private final String code;
     private final String message;
