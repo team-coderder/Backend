@@ -21,24 +21,24 @@ import java.io.IOException;
 
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
-    // 의존성 주
-//    private UserTestRepository userTestRepository;
+    // 의존성 주입
     private MemberRepository memberRepository;
 
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager) {
+    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, MemberRepository memberRepository) {
         super(authenticationManager);
-        System.out.println("인증이나 권한이 필요한 주소 요청이 됨");
+        // System.out.println("======== jwt authorization filter 생성 =======");
         this.memberRepository = memberRepository;
     }
 
     // 인증 필터
+    // jwt 토큰을 검증한다
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
         // header에서 jwt토큰을 가져온다
         String header = request.getHeader(JwtProperties.HEADER_STRING);
-        System.out.println("jwt header : " + header);
+        // System.out.println("=============== header에서 jwt 토큰을 가져온다 " + header);
         if(header == null || !header.startsWith(JwtProperties.TOKEN_PREFIX)) {
             chain.doFilter(request, response); // 아무 내용도 없는 필터
             return;
@@ -47,20 +47,27 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         // jwt 토큰을 검증한다
         String token = request.getHeader(JwtProperties.HEADER_STRING)
                 .replace(JwtProperties.TOKEN_PREFIX, "");
-        String username = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token)
+        // System.out.println("=============== 토큰 값 가져온만다 " + token);
+
+        String username = JWT.require(Algorithm.HMAC512(JwtProperties.getSECRET())).build().verify(token)
                 .getClaim("username").asString();
+        // System.out.println("=============== 토큰을 디코딩하여 username을 얻는다 " + username + "======");
 
         if(username != null) {
             Member userEntity = memberRepository.findByUsername(username);
+            // System.out.println("=============== username으로 Member를 찾는다 " + userEntity.getUsername());
 
             // 권한 처리
             PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+            // System.out.println("=============== Member로 principalDetails를 만든다 " + principalDetails.getUsername());
+
             Authentication authentication =
                     new UsernamePasswordAuthenticationToken(
                             principalDetails,
                             null,
                             principalDetails.getAuthorities());
 
+            // System.out.println("=============== 권한 관리를 위해 Authentication 객체에 저장한다 " + authentication);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 

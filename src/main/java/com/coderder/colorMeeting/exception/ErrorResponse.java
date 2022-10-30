@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class ErrorResponse {
+public class ErrorResponse extends RuntimeException {
     private String code;
     private String message;
 

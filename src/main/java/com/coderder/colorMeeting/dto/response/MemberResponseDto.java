@@ -5,9 +5,8 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class MemberJoinDto {
+public class MemberResponseDto {
+    private Long id;
     private String username;
-    private String password;
     private String nickname;
-    private String roles;
 }

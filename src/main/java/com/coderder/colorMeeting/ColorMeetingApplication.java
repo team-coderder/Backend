@@ -1,5 +1,6 @@
 package com.coderder.colorMeeting;
 
+import com.coderder.colorMeeting.config.jwt.JwtProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -16,6 +17,7 @@ public class ColorMeetingApplication {
 	}
 
 	public static void main(String[] args) {
+
 		SpringApplication.run(ColorMeetingApplication.class, args);
 	}
 
