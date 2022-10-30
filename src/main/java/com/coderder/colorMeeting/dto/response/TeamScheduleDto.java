@@ -2,15 +2,17 @@ package com.coderder.colorMeeting.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
+
+import java.time.LocalTime;
 
 @Builder
 @Getter
-public class ScheduleBlockDto {
-    private String userid;
+@ToString
+public class TeamScheduleDto {
     private String name;
     private String weekday;
-    private String start_time;
-    private String end_time;
+    private LocalTime startTime;
+    private LocalTime finishTime;
     private String memo;
-    private Long group_id;
 }
