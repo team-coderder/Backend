@@ -5,22 +5,20 @@ import com.coderder.colorMeeting.dto.request.TeamScheduleRequestDto;
 import com.coderder.colorMeeting.dto.response.RecommendationDto;
 import com.coderder.colorMeeting.dto.response.ScheduleBlockDto;
 import com.coderder.colorMeeting.dto.response.TeamScheduleDto;
-import com.coderder.colorMeeting.exception.MemberNotFoundException;
-import com.coderder.colorMeeting.exception.TeamNotFoundException;
+import com.coderder.colorMeeting.exception.ErrorCode;
+import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.Member;
 import com.coderder.colorMeeting.model.PersonalSchedule;
 import com.coderder.colorMeeting.model.Team;
 import com.coderder.colorMeeting.model.TeamSchedule;
 import com.coderder.colorMeeting.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService{
@@ -42,7 +40,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     @Override
     public void insertScheduleBlock(ScheduleRequestDto scheduleRequestDto) {
         Member member = memberRepository.findById(scheduleRequestDto.getUserId())
-                .orElseThrow(()->new MemberNotFoundException());
+                .orElseThrow(()->new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
         PersonalSchedule personalSchedule = PersonalSchedule.builder()
                 .name(scheduleRequestDto.getName())
                 .weekday(scheduleRequestDto.getWeekday())
@@ -56,7 +54,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     @Override
     public List<ScheduleBlockDto> getBlockListByUserId(Long userId) {
         Member member = memberRepository.findById(userId)
-                .orElseThrow(()->new MemberNotFoundException());
+                .orElseThrow(()->new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
         List<PersonalSchedule> blockList = personalScheduleRepository.findAllByMember(member);
         List<ScheduleBlockDto> blockDtoList = new ArrayList<>();
         for(PersonalSchedule block : blockList){
@@ -75,8 +73,8 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
 
     @Override
-    public List<ScheduleBlockDto> getBlockListByGroupId(String teamId) {
-        List<Member> members = memberRepository.findAllWithTeamName(teamId);
+    public List<ScheduleBlockDto> getBlockListByTeamId(Long teamId) {
+        List<Member> members = memberRepository.findAllWithTeamId(teamId);
         List<PersonalSchedule> schedules = personalScheduleRepository.findAllByMemberIn(members);
 
         List<ScheduleBlockDto> blockDtoList
@@ -100,8 +98,8 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
 
     @Override
-    public List<RecommendationDto> getTeamEmptyTimes(String teamId, Long spendingMinute) {
-        List<Member> members = memberRepository.findAllWithTeamName(teamId);
+    public List<RecommendationDto> getTeamEmptyTimes(Long teamId, Long spendingMinute) {
+        List<Member> members = memberRepository.findAllWithTeamId(teamId);
         List<PersonalSchedule> teamSchedules = personalScheduleRepository.findAllByMemberIn(members);
 
         List<RecommendationDto> recommendationDtos = calculateEmptyTimes(teamSchedules, 2);
@@ -168,7 +166,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     @Override
     public void insertGroupSchedule(TeamScheduleRequestDto teamScheduleDto) {
         Team team = teamRepository.findById(teamScheduleDto.getTeamId())
-                .orElseThrow(()->new TeamNotFoundException());
+                .orElseThrow(()->new NotFoundException(ErrorCode.TEAM_NOT_FOUND));
         TeamSchedule teamSchedule = TeamSchedule.builder()
                 .name(teamScheduleDto.getName())
                 .weekday(teamScheduleDto.getWeekday())

@@ -17,9 +17,9 @@ public interface ScheduleService {
     void insertScheduleBlock(ScheduleRequestDto scheduleRequestDtoDto);
     List<ScheduleBlockDto> getBlockListByUserId(Long userId);
 
-    List<ScheduleBlockDto> getBlockListByGroupId(String groupId);
+    List<ScheduleBlockDto> getBlockListByTeamId(Long teamId);
 
-    List<RecommendationDto> getTeamEmptyTimes(String teamId, Long spendingMinute);
+    List<RecommendationDto> getTeamEmptyTimes(Long teamId, Long spendingMinute);
 
     void insertGroupSchedule(TeamScheduleRequestDto teamScheduleDto);
 

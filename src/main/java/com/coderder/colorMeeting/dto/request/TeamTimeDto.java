@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class TeamTimeDto {
-    private String teamId;
+    private Long teamId;
     private Long spendingMinute;
 
 }

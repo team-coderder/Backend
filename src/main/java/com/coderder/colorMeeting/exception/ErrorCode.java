@@ -34,7 +34,7 @@ public enum ErrorCode {
     // 로그인 관련 오류
     LOGIN_REQUIRED("LOGIN_REQUIRED", "로그인이 필요합니다."),
 
-    
+
     NOT_AUTHORIZED("NOT_AUTHORIZED", "권한이 없습니다."),
 
     // 회원가입 로직 : 중복 아이디

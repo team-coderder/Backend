@@ -34,9 +34,9 @@ public class ScheduleController {
     }
 
     @GetMapping("/api/schedule/myteam")
-    public ResponseEntity<ScheduleCalendarDto> getGroupUserAllSchedule(@RequestParam String teamId)
+    public ResponseEntity<ScheduleCalendarDto> getGroupUserAllSchedule(@RequestParam Long teamId)
     {
-        List<ScheduleBlockDto> scheduleBlockDtoList = scheduleService.getBlockListByGroupId(teamId);
+        List<ScheduleBlockDto> scheduleBlockDtoList = scheduleService.getBlockListByTeamId(teamId);
         ScheduleCalendarDto scheduleCalendarDto = ScheduleCalendarDto.builder()
                 .blocks(scheduleBlockDtoList)
                 .build();

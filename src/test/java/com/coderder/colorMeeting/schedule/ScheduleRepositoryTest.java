@@ -5,7 +5,6 @@ import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.PersonalScheduleRepository;
 import com.coderder.colorMeeting.repository.TeamMemberRepository;
 import com.coderder.colorMeeting.repository.TeamRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -108,7 +107,7 @@ public class ScheduleRepositoryTest {
         teamMemberRepository.save(teamMember);
         System.out.println(teamMember);
 
-        List<Member> members = memberRepository.findAllWithTeamName(team.getName());
+        List<Member> members = memberRepository.findAllWithTeamId(team.getId());
         System.out.println(members);
 
         List<PersonalSchedule> schedules = personalScheduleRepository.findAllByMemberIn(members);
