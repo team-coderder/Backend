@@ -35,6 +35,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+         System.out.println("=============== Authorization starts");
 
         // header에서 jwt토큰을 가져온다
         String header = request.getHeader(JwtProperties.HEADER_STRING);
@@ -72,6 +73,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         }
 
         chain.doFilter(request, response);
+
+
+        System.out.println("=============== Authorization ends");
 
 
     }
