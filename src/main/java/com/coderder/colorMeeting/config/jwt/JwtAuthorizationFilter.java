@@ -23,11 +23,13 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     // 의존성 주입
     private MemberRepository memberRepository;
+    private JwtProperties jwtProperties;
 
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, MemberRepository memberRepository) {
+    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, MemberRepository memberRepository, JwtProperties jwtProperties) {
         super(authenticationManager);
         // System.out.println("======== jwt authorization filter 생성 =======");
         this.memberRepository = memberRepository;
+        this.jwtProperties = jwtProperties;
     }
 
     // 인증 필터
@@ -36,6 +38,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
          System.out.println("=============== Authorization starts");
+        System.out.println("=============== is this colorMeeting? " + jwtProperties.getTEST());
 
         // header에서 jwt토큰을 가져온다
         String header = request.getHeader(JwtProperties.HEADER_STRING);
