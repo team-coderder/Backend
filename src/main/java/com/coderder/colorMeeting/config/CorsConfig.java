@@ -14,7 +14,10 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("*"); // e.g. http://domain1.com
+        config.addAllowedOrigin("http://localhost:8081"); // e.g. http://domain1.com
+        config.addAllowedOrigin("http://localhost:8080");
+        config.addAllowedOrigin("http://43.200.220.2:8081");
+        config.addAllowedOrigin("http://43.200.220.2:8080");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
