@@ -23,6 +23,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private CorsConfig corsConfig;
 
+    @Autowired
+    private JwtProperties jwtProperties;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -35,8 +38,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic().disable()
 
                 // 필터
-                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
-                .addFilter(new JwtAuthorizationFilter(authenticationManager(), memberRepository))
+                .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtProperties))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager(), memberRepository, jwtProperties))
 
                 // 로그인한 유저만 /api/**에 접근할 수 있다
                 .authorizeRequests()

@@ -28,6 +28,7 @@ import java.util.Date;
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
+    private final JwtProperties jwtProperties;
 
 
     // DB에 저장된 값과 일치하는가?
