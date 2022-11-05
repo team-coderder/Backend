@@ -119,7 +119,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 
         List<RecommendationDto> times = new ArrayList<>();
         for(int i=0; i<weekCalendar.length; i++){
-            for(int j=0; j< weekCalendar[0].length; j++){
+            for(int j=0; j< weekCalendar[0].length-1; j++){
                 if(weekCalendar[i][j]) continue;
                 RecommendationDto time = RecommendationDto.builder()
                         .weekday(convertToWeekday(i))
