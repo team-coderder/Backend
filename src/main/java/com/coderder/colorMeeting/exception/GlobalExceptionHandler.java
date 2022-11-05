@@ -24,4 +24,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> unAuthorizedExceptionHandler(UnAuthorizedException exception) {
         return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode()), HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler
+    public ResponseEntity<?> ForbiddenExceptionHandler(ForbiddenException exception) {
+        return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode()), HttpStatus.FORBIDDEN);
+    }
 }
