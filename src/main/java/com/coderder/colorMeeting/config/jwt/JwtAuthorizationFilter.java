@@ -23,11 +23,13 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     // 의존성 주입
     private MemberRepository memberRepository;
+    private JwtProperties jwtProperties;
 
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, MemberRepository memberRepository) {
+    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, MemberRepository memberRepository, JwtProperties jwtProperties) {
         super(authenticationManager);
         // System.out.println("======== jwt authorization filter 생성 =======");
         this.memberRepository = memberRepository;
+        this.jwtProperties = jwtProperties;
     }
 
     // 인증 필터
@@ -35,6 +37,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+        // System.out.println("=============== Authorization starts");
+        // System.out.println("=============== is this colorMeeting? " + jwtProperties.getTEST());
 
         // header에서 jwt토큰을 가져온다
         String header = request.getHeader(JwtProperties.HEADER_STRING);
@@ -49,7 +53,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 .replace(JwtProperties.TOKEN_PREFIX, "");
         // System.out.println("=============== 토큰 값 가져온만다 " + token);
 
-        String username = JWT.require(Algorithm.HMAC512(JwtProperties.getSECRET())).build().verify(token)
+        String username = JWT.require(Algorithm.HMAC512(jwtProperties.getSECRET())).build().verify(token)
                 .getClaim("username").asString();
         // System.out.println("=============== 토큰을 디코딩하여 username을 얻는다 " + username + "======");
 
@@ -72,6 +76,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         }
 
         chain.doFilter(request, response);
+
+
+        // System.out.println("=============== Authorization ends");
 
 
     }
