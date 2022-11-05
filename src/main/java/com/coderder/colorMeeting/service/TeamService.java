@@ -2,10 +2,7 @@ package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamRequestDto;
-import com.coderder.colorMeeting.dto.response.ResponseMessage;
-import com.coderder.colorMeeting.dto.response.TeamMemberDto;
-import com.coderder.colorMeeting.dto.response.TeamMembersResponseDto;
-import com.coderder.colorMeeting.dto.response.TeamResponseDto;
+import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.exception.BadRequestException;
 import com.coderder.colorMeeting.exception.ForbiddenException;
 import com.coderder.colorMeeting.exception.NotFoundException;
@@ -35,7 +32,7 @@ public class TeamService {
     private final InvitationRepository invitationRepository;
 
     @Transactional
-    public TeamResponseDto createTeam(TeamRequestDto requestDto) {
+    public TeamSimpleResponseDto createTeam(TeamRequestDto requestDto) {
         Team team = Team.builder()
                 .name(requestDto.getName())
                 .teamMemberList(null)
@@ -43,7 +40,7 @@ public class TeamService {
                 .build();
         teamRepository.save(team);
 
-        TeamResponseDto response = TeamResponseDto.builder()
+        TeamSimpleResponseDto response = TeamSimpleResponseDto.builder()
                 .teamId(team.getId())
                 .name(team.getName())
                 .build();
@@ -52,7 +49,40 @@ public class TeamService {
     }
 
     @Transactional
-    public TeamResponseDto updateTeam(Long teamId, TeamRequestDto requestDto) {
+    public TeamDetailResponseDto showTeamInfo(Long teamId) {
+        Team team = isPresentTeam(teamId);
+        if (team == null) {
+            throw new NotFoundException(TEAM_NOT_FOUND);
+        }
+
+        // response에 쓰일 멤버 리스트 Dto 생성
+        List<TeamMemberDto> members = new ArrayList<>();
+
+        // TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하기
+        List<TeamMember> teamMembers = team.getTeamMemberList();
+        for (TeamMember teamMember : teamMembers) {
+            Member member = teamMember.getMember();
+            TeamMemberDto teamMemberDto = TeamMemberDto.builder()
+                    .memberId(member.getId())
+                    .username(member.getUsername())
+                    .nickname(member.getNickname())
+                    .teamRole(String.valueOf(teamMember.getTeamRole()))
+                    .build();
+            members.add(teamMemberDto);
+        }
+
+        TeamDetailResponseDto response = TeamDetailResponseDto.builder()
+                .teamId(team.getId())
+                .name(team.getName())
+                .teamMembers(members)
+                .invitations(null)
+                .build();
+
+        return response;
+    }
+
+    @Transactional
+    public TeamSimpleResponseDto updateTeam(Long teamId, TeamRequestDto requestDto) {
 
         Team team = isPresentTeam(teamId);
         if (team == null) {
@@ -60,7 +90,7 @@ public class TeamService {
         }
         team.updateName(requestDto.getName());
 
-        TeamResponseDto response = TeamResponseDto.builder()
+        TeamSimpleResponseDto response = TeamSimpleResponseDto.builder()
                 .teamId(team.getId())
                 .name(team.getName())
                 .build();
@@ -140,7 +170,7 @@ public class TeamService {
     return new ResponseMessage("그룹(teamId : " + team.getId() +")에 멤버 " + cnt + "명 추가 완료");
     }
 
-    public List<TeamResponseDto> getMyTeams() {
+    public List<TeamSimpleResponseDto> getMyTeams() {
 
         // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
         Member me = isPresentMember(1L);
@@ -148,12 +178,12 @@ public class TeamService {
             throw new NotFoundException(MEMBER_NOT_FOUND);
         }
 
-        List<TeamResponseDto> response = new ArrayList<>();
+        List<TeamSimpleResponseDto> response = new ArrayList<>();
         List<TeamMember> teamMembers = teamMemberRepository.getAllByMember(me);
         for (TeamMember teamMember : teamMembers) {
             Team team = teamMember.getTeam();
 
-            response.add(TeamResponseDto.builder()
+            response.add(TeamSimpleResponseDto.builder()
                     .teamId(team.getId())
                     .name(team.getName())
                     .build());

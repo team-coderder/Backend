@@ -20,6 +20,12 @@ public class TeamController {
         return ResponseEntity.ok().body(teamService.createTeam(requestDto));
     }
 
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<?> showTeamInfo( // @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                         @RequestParam Long teamId) {
+        return ResponseEntity.ok().body(teamService.showTeamInfo(teamId));
+    }
+
     @RequestMapping(method = RequestMethod.PATCH)
     public ResponseEntity<?> updateTeam( // @AuthenticationPrincipal UserDetailsImpl userDetails,
                         @RequestParam Long teamId, @RequestBody TeamRequestDto requestDto) {
