@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         throws AuthenticationException {
 
         try {
-             System.out.println("============== attempt Authentication starts ===============");
+            // System.out.println("============== attempt Authentication starts ===============");
             // 1) request에서 username, password 받아오기
             // ObjectMapper는 json을 파싱한다
             // User.class를 넣으면 username, password 외에 기타 정보도 다 가져온다. loginDto를 추가로 만들자
@@ -54,7 +54,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             // 로깅
             PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
             // System.out.println("================== Authentication : "+principalDetails.getMember().getUsername() + " ==================");
-             System.out.println("============== attempt Authentication ends ===============");
+            // System.out.println("============== attempt Authentication ends ===============");
 
             // 3) authenticate를 성공하면 authentication을 만든다.
             // attemptAuthentication의 리턴값은 session 영역에 저장된다.
@@ -77,7 +77,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult)
             throws IOException, ServletException {
-         System.out.println("============== successful Authentication starts ===============");
+        // System.out.println("============== successful Authentication starts ===============");
 
         PrincipalDetails principalDetailis = (PrincipalDetails) authResult.getPrincipal();
 
@@ -86,11 +86,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .withExpiresAt(new Date(System.currentTimeMillis()+JwtProperties.EXPIRATION_TIME)) // 만료시간
                 .withClaim("id", principalDetailis.getMember().getId()) // payload : id. pk
                 .withClaim("username", principalDetailis.getMember().getUsername()) // payload : username. pk
-                .sign(Algorithm.HMAC512(jwtProperties.getTEST())); // 검증값
+                .sign(Algorithm.HMAC512(jwtProperties.getSECRET())); // 검증값
 
         response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken); // 헤더key, value
 
-         System.out.println("============== successful Authentication ends ===============");
+        // System.out.println("============== successful Authentication ends ===============");
 
     }
 }

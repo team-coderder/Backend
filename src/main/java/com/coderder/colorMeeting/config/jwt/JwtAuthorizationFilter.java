@@ -37,8 +37,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-         System.out.println("=============== Authorization starts");
-        System.out.println("=============== is this colorMeeting? " + jwtProperties.getTEST());
+        // System.out.println("=============== Authorization starts");
+        // System.out.println("=============== is this colorMeeting? " + jwtProperties.getTEST());
 
         // header에서 jwt토큰을 가져온다
         String header = request.getHeader(JwtProperties.HEADER_STRING);
@@ -53,7 +53,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 .replace(JwtProperties.TOKEN_PREFIX, "");
         // System.out.println("=============== 토큰 값 가져온만다 " + token);
 
-        String username = JWT.require(Algorithm.HMAC512(jwtProperties.getTEST())).build().verify(token)
+        String username = JWT.require(Algorithm.HMAC512(jwtProperties.getSECRET())).build().verify(token)
                 .getClaim("username").asString();
         // System.out.println("=============== 토큰을 디코딩하여 username을 얻는다 " + username + "======");
 
@@ -78,7 +78,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         chain.doFilter(request, response);
 
 
-        System.out.println("=============== Authorization ends");
+        // System.out.println("=============== Authorization ends");
 
 
     }
