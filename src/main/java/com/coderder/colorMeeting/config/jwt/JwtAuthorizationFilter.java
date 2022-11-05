@@ -53,7 +53,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 .replace(JwtProperties.TOKEN_PREFIX, "");
         // System.out.println("=============== 토큰 값 가져온만다 " + token);
 
-        String username = JWT.require(Algorithm.HMAC512(JwtProperties.getSECRET())).build().verify(token)
+        String username = JWT.require(Algorithm.HMAC512(jwtProperties.getTEST())).build().verify(token)
                 .getClaim("username").asString();
         // System.out.println("=============== 토큰을 디코딩하여 username을 얻는다 " + username + "======");
 
