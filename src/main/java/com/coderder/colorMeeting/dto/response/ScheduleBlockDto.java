@@ -6,11 +6,11 @@ import lombok.Getter;
 @Builder
 @Getter
 public class ScheduleBlockDto {
-    private String userid;
+    private String userId;
     private String name;
     private String weekday;
-    private String start_time;
-    private String end_time;
+    private String startTime;
+    private String finishTime;
     private String memo;
-    private Long group_id;
+    private Long groupId;
 }

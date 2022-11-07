@@ -2,6 +2,7 @@ package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.dto.request.ScheduleRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamScheduleRequestDto;
+import com.coderder.colorMeeting.dto.request.TeamTimeDto;
 import com.coderder.colorMeeting.dto.response.RecommendationDto;
 import com.coderder.colorMeeting.dto.response.ScheduleBlockDto;
 import com.coderder.colorMeeting.dto.response.TeamScheduleDto;
@@ -19,7 +20,7 @@ public interface ScheduleService {
 
     List<ScheduleBlockDto> getBlockListByTeamId(Long teamId);
 
-    List<RecommendationDto> getTeamEmptyTimes(Long teamId, Long spendingMinute);
+    List<RecommendationDto> getTeamEmptyTimes(TeamTimeDto teamTimeDto);
 
     void insertGroupSchedule(TeamScheduleRequestDto teamScheduleDto);
 

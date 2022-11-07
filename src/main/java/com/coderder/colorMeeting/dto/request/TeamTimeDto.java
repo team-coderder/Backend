@@ -5,6 +5,6 @@ import lombok.Getter;
 @Getter
 public class TeamTimeDto {
     private Long teamId;
-    private Long spendingMinute;
+    private int spendingMinute;
 
 }
