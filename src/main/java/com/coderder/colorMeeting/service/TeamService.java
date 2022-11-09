@@ -53,7 +53,7 @@ public class TeamService {
                 .teamRole(LEADER)
                 .build();
         teamMemberRepository.save(firstTeamMember);
-        newTeam.addTeamMember(firstTeamMember);
+//        newTeam.addTeamMember(firstTeamMember);       // JPA에서 자동으로 넣어주는 게 아니기 때문에 논리적으로는 이 코드라인이 없어도 상관 X
 
         // 3. 응답 생성하기
         TeamSimpleResponseDto response = TeamSimpleResponseDto.builder()
@@ -183,6 +183,29 @@ public class TeamService {
         return new ResponseMessage("그룹(teamId : " + targetTeam.getId() + ")의 멤버로 추가 완료");
     }
 
+    public ResponseMessage memberOut(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
+
+        Member me = userDetails.getMember();
+        Team targetTeam = findTeam(requestDto.getTeamId());
+        TeamMember myInfo = findTeamMember(me, targetTeam);
+
+        // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
+        checkLeaderRole(myInfo);
+
+        // 1. 해당 그룹에서 멤버들 제외하기
+        List<Long> memberIds = requestDto.getMemberIds();
+        int cnt = 0;
+        for (Long memberId : memberIds) {
+            Member targetMemer = findMember(memberId);
+            TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(targetMemer, targetTeam);
+            teamMemberRepository.delete(teamMember);
+            cnt++;
+        }
+
+        // 2. response 생성 및 출력하기
+        return new ResponseMessage("그룹(teamId : " + targetTeam.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료");
+    }
+
     public List<TeamSimpleResponseDto> getMyTeams() {
 
         // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
@@ -224,33 +247,6 @@ public class TeamService {
         teamMemberRepository.delete(teamMember);
 
         return new ResponseMessage("그룹(teamId : " + team.getId() +")에서 탈퇴 완료");
-    }
-
-    public ResponseMessage memberOut(TeamMemberRequestDto requestDto) {
-
-        Team team = findTeam(requestDto.getTeamId());
-        if (team == null) {
-            throw new NotFoundException(TEAM_NOT_FOUND);
-        }
-
-        List<Long> memberIds = requestDto.getMemberIds();
-        int cnt = 0;
-        for (Long memberId : memberIds) {
-
-            Member member = findMember(memberId);
-            if (member == null) {
-                throw new NotFoundException(MEMBER_NOT_FOUND);
-            }
-
-            TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
-            if (teamMember == null) {
-                throw new BadRequestException(TEAM_MEMBER_NOT_FOUND);
-            }
-
-            teamMemberRepository.delete(teamMember);
-            cnt++;
-        }
-        return new ResponseMessage("그룹(teamId : " + team.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료");
     }
 
     private Team findTeam(Long teamId) {

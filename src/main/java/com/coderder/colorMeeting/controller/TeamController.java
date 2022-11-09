@@ -47,8 +47,8 @@ public class TeamController {
     }
 
     @RequestMapping(value = "/members", method = RequestMethod.DELETE)
-    public ResponseEntity<?> memberOut(@RequestBody TeamMemberRequestDto requestDto) {
-        return ResponseEntity.ok().body(teamService.memberOut(requestDto));
+    public ResponseEntity<?> memberOut(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestBody TeamMemberRequestDto requestDto) {
+        return ResponseEntity.ok().body(teamService.memberOut(userDetails, requestDto));
     }
 
     @RequestMapping(value = "/myteams", method = RequestMethod.GET)
