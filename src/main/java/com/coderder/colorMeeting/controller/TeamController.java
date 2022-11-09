@@ -1,10 +1,12 @@
 package com.coderder.colorMeeting.controller;
 
+import com.coderder.colorMeeting.config.auth.PrincipalDetails;
 import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,9 +17,8 @@ public class TeamController {
     private final TeamService teamService;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<?> createTeam( // @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                         @RequestBody TeamRequestDto requestDto) {
-        return ResponseEntity.ok().body(teamService.createTeam(requestDto));
+    public ResponseEntity<?> createTeam(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestBody TeamRequestDto requestDto) {
+        return ResponseEntity.ok().body(teamService.createTeam(userDetails, requestDto));
     }
 
     @RequestMapping(method = RequestMethod.GET)

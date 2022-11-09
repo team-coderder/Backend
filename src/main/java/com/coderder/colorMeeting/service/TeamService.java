@@ -1,13 +1,12 @@
 package com.coderder.colorMeeting.service;
 
+import com.coderder.colorMeeting.config.auth.PrincipalDetails;
 import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.exception.BadRequestException;
-import com.coderder.colorMeeting.exception.ForbiddenException;
 import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.*;
-import com.coderder.colorMeeting.repository.InvitationRepository;
 import com.coderder.colorMeeting.repository.TeamMemberRepository;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.TeamRepository;
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,17 +29,30 @@ public class TeamService {
     private final TeamMemberRepository teamMemberRepository;
 
     @Transactional
-    public TeamSimpleResponseDto createTeam(TeamRequestDto requestDto) {
-        Team team = Team.builder()
-                .name(requestDto.getName())
-                .teamMemberList(null)
-//                .teamScheduleList(null)
-                .build();
-        teamRepository.save(team);
+    public TeamSimpleResponseDto createTeam(PrincipalDetails userDetails, TeamRequestDto requestDto) {
 
+        // 1. 팀 생성하기
+        Team newTeam = Team.builder()
+                .name(requestDto.getName())
+                .teamMemberList(new ArrayList<>())
+                .teamScheduleList(new ArrayList<>())
+                .build();
+        teamRepository.save(newTeam);
+
+        // 2. 생성한 팀에 나를 첫번째 멤버로 추가하기
+        Member me = userDetails.getMember();
+        TeamMember firstTeamMember = TeamMember.builder()
+                .team(newTeam)
+                .member(me)
+                .teamRole(TeamRole.LEADER)
+                .build();
+        teamMemberRepository.save(firstTeamMember);
+        newTeam.addTeamMember(firstTeamMember);
+
+        // 3. 응답 생성하기
         TeamSimpleResponseDto response = TeamSimpleResponseDto.builder()
-                .teamId(team.getId())
-                .name(team.getName())
+                .teamId(newTeam.getId())
+                .name(newTeam.getName())
                 .build();
 
         return response;
