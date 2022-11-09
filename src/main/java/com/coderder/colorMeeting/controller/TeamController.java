@@ -32,9 +32,8 @@ public class TeamController {
     }
 
     @RequestMapping(method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteTeam( // @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                       @RequestParam Long teamId) {
-        return ResponseEntity.ok().body(teamService.deleteTeam(teamId));
+    public ResponseEntity<?> deleteTeam(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestParam Long teamId) {
+        return ResponseEntity.ok().body(teamService.deleteTeam(userDetails, teamId));
     }
 
     @RequestMapping(value = "/members", method = RequestMethod.GET)

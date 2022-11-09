@@ -105,9 +105,7 @@ public class TeamService {
         TeamMember myInfo = isPresentTeamMember(me, team);
 
         // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
-        if (myInfo.getTeamRole() != LEADER) {
-            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
-        }
+        checkLeaderRole(myInfo);
 
         // 1. 그룹의 이름 수정
         team.updateName(requestDto.getName());
@@ -121,14 +119,19 @@ public class TeamService {
     }
 
     @Transactional
-    public ResponseMessage deleteTeam(Long teamId) {
+    public ResponseMessage deleteTeam(PrincipalDetails userDetails, Long teamId) {
 
+        Member me = userDetails.getMember();
         Team team = isPresentTeam(teamId);
-        if (team == null) {
-            throw new NotFoundException(TEAM_NOT_FOUND);
-        }
+        TeamMember myInfo = isPresentTeamMember(me, team);
+
+        // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
+        checkLeaderRole(myInfo);
+
+        // 1. 그룹 삭제하기
         teamRepository.delete(team);
 
+        // 2. response 생성 및 출력하기
         return new ResponseMessage("그룹(teamId : " + team.getId() + ") 삭제 완료");
     }
 
@@ -280,5 +283,11 @@ public class TeamService {
             throw new NotFoundException(TEAM_MEMBER_NOT_FOUND);
         }
         return teamMember;
+    }
+
+    private void checkLeaderRole(TeamMember teamMember) {
+        if (teamMember.getTeamRole() != LEADER) {
+            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
+        }
     }
 }
