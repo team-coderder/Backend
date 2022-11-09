@@ -37,9 +37,8 @@ public class TeamController {
     }
 
     @RequestMapping(value = "/members", method = RequestMethod.GET)
-    public ResponseEntity<?> getTeamMembers( // @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam Long teamId) {
-        return ResponseEntity.ok().body(teamService.getTeamMembers(teamId));
+    public ResponseEntity<?> getTeamMembers(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestParam Long teamId) {
+        return ResponseEntity.ok().body(teamService.getTeamMembers(userDetails, teamId));
     }
 
     @RequestMapping(value = "/members", method = RequestMethod.PATCH)

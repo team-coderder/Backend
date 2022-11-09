@@ -60,7 +60,6 @@ public class TeamService {
                 .teamId(newTeam.getId())
                 .name(newTeam.getName())
                 .build();
-
         return response;
     }
 
@@ -74,7 +73,6 @@ public class TeamService {
         // 1. TeamMembers라는 객체에서 각 멤버들에 대한 정보를 추출하여 TeamMemberDto 리스트에 담기
         List<TeamMember> teamMembers = team.getTeamMemberList();
         List<TeamMemberDto> members = new ArrayList<>();
-
         for (TeamMember teamMember : teamMembers) {
             Member member = teamMember.getMember();
             TeamMemberDto teamMemberDto = TeamMemberDto.builder()
@@ -93,7 +91,6 @@ public class TeamService {
                 .teamMembers(members)
                 .invitations(null)
                 .build();
-
         return response;
     }
 
@@ -136,17 +133,15 @@ public class TeamService {
     }
 
     @Transactional
-    public TeamMembersResponseDto getTeamMembers(Long teamId) {
+    public TeamMembersResponseDto getTeamMembers(PrincipalDetails userDetails, Long teamId) {
+
+        Member me = userDetails.getMember();
         Team team = isPresentTeam(teamId);
-        if (team == null) {
-            throw new NotFoundException(TEAM_NOT_FOUND);
-        }
+        TeamMember myInfo = isPresentTeamMember(me, team);
 
-        // response에 쓰일 멤버 리스트 Dto 생성
-        List<TeamMemberDto> members = new ArrayList<>();
-
-        // TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하기
+        // 1. TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하여 Dto에 담기
         List<TeamMember> teamMembers = team.getTeamMemberList();
+        List<TeamMemberDto> members = new ArrayList<>();
         for (TeamMember teamMember : teamMembers) {
             Member member = teamMember.getMember();
             TeamMemberDto teamMemberDto = TeamMemberDto.builder()
@@ -158,11 +153,10 @@ public class TeamService {
             members.add(teamMemberDto);
         }
 
-        // response에 쓰일 Dto 생성
+        // 2. response 빌드하기
         TeamMembersResponseDto response = TeamMembersResponseDto.builder()
                 .teamMembers(members)
                 .build();
-
         return response;
     }
 
