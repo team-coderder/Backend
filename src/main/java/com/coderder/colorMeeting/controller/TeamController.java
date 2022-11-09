@@ -22,9 +22,8 @@ public class TeamController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<?> showTeamInfo( // @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                         @RequestParam Long teamId) {
-        return ResponseEntity.ok().body(teamService.showTeamInfo(teamId));
+    public ResponseEntity<?> showTeamInfo(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestParam Long teamId) {
+        return ResponseEntity.ok().body(teamService.showTeamInfo(userDetails, teamId));
     }
 
     @RequestMapping(method = RequestMethod.PATCH)

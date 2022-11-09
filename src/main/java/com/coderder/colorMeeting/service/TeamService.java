@@ -64,17 +64,21 @@ public class TeamService {
     }
 
     @Transactional
-    public TeamDetailResponseDto showTeamInfo(Long teamId) {
+    public TeamDetailResponseDto showTeamInfo(PrincipalDetails userDetails, Long teamId) {
+
+        Member me = userDetails.getMember();
         Team team = isPresentTeam(teamId);
-        if (team == null) {
-            throw new NotFoundException(TEAM_NOT_FOUND);
+
+        // 0. 예외처리
+        TeamMember myInfo = isPresentTeamMember(me, team);
+        if (myInfo == null) {
+            throw new NotFoundException(TEAM_MEMBER_NOT_FOUND);
         }
 
-        // response에 쓰일 멤버 리스트 Dto 생성
+        // 1. TeamMembers라는 객체에서 각 멤버들에 대한 정보를 추출하여 TeamMemberDto 리스트에 담기
+        List<TeamMember> teamMembers = team.getTeamMemberList();
         List<TeamMemberDto> members = new ArrayList<>();
 
-        // TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하기
-        List<TeamMember> teamMembers = team.getTeamMemberList();
         for (TeamMember teamMember : teamMembers) {
             Member member = teamMember.getMember();
             TeamMemberDto teamMemberDto = TeamMemberDto.builder()
@@ -86,6 +90,7 @@ public class TeamService {
             members.add(teamMemberDto);
         }
 
+        // 2. responseDto 빌드하기
         TeamDetailResponseDto response = TeamDetailResponseDto.builder()
                 .teamId(team.getId())
                 .name(team.getName())
@@ -256,13 +261,15 @@ public class TeamService {
     }
 
     private Team isPresentTeam(Long teamId) {
-        Optional<Team> team = teamRepository.findById(teamId);
-        return team.orElse(null);
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new NotFoundException(TEAM_NOT_FOUND));
+        return team;
     }
 
     private Member isPresentMember(Long memberId) {
-        Optional<Member> member = memberRepository.findById(memberId);
-        return member.orElse(null);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        return member;
     }
 
     private TeamMember isPresentTeamMember(Member member, Team team) {
