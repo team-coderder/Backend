@@ -31,6 +31,11 @@ public class TeamService {
     @Transactional
     public TeamSimpleResponseDto createTeam(PrincipalDetails userDetails, TeamRequestDto requestDto) {
 
+        // 0. request 오류시 예외처리
+        if (requestDto.getName() == null || requestDto.getName().equals(" ")) {
+            throw new BadRequestException(INVALID_TEAM_NAME);
+        }
+
         // 1. 팀 생성하기
         Team newTeam = Team.builder()
                 .name(requestDto.getName())
