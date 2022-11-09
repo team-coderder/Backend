@@ -62,6 +62,7 @@ public class JwtCheckingInfoFilter extends UsernamePasswordAuthenticationFilter 
             return authentication;
 
         } catch (StreamReadException e) {
+            // 이 부분에서 stackTrace가 추가되는 것으로 추정 ... 단, 주석처리로는 해결되지 않음
             e.printStackTrace();
         } catch (DatabindException e) {
             e.printStackTrace();
