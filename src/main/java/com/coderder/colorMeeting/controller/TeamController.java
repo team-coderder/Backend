@@ -27,9 +27,8 @@ public class TeamController {
     }
 
     @RequestMapping(method = RequestMethod.PATCH)
-    public ResponseEntity<?> updateTeam( // @AuthenticationPrincipal UserDetailsImpl userDetails,
-                        @RequestParam Long teamId, @RequestBody TeamRequestDto requestDto) {
-        return ResponseEntity.ok().body(teamService.updateTeam(teamId, requestDto));
+    public ResponseEntity<?> updateTeam(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestParam Long teamId, @RequestBody TeamRequestDto requestDto) {
+        return ResponseEntity.ok().body(teamService.updateTeam(userDetails, teamId, requestDto));
     }
 
     @RequestMapping(method = RequestMethod.DELETE)

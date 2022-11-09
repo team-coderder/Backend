@@ -5,6 +5,7 @@ import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.exception.BadRequestException;
+import com.coderder.colorMeeting.exception.ForbiddenException;
 import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.*;
 import com.coderder.colorMeeting.repository.TeamMemberRepository;
@@ -16,9 +17,9 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.coderder.colorMeeting.exception.ErrorCode.*;
+import static com.coderder.colorMeeting.model.TeamRole.LEADER;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +50,7 @@ public class TeamService {
         TeamMember firstTeamMember = TeamMember.builder()
                 .team(newTeam)
                 .member(me)
-                .teamRole(TeamRole.LEADER)
+                .teamRole(LEADER)
                 .build();
         teamMemberRepository.save(firstTeamMember);
         newTeam.addTeamMember(firstTeamMember);
@@ -68,12 +69,7 @@ public class TeamService {
 
         Member me = userDetails.getMember();
         Team team = isPresentTeam(teamId);
-
-        // 0. 예외처리
         TeamMember myInfo = isPresentTeamMember(me, team);
-        if (myInfo == null) {
-            throw new NotFoundException(TEAM_MEMBER_NOT_FOUND);
-        }
 
         // 1. TeamMembers라는 객체에서 각 멤버들에 대한 정보를 추출하여 TeamMemberDto 리스트에 담기
         List<TeamMember> teamMembers = team.getTeamMemberList();
@@ -102,19 +98,25 @@ public class TeamService {
     }
 
     @Transactional
-    public TeamSimpleResponseDto updateTeam(Long teamId, TeamRequestDto requestDto) {
+    public TeamSimpleResponseDto updateTeam(PrincipalDetails userDetails, Long teamId, TeamRequestDto requestDto) {
 
+        Member me = userDetails.getMember();
         Team team = isPresentTeam(teamId);
-        if (team == null) {
-            throw new NotFoundException(TEAM_NOT_FOUND);
+        TeamMember myInfo = isPresentTeamMember(me, team);
+
+        // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
+        if (myInfo.getTeamRole() != LEADER) {
+            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
         }
+
+        // 1. 그룹의 이름 수정
         team.updateName(requestDto.getName());
 
+        // 2. response 빌드하기
         TeamSimpleResponseDto response = TeamSimpleResponseDto.builder()
                 .teamId(team.getId())
                 .name(team.getName())
                 .build();
-
         return response;
     }
 
@@ -274,6 +276,9 @@ public class TeamService {
 
     private TeamMember isPresentTeamMember(Member member, Team team) {
         TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
+        if (teamMember == null) {
+            throw new NotFoundException(TEAM_MEMBER_NOT_FOUND);
+        }
         return teamMember;
     }
 }
