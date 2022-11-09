@@ -67,8 +67,8 @@ public class TeamService {
     public TeamDetailResponseDto showTeamInfo(PrincipalDetails userDetails, Long teamId) {
 
         Member me = userDetails.getMember();
-        Team team = isPresentTeam(teamId);
-        TeamMember myInfo = isPresentTeamMember(me, team);
+        Team team = findTeam(teamId);
+        TeamMember myInfo = findTeamMember(me, team);
 
         // 1. TeamMembers라는 객체에서 각 멤버들에 대한 정보를 추출하여 TeamMemberDto 리스트에 담기
         List<TeamMember> teamMembers = team.getTeamMemberList();
@@ -98,8 +98,8 @@ public class TeamService {
     public TeamSimpleResponseDto updateTeam(PrincipalDetails userDetails, Long teamId, TeamRequestDto requestDto) {
 
         Member me = userDetails.getMember();
-        Team team = isPresentTeam(teamId);
-        TeamMember myInfo = isPresentTeamMember(me, team);
+        Team team = findTeam(teamId);
+        TeamMember myInfo = findTeamMember(me, team);
 
         // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
         checkLeaderRole(myInfo);
@@ -119,8 +119,8 @@ public class TeamService {
     public ResponseMessage deleteTeam(PrincipalDetails userDetails, Long teamId) {
 
         Member me = userDetails.getMember();
-        Team team = isPresentTeam(teamId);
-        TeamMember myInfo = isPresentTeamMember(me, team);
+        Team team = findTeam(teamId);
+        TeamMember myInfo = findTeamMember(me, team);
 
         // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
         checkLeaderRole(myInfo);
@@ -136,8 +136,8 @@ public class TeamService {
     public TeamMembersResponseDto getTeamMembers(PrincipalDetails userDetails, Long teamId) {
 
         Member me = userDetails.getMember();
-        Team team = isPresentTeam(teamId);
-        TeamMember myInfo = isPresentTeamMember(me, team);
+        Team team = findTeam(teamId);
+        TeamMember myInfo = findTeamMember(me, team);
 
         // 1. TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하여 Dto에 담기
         List<TeamMember> teamMembers = team.getTeamMemberList();
@@ -160,39 +160,33 @@ public class TeamService {
         return response;
     }
 
-    // 그룹에 유저 추가하기 - Member 구현 완료 후 구현 가능
     @Transactional
-    public ResponseMessage addMember(TeamMemberRequestDto requestDto) {
-        Team team = isPresentTeam(requestDto.getTeamId());
-        if (team == null) {
-            throw new NotFoundException(TEAM_NOT_FOUND);
-        }
+    public ResponseMessage addMember(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
 
-        List<Long> memberIds = requestDto.getMemberIds();
-        int cnt = 0;
-        for (Long memberId : memberIds) {
-            Member member = isPresentMember(memberId);
-            if (member == null) {
-                throw new NotFoundException(MEMBER_NOT_FOUND);
-            }
-            if (teamMemberRepository.findByMemberAndTeam(member, team) == null) {
-                TeamMember teamMember = TeamMember.builder()
-                        .member(member)
-                        .team(team)
-                        .teamRole(TeamRole.FOLLOWER)
-                        .build();
-                teamMemberRepository.save(teamMember);
-                cnt++;
-            }
-        }
+        Member me = userDetails.getMember();
+        Team targetTeam = findTeam(requestDto.getTeamId());
+        Member targetMember = findMember(requestDto.getMemberIds().get(0));
 
-    return new ResponseMessage("그룹(teamId : " + team.getId() +")에 멤버 " + cnt + "명 추가 완료");
+        // 0. 예외처리
+        checkSameMember(me, targetMember);              // requestDto의 member가 사용자 본인이 아닐 경우
+        checkNewTeamMember(targetMember, targetTeam);   // 사용자 본인이 이미 requestDto의 Team에 속해있는 경우
+
+        // 1. 해당 그룹에 유저 추가하기
+        TeamMember teamMember = TeamMember.builder()
+                .member(targetMember)
+                .team(targetTeam)
+                .teamRole(TeamRole.FOLLOWER)
+                .build();
+        teamMemberRepository.save(teamMember);
+
+        // 2. response 생성 및 출력하기
+        return new ResponseMessage("그룹(teamId : " + targetTeam.getId() + ")의 멤버로 추가 완료");
     }
 
     public List<TeamSimpleResponseDto> getMyTeams() {
 
         // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
-        Member me = isPresentMember(1L);
+        Member me = findMember(1L);
         if (me == null) {
             throw new NotFoundException(MEMBER_NOT_FOUND);
         }
@@ -213,12 +207,12 @@ public class TeamService {
     public ResponseMessage leaveTeam(Long teamId) {
 
         // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
-        Member me = isPresentMember(1L);
+        Member me = findMember(1L);
         if (me == null) {
             throw new NotFoundException(MEMBER_NOT_FOUND);
         }
 
-        Team team = isPresentTeam(teamId);
+        Team team = findTeam(teamId);
         if (team == null) {
             throw new NotFoundException(TEAM_NOT_FOUND);
         }
@@ -234,7 +228,7 @@ public class TeamService {
 
     public ResponseMessage memberOut(TeamMemberRequestDto requestDto) {
 
-        Team team = isPresentTeam(requestDto.getTeamId());
+        Team team = findTeam(requestDto.getTeamId());
         if (team == null) {
             throw new NotFoundException(TEAM_NOT_FOUND);
         }
@@ -243,7 +237,7 @@ public class TeamService {
         int cnt = 0;
         for (Long memberId : memberIds) {
 
-            Member member = isPresentMember(memberId);
+            Member member = findMember(memberId);
             if (member == null) {
                 throw new NotFoundException(MEMBER_NOT_FOUND);
             }
@@ -259,19 +253,19 @@ public class TeamService {
         return new ResponseMessage("그룹(teamId : " + team.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료");
     }
 
-    private Team isPresentTeam(Long teamId) {
+    private Team findTeam(Long teamId) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new NotFoundException(TEAM_NOT_FOUND));
         return team;
     }
 
-    private Member isPresentMember(Long memberId) {
+    private Member findMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
         return member;
     }
 
-    private TeamMember isPresentTeamMember(Member member, Team team) {
+    private TeamMember findTeamMember(Member member, Team team) {
         TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
         if (teamMember == null) {
             throw new NotFoundException(TEAM_MEMBER_NOT_FOUND);
@@ -281,6 +275,19 @@ public class TeamService {
 
     private void checkLeaderRole(TeamMember teamMember) {
         if (teamMember.getTeamRole() != LEADER) {
+            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
+        }
+    }
+
+    private void checkNewTeamMember(Member member, Team team) {
+        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
+        if (teamMember != null) {
+            throw new BadRequestException(ALREADY_TEAM_MEMBER);
+        }
+    }
+
+    private void checkSameMember(Member member1, Member member2) {
+        if (member1.getId() != member2.getId()) {
             throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
         }
     }

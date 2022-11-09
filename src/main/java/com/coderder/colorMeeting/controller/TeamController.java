@@ -42,8 +42,8 @@ public class TeamController {
     }
 
     @RequestMapping(value = "/members", method = RequestMethod.PATCH)
-    public ResponseEntity<?> addMember(@RequestBody TeamMemberRequestDto requestDto) {
-        return ResponseEntity.ok().body(teamService.addMember(requestDto));
+    public ResponseEntity<?> addMember(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestBody TeamMemberRequestDto requestDto) {
+        return ResponseEntity.ok().body(teamService.addMember(userDetails, requestDto));
     }
 
     @RequestMapping(value = "/members", method = RequestMethod.DELETE)
