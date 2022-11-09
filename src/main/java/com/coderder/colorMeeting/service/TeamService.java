@@ -206,47 +206,36 @@ public class TeamService {
         return new ResponseMessage("그룹(teamId : " + targetTeam.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료");
     }
 
-    public List<TeamSimpleResponseDto> getMyTeams() {
+    public List<TeamSimpleResponseDto> getMyTeams(PrincipalDetails userDetails) {
 
-        // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
-        Member me = findMember(1L);
-        if (me == null) {
-            throw new NotFoundException(MEMBER_NOT_FOUND);
-        }
+        Member me = userDetails.getMember();
 
+        // 1. 나의 그룹들을 추출하여 Dto에 넣기
         List<TeamSimpleResponseDto> response = new ArrayList<>();
         List<TeamMember> teamMembers = teamMemberRepository.getAllByMember(me);
         for (TeamMember teamMember : teamMembers) {
             Team team = teamMember.getTeam();
-
             response.add(TeamSimpleResponseDto.builder()
                     .teamId(team.getId())
                     .name(team.getName())
                     .build());
         }
+
+        // 2. response 생성 및 출력하기
         return response;
     }
 
-    public ResponseMessage leaveTeam(Long teamId) {
+    public ResponseMessage leaveTeam(PrincipalDetails userDetails, Long teamId) {
 
-        // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
-        Member me = findMember(1L);
-        if (me == null) {
-            throw new NotFoundException(MEMBER_NOT_FOUND);
-        }
+        Member me = userDetails.getMember();
+        Team targetTeam = findTeam(teamId);
+        TeamMember myInfo = findTeamMember(me, targetTeam);
 
-        Team team = findTeam(teamId);
-        if (team == null) {
-            throw new NotFoundException(TEAM_NOT_FOUND);
-        }
+        // 1. TeamMember 삭제하기
+        teamMemberRepository.delete(myInfo);
 
-        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(me, team);
-        if (teamMember == null) {
-            throw new BadRequestException(TEAM_MEMBER_NOT_FOUND);
-        }
-        teamMemberRepository.delete(teamMember);
-
-        return new ResponseMessage("그룹(teamId : " + team.getId() +")에서 탈퇴 완료");
+        // 2. response 생성 및 출력하기
+        return new ResponseMessage("그룹(teamId : " + targetTeam.getId() +")에서 탈퇴 완료");
     }
 
     private Team findTeam(Long teamId) {

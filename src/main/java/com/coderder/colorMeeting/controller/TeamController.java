@@ -52,14 +52,12 @@ public class TeamController {
     }
 
     @RequestMapping(value = "/myteams", method = RequestMethod.GET)
-    public ResponseEntity<?> getMyTeams(// @AuthenticationPrincipal UserDetailsImpl userDetails
-                                        ) {
-        return ResponseEntity.ok().body(teamService.getMyTeams());
+    public ResponseEntity<?> getMyTeams(@AuthenticationPrincipal PrincipalDetails userDetails) {
+        return ResponseEntity.ok().body(teamService.getMyTeams(userDetails));
     }
 
     @RequestMapping(value = "/myteam", method = RequestMethod.DELETE)
-    public ResponseEntity<?> leaveTeam(// @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                       @RequestParam Long teamId) {
-        return ResponseEntity.ok().body(teamService.leaveTeam(teamId));
+    public ResponseEntity<?> leaveTeam(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestParam Long teamId) {
+        return ResponseEntity.ok().body(teamService.leaveTeam(userDetails, teamId));
     }
 }
