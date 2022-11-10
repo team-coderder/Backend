@@ -90,7 +90,7 @@ public class TeamService {
         for (Invitation invitation : invitations) {
             invitationDtos.add(InvitationDto.builder()
                     .invitationId(invitation.getId())
-//                    .fromTeam(invitation.getFromTeam())
+                    .fromTeamId(invitation.getFromTeam().getId())
                     .fromMemberId(invitation.getFromLeader().getId())
                     .toMemberId(invitation.getToMember().getId())
                     .createdAt(invitation.getCreatedAt())

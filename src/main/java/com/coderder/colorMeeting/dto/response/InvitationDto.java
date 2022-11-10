@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 public class InvitationDto {
     private Long invitationId;
-//    private Long fromTeamId;
+    private Long fromTeamId;
     private Long fromMemberId;
     private Long toMemberId;
     private LocalDateTime createdAt;
