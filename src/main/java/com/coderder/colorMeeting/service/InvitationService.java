@@ -1,5 +1,6 @@
 package com.coderder.colorMeeting.service;
 
+import com.coderder.colorMeeting.config.auth.PrincipalDetails;
 import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
 import com.coderder.colorMeeting.dto.response.ResponseMessage;
 import com.coderder.colorMeeting.exception.BadRequestException;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.coderder.colorMeeting.exception.ErrorCode.*;
+import static com.coderder.colorMeeting.model.TeamRole.LEADER;
 
 @Service
 @RequiredArgsConstructor
@@ -28,77 +30,42 @@ public class InvitationService {
     private final TeamMemberRepository teamMemberRepository;
     private final InvitationRepository invitationRepository;
 
-    public ResponseMessage inviteMember(TeamMemberRequestDto requestDto) {
+    public ResponseMessage inviteMember(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
 
-        Team team = isPresentTeam(requestDto.getTeamId());
-        if (team == null) {
-            throw new NotFoundException(TEAM_NOT_FOUND);
-        }
+        Member me = userDetails.getMember();
+        Team targetTeam = findTeam(requestDto.getTeamId());
+        TeamMember myInfo = findTeamMember(me, targetTeam);
 
+        // 0. 예외처리 : 유저가 해당 팀의 리더가 아닐 경우
+        checkLeaderRole(myInfo);
+
+        // 1. 초대장 생성하기
         List<Long> memberIds = requestDto.getMemberIds();
         int cnt = 0;
         for (Long memberId : memberIds) {
-
-            Member member = isPresentMember(memberId);
-            if (member == null) {
-                throw new NotFoundException(MEMBER_NOT_FOUND);
-            }
-
-            TeamMember teamMember = isPresentTeamMember(member, team);
-            if (teamMember != null) {
-                throw new BadRequestException(ALREADY_TEAM_MEMBER);
-            }
-
-            Invitation invitation = invitationDoubleCheck(member, team);
-            if (invitation != null) {
-                throw new BadRequestException(ALREADY_INVITED);
-            }
-
-            // 회원가입 구현 전까지 member_id = 1인 유저로 하드코딩
-            Member me = isPresentMember(1L);
-            TeamMember myRole = isPresentTeamMember(me, team);
-            if (myRole == null) {
-                throw new BadRequestException(TEAM_MEMBER_NOT_FOUND);
-            }
-            if (myRole.getTeamRole() != TeamRole.LEADER) {
-                throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
-            }
-
+            Member targetMember = findMember(memberId);
+            checkInvitation(targetMember, targetTeam);      // 예외처리 : 이미 초대장이 있다면 오류 발생
             Invitation new_invitation = Invitation.builder()
-                    .fromTeam(team)
+                    .fromTeam(targetTeam)
                     .fromLeader(me)
-                    .toMember(member)
+                    .toMember(targetMember)
                     .createdAt(LocalDateTime.now())
                     .build();
-
             invitationRepository.save(new_invitation);
-
             cnt++;
         }
-        return new ResponseMessage("그룹(teamId : " + team.getId() +")에 멤버 " + cnt + "명 초대 완료");
+
+        // 2. response 생성 및 출력하기
+        return new ResponseMessage("그룹(teamId : " + targetTeam.getId() +")에 멤버 " + cnt + "명 초대 완료");
     }
 
     public ResponseMessage acceptInvitation(Long invitationId) {
 
-        Invitation invitation = isPresentInvitation(invitationId);
-        if (invitation == null) {
-            throw new NotFoundException(INVITATION_NOT_FOUND);
-        }
+        Invitation invitation = findInvitation(invitationId);
+        Team targetTeam = findTeam(invitation.getFromTeam().getId());
+        Member targetMember = findMember(invitation.getToMember().getId());
 
-        Team team = isPresentTeam(invitation.getFromTeam().getId());
-        if (team == null) {
-            throw new NotFoundException(TEAM_NOT_FOUND);
-        }
-
-        Member member = isPresentMember(invitation.getToMember().getId());
-        if (member == null) {
-            throw new NotFoundException(MEMBER_NOT_FOUND);
-        }
-
-//        // 나한테 보낸 초대장이 아닐 경우
-//        if (invitation.getToMember() != me) {
-//            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
-//        }
+//        checkSameMember(me, targetMember);
 
         TeamMember teamMember = TeamMember.builder()
                 .team(invitation.getFromTeam())
@@ -112,28 +79,48 @@ public class InvitationService {
         return new ResponseMessage("그룹(teamId : " + invitation.getFromTeam().getId() +")의 초대장 수락 완료");
     }
 
-    private Team isPresentTeam(Long teamId) {
-        Optional<Team> team = teamRepository.findById(teamId);
-        return team.orElse(null);
+    private Team findTeam(Long teamId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new NotFoundException(TEAM_NOT_FOUND));
+        return team;
     }
 
-    private Member isPresentMember(Long memberId) {
-        Optional<Member> member = memberRepository.findById(memberId);
-        return member.orElse(null);
+    private Member findMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        return member;
     }
 
-    private TeamMember isPresentTeamMember(Member member, Team team) {
+    private TeamMember findTeamMember(Member member, Team team) {
         TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
+        if (teamMember == null) {
+            throw new BadRequestException(TEAM_MEMBER_NOT_FOUND);
+        }
         return teamMember;
     }
 
-    private Invitation invitationDoubleCheck(Member member, Team team) {
-        Invitation invitation = invitationRepository.findByToMemberAndFromTeam(member, team);
+    private Invitation findInvitation(Long invitationId) {
+        Invitation invitation = invitationRepository.findById(invitationId)
+                .orElseThrow(() -> new NotFoundException(INVITATION_NOT_FOUND));
         return invitation;
     }
 
-    private Invitation isPresentInvitation(Long invitationId) {
-        Optional<Invitation> invitation = invitationRepository.findById(invitationId);
-        return invitation.orElse(null);
+    private void checkInvitation(Member targetMember, Team targetTeam) {
+        Invitation invitation = invitationRepository.findByToMemberAndFromTeam(targetMember, targetTeam);
+        if (invitation != null) {
+            throw new BadRequestException(ALREADY_INVITED);
+        }
+    }
+
+    private void checkLeaderRole(TeamMember teamMember) {
+        if (teamMember.getTeamRole() != LEADER) {
+            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
+        }
+    }
+
+    private void checkSameMember(Member member1, Member member2) {
+        if (member1.getId() != member2.getId()) {
+            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
+        }
     }
 }
