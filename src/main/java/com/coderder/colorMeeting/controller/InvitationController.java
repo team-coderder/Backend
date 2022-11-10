@@ -15,6 +15,11 @@ public class InvitationController {
 
     private final InvitationService invitationService;
 
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<?> showAllInvitations(@AuthenticationPrincipal PrincipalDetails userDetails) {
+        return ResponseEntity.ok().body(invitationService.showAllInvitations(userDetails));
+    }
+
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<?> createInvitation(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestBody TeamMemberRequestDto requestDto) {
         return ResponseEntity.ok().body(invitationService.createInvitation(userDetails, requestDto));

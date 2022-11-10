@@ -2,6 +2,7 @@ package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
 import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
+import com.coderder.colorMeeting.dto.response.InvitationDto;
 import com.coderder.colorMeeting.dto.response.ResponseMessage;
 import com.coderder.colorMeeting.exception.BadRequestException;
 import com.coderder.colorMeeting.exception.ForbiddenException;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.coderder.colorMeeting.exception.ErrorCode.*;
@@ -28,6 +30,28 @@ public class InvitationService {
     private final MemberRepository memberRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final InvitationRepository invitationRepository;
+
+    public List<InvitationDto> showAllInvitations(PrincipalDetails userDetails) {
+
+        Member me = userDetails.getMember();
+
+        // 1. 나의 초대장 목록을 불러오기
+        List<Invitation> invitations = invitationRepository.findAllByToMember(me);
+
+        // 2. 나의 초대장들을 하나씩 추출하여 Dto에 넣기
+        List<InvitationDto> response = new ArrayList<>();
+        for (Invitation invitation : invitations) {
+            response.add(InvitationDto.builder()
+                    .invitationId(invitation.getId())
+                    .fromMemberId(invitation.getFromLeader().getId())
+                    .toMemberId(invitation.getToMember().getId())
+                    .createdAt(invitation.getCreatedAt())
+                    .build());
+        }
+
+        // 3. response 출력하기
+        return response;
+    }
 
     public ResponseMessage createInvitation(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
 
