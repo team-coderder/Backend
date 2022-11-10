@@ -8,6 +8,7 @@ import com.coderder.colorMeeting.exception.BadRequestException;
 import com.coderder.colorMeeting.exception.ForbiddenException;
 import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.*;
+import com.coderder.colorMeeting.repository.InvitationRepository;
 import com.coderder.colorMeeting.repository.TeamMemberRepository;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.TeamRepository;
@@ -28,6 +29,7 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final MemberRepository memberRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final InvitationRepository invitationRepository;
 
     @Transactional
     public TeamSimpleResponseDto createTeam(PrincipalDetails userDetails, TeamRequestDto requestDto) {
@@ -72,24 +74,37 @@ public class TeamService {
 
         // 1. TeamMembers라는 객체에서 각 멤버들에 대한 정보를 추출하여 TeamMemberDto 리스트에 담기
         List<TeamMember> teamMembers = team.getTeamMemberList();
-        List<TeamMemberDto> members = new ArrayList<>();
+        List<TeamMemberDto> teamMemberDtos = new ArrayList<>();
         for (TeamMember teamMember : teamMembers) {
             Member member = teamMember.getMember();
-            TeamMemberDto teamMemberDto = TeamMemberDto.builder()
+            teamMemberDtos.add(TeamMemberDto.builder()
                     .memberId(member.getId())
                     .username(member.getUsername())
                     .nickname(member.getNickname())
                     .teamRole(String.valueOf(teamMember.getTeamRole()))
-                    .build();
-            members.add(teamMemberDto);
+                    .build());
+        }
+        // 2. 초대장 목록 불러와서 각 초대장 정보를 Dto 리스트에 담기
+        List<Invitation> invitations = invitationRepository.findAllByFromTeam(team);
+        List<InvitationDto> invitationDtos = new ArrayList<>();
+        for (Invitation invitation : invitations) {
+            invitationDtos.add(InvitationDto.builder()
+                    .invitationId(invitation.getId())
+//                    .fromTeam(invitation.getFromTeam())
+                    .fromMemberId(invitation.getFromLeader().getId())
+                    .toMemberId(invitation.getToMember().getId())
+                    .createdAt(invitation.getCreatedAt())
+                    .build()
+                    );
         }
 
-        // 2. responseDto 빌드하기
+
+        // 3. responseDto 빌드하기
         TeamDetailResponseDto response = TeamDetailResponseDto.builder()
                 .teamId(team.getId())
                 .name(team.getName())
-                .teamMembers(members)
-                .invitations(null)
+                .teamMembers(teamMemberDtos)
+                .invitations(invitationDtos)
                 .build();
         return response;
     }
@@ -169,7 +184,7 @@ public class TeamService {
 
         // 0. 예외처리
         checkSameMember(me, targetMember);              // requestDto의 member가 사용자 본인이 아닐 경우
-        checkNewTeamMember(targetMember, targetTeam);   // 사용자 본인이 이미 requestDto의 Team에 속해있는 경우
+        checkTeamMember(targetMember, targetTeam);   // 사용자 본인이 이미 requestDto의 Team에 속해있는 경우
 
         // 1. 해당 그룹에 유저 추가하기
         TeamMember teamMember = TeamMember.builder()
@@ -264,7 +279,7 @@ public class TeamService {
         }
     }
 
-    private void checkNewTeamMember(Member member, Team team) {
+    private void checkTeamMember(Member member, Team team) {
         TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
         if (teamMember != null) {
             throw new BadRequestException(ALREADY_TEAM_MEMBER);
