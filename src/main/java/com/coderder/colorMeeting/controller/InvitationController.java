@@ -34,4 +34,9 @@ public class InvitationController {
     public ResponseEntity<?> refuseInvitation(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestParam Long invitationId) {
         return ResponseEntity.ok().body(invitationService.refuseInvitation(userDetails, invitationId));
     }
+
+    @RequestMapping(value = "/cancel", method = RequestMethod.PATCH)
+    public ResponseEntity<?> cancelInvitation(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestParam Long invitationId) {
+        return ResponseEntity.ok().body(invitationService.cancelInvitation(userDetails, invitationId));
+    }
 }
