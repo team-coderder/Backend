@@ -43,6 +43,7 @@ public class InvitationService {
         for (Invitation invitation : invitations) {
             response.add(InvitationDto.builder()
                     .invitationId(invitation.getId())
+                    .fromTeamId(invitation.getFromTeam().getId())
                     .fromMemberId(invitation.getFromLeader().getId())
                     .toMemberId(invitation.getToMember().getId())
                     .createdAt(invitation.getCreatedAt())
