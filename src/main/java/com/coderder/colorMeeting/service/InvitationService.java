@@ -107,6 +107,22 @@ public class InvitationService {
         return new ResponseMessage("그룹(teamId : " + invitation.getFromTeam().getId() +")의 초대장 수락 완료");
     }
 
+    public ResponseMessage refuseInvitation(PrincipalDetails userDetails, Long invitationId) {
+
+        Member me = userDetails.getMember();
+        Invitation invitation = findInvitation(invitationId);
+        Member targetMember = findMember(invitation.getToMember().getId());
+
+        // 0. 예외처리 : 초대장 속 member가 유저 본인이 아니라면 예외 발생
+        checkSameMember(me, targetMember);
+
+        // 1. 초대장 삭제하기
+        invitationRepository.delete(invitation);
+
+        // 2. response 생성 및 출력하기
+        return new ResponseMessage("그룹(teamId : " + invitation.getFromTeam().getId() +")의 초대장 거절 완료");
+    }
+
     private Team findTeam(Long teamId) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new NotFoundException(TEAM_NOT_FOUND));

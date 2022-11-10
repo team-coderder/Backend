@@ -29,4 +29,9 @@ public class InvitationController {
     public ResponseEntity<?> acceptInvitation(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestParam Long invitationId) {
         return ResponseEntity.ok().body(invitationService.acceptInvitation(userDetails, invitationId));
     }
+
+    @RequestMapping(value = "/refuse", method = RequestMethod.PATCH)
+    public ResponseEntity<?> refuseInvitation(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestParam Long invitationId) {
+        return ResponseEntity.ok().body(invitationService.refuseInvitation(userDetails, invitationId));
+    }
 }
