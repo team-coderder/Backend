@@ -16,12 +16,12 @@ public class InvitationController {
     private final InvitationService invitationService;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<?> inviteMember(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestBody TeamMemberRequestDto requestDto) {
-        return ResponseEntity.ok().body(invitationService.inviteMember(userDetails, requestDto));
+    public ResponseEntity<?> createInvitation(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestBody TeamMemberRequestDto requestDto) {
+        return ResponseEntity.ok().body(invitationService.createInvitation(userDetails, requestDto));
     }
 
     @RequestMapping(value = "/accept", method = RequestMethod.PATCH)
-    public ResponseEntity<?> acceptInvitation(@RequestParam Long invitationId) {
-        return ResponseEntity.ok().body(invitationService.acceptInvitation(invitationId));
+    public ResponseEntity<?> acceptInvitation(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestParam Long invitationId) {
+        return ResponseEntity.ok().body(invitationService.acceptInvitation(userDetails, invitationId));
     }
 }

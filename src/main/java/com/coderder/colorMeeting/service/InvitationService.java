@@ -16,10 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static com.coderder.colorMeeting.exception.ErrorCode.*;
-import static com.coderder.colorMeeting.model.TeamRole.LEADER;
+import static com.coderder.colorMeeting.model.TeamRole.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,13 +29,13 @@ public class InvitationService {
     private final TeamMemberRepository teamMemberRepository;
     private final InvitationRepository invitationRepository;
 
-    public ResponseMessage inviteMember(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
+    public ResponseMessage createInvitation(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
 
         Member me = userDetails.getMember();
         Team targetTeam = findTeam(requestDto.getTeamId());
         TeamMember myInfo = findTeamMember(me, targetTeam);
 
-        // 0. 예외처리 : 유저가 해당 팀의 리더가 아닐 경우
+        // 0. 예외처리 : 유저가 해당 팀의 리더가 아닐 경우 오류 발생
         checkLeaderRole(myInfo);
 
         // 1. 초대장 생성하기
@@ -59,23 +58,28 @@ public class InvitationService {
         return new ResponseMessage("그룹(teamId : " + targetTeam.getId() +")에 멤버 " + cnt + "명 초대 완료");
     }
 
-    public ResponseMessage acceptInvitation(Long invitationId) {
+    public ResponseMessage acceptInvitation(PrincipalDetails userDetails, Long invitationId) {
 
+        Member me = userDetails.getMember();
         Invitation invitation = findInvitation(invitationId);
         Team targetTeam = findTeam(invitation.getFromTeam().getId());
         Member targetMember = findMember(invitation.getToMember().getId());
 
-//        checkSameMember(me, targetMember);
+        // 0. 예외처리 : 초대장 속 member가 유저 본인이 아니라면 예외 발생
+        checkSameMember(me, targetMember);
 
+        // 1. TeamMember 생성함으로서 그룹에 멤버 추가하기
         TeamMember teamMember = TeamMember.builder()
-                .team(invitation.getFromTeam())
-                .member(invitation.getToMember())
-                .teamRole(TeamRole.FOLLOWER)
+                .team(targetTeam)
+                .member(targetMember)
+                .teamRole(FOLLOWER)
                 .build();
-
         teamMemberRepository.save(teamMember);
+
+        // 2. 초대장 삭제하기
         invitationRepository.delete(invitation);
 
+        // 3. response 생성 및 출력하기
         return new ResponseMessage("그룹(teamId : " + invitation.getFromTeam().getId() +")의 초대장 수락 완료");
     }
 
