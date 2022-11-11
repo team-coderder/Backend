@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalTime;
 
 @Data
+@Builder
 public class ScheduleRequestDto {
     private Long userId;
     private String name;

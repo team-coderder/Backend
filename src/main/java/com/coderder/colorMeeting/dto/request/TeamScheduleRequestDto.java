@@ -11,6 +11,7 @@ import java.time.LocalTime;
 
 
 @Data
+@Builder
 public class TeamScheduleRequestDto {
     private Long teamId;
     private String name;
