@@ -11,6 +11,7 @@ import javax.persistence.*;
 @IdClass(TeamMemberId.class)
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class TeamMember {
 
     @JsonIgnore

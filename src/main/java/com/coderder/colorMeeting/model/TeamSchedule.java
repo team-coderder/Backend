@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Getter
@@ -25,8 +26,8 @@ public class TeamSchedule {
     private String name;
 
     private String weekday;
-    private LocalDateTime startTime;
-    private LocalDateTime finishTime;
+    private LocalTime startTime;
+    private LocalTime finishTime;
     private String memo;
 
 }
