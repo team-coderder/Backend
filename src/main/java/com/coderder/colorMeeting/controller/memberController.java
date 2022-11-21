@@ -1,6 +1,8 @@
 package com.coderder.colorMeeting.controller;
 
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
+import com.coderder.colorMeeting.dto.request.MemberUpdateDto;
+import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -47,5 +49,10 @@ public class memberController {
         return ResponseEntity.ok().body(memberService.getMyInformation(memberId));
     }
 
-
+    // 내 정보 수정하기
+    @RequestMapping(value="/mypage", method= RequestMethod.PATCH)
+    public ResponseEntity<?> updateMyInformation(
+            @RequestParam("memberId") Long memberId, @RequestBody MemberUpdateDto requestDto) {
+        return ResponseEntity.ok().body(memberService.updateMyInformation(memberId, requestDto));
+    }
 }
