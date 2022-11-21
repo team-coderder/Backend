@@ -107,9 +107,27 @@ public class MemberService {
         }
     }
 
-    public Member getMembersByUsername(String exactUsername) {
+    public Member getMembersByExactUsername(String exactUsername) {
         Member member = memberRepository.findByUsername(exactUsername);
 
         return member;
+    }
+
+    public List<MemberResponseDto> getMembersByUsername(String partOfUsername) {
+        List<Member> memberList = memberRepository.findByUsernameContaining(partOfUsername);
+
+        // TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하기
+        List<MemberResponseDto> memberResponseDtoList = new ArrayList<>();
+
+        for (Member member : memberList) {
+            MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+                    .id(member.getId())
+                    .username(member.getUsername())
+                    .nickname(member.getNickname())
+                    .build();
+            memberResponseDtoList.add(memberResponseDto);
+        }
+
+        return memberResponseDtoList;
     }
 }

@@ -25,13 +25,19 @@ public class memberController {
 
     // 유저 검색 : 닉네임 일부로
     @RequestMapping(value="/search/nickname", method = RequestMethod.GET)
-    public ResponseEntity<?> getMembersByNickname(@RequestParam("nickname") String partOfNickname) {
+    public ResponseEntity<?> getMembersByNickname(@RequestParam("query") String partOfNickname) {
         return ResponseEntity.ok().body(memberService.getMembersByNickname(partOfNickname));
     }
 
     // 유저검색 : 정확한 아이디로
+    @RequestMapping(value="/search/username/exact", method = RequestMethod.GET)
+    public ResponseEntity<?> getMembersByExactUsername(@RequestParam("query") String exactUsername) {
+        return ResponseEntity.ok().body(memberService.getMembersByExactUsername(exactUsername));
+    }
+
+    // 유저검색 : 아이디 일부로
     @RequestMapping(value="/search/username", method = RequestMethod.GET)
-    public ResponseEntity<?> getMembersByUsername(@RequestParam("username") String exactUsername) {
+    public ResponseEntity<?> getMembersByUsername(@RequestParam("query") String exactUsername) {
         return ResponseEntity.ok().body(memberService.getMembersByUsername(exactUsername));
     }
 
