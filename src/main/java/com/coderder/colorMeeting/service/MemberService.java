@@ -1,6 +1,7 @@
 package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.dto.request.MemberJoinRequestDto;
+import com.coderder.colorMeeting.dto.response.MemberDto;
 import com.coderder.colorMeeting.dto.response.MemberResponseDto;
 import com.coderder.colorMeeting.exception.ErrorResponse;
 import com.coderder.colorMeeting.exception.NotFoundException;
@@ -24,7 +25,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public MemberResponseDto join(MemberJoinRequestDto requestDto) {
+    public MemberDto join(MemberJoinRequestDto requestDto) {
         // 로그인되어 있으면 돌려보내기
         // 컨트롤러에서 request.header 체크하여 수행하려 했으나
         // 스프링 시큐리티에서 수행해주는 것으로 확인함
@@ -50,7 +51,7 @@ public class MemberService {
         // 저장하기
         Member savedMember = memberRepository.save(member);
 
-        MemberResponseDto responseDto = MemberResponseDto.builder()
+        MemberDto responseDto = MemberDto.builder()
                 .id(savedMember.getId())
                 .username(savedMember.getUsername())
                 .nickname(savedMember.getNickname())
@@ -59,32 +60,37 @@ public class MemberService {
         return responseDto;
     }
 
-    public List<MemberResponseDto> getMembersByNickname(String partOfNickname) {
+    public MemberResponseDto getMembersByNickname(String partOfNickname) {
+
         List<Member> memberList = memberRepository.findByNicknameContaining(partOfNickname);
 
         // TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하기
-        List<MemberResponseDto> memberResponseDtoList = new ArrayList<>();
+        List<MemberDto> memberDtoList = new ArrayList<>();
 
         for (Member member : memberList) {
-            MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+            MemberDto memberDto = MemberDto.builder()
                     .id(member.getId())
                     .username(member.getUsername())
                     .nickname(member.getNickname())
                     .build();
-            memberResponseDtoList.add(memberResponseDto);
+            memberDtoList.add(memberDto);
         }
 
-        return memberResponseDtoList;
+        MemberResponseDto response = MemberResponseDto.builder()
+                .members(memberDtoList)
+                .build();
+
+        return response;
     }
 
-    public MemberResponseDto getMyInformation(Long memberId) {
+    public MemberDto getMyInformation(Long memberId) {
 
         Member member = isPresentMember(memberId);
         if (member == null) {
             throw new NotFoundException(MEMBER_NOT_FOUND);
         }
 
-        MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+        MemberDto memberResponseDto = MemberDto.builder()
                 .id(member.getId())
                 .username(member.getUsername())
                 .nickname(member.getNickname())
@@ -113,21 +119,27 @@ public class MemberService {
         return member;
     }
 
-    public List<MemberResponseDto> getMembersByUsername(String partOfUsername) {
+
+    public MemberResponseDto getMembersByUsername(String partOfUsername) {
+
         List<Member> memberList = memberRepository.findByUsernameContaining(partOfUsername);
 
         // TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하기
-        List<MemberResponseDto> memberResponseDtoList = new ArrayList<>();
+        List<MemberDto> memberDtoList = new ArrayList<>();
 
         for (Member member : memberList) {
-            MemberResponseDto memberResponseDto = MemberResponseDto.builder()
+            MemberDto memberDto = MemberDto.builder()
                     .id(member.getId())
                     .username(member.getUsername())
                     .nickname(member.getNickname())
                     .build();
-            memberResponseDtoList.add(memberResponseDto);
+            memberDtoList.add(memberDto);
         }
 
-        return memberResponseDtoList;
+        MemberResponseDto response = MemberResponseDto.builder()
+                .members(memberDtoList)
+                .build();
+
+        return response;
     }
 }
