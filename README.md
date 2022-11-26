@@ -73,4 +73,7 @@
 2. (2차 배포) PostgreSQL의 ORDBMS 특징을 활용하여 DB에 List형태로 데이터를 삽입하여 table의 row 수 감축
 
 3. (2차 배포) Apache Kapka를 통한 멤버 초대시 알림 Push 기능 구현
+
+4. (2차 배포) JWT를 이용한 로그인/회원가입 기능에 캐싱 도입
+
 <br />

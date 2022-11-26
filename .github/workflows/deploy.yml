@@ -57,6 +57,14 @@ jobs:
         touch ./application-db-password.properties
         echo "${{ secrets.DB_PASSWORD_PROPERTIES }}" > ./application-db-password.properties
       shell: bash
+      
+    # application-secret.properties 생성하기
+    - name: make application-secret.properties
+      run: |
+        cd ./src/main/resources
+        touch ./application-secret.properties
+        echo "${{ secrets.SECRET_PROPERTIES }}" > ./application-secret.properties
+      shell: bash
 
     # (3) Gradle build (Test 제외)
     - name: Build with Gradle

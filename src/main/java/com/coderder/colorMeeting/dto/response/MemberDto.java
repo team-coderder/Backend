@@ -2,10 +2,11 @@ package com.coderder.colorMeeting.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
-import java.util.List;
 
 @Builder
 @Getter
-public class MemberResponseDto {
-    private List<MemberDto> members;
+public class MemberDto {
+    private Long id;
+    private String username;
+    private String nickname;
 }

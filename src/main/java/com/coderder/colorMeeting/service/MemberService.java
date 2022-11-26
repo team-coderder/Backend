@@ -1,6 +1,8 @@
 package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.dto.request.MemberJoinRequestDto;
+import com.coderder.colorMeeting.dto.request.MemberUpdateDto;
+import com.coderder.colorMeeting.dto.response.MemberDto;
 import com.coderder.colorMeeting.dto.response.MemberResponseDto;
 import com.coderder.colorMeeting.exception.ErrorResponse;
 import com.coderder.colorMeeting.exception.NotFoundException;
@@ -14,8 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.coderder.colorMeeting.exception.ErrorCode.MEMBER_NOT_FOUND;
-import static com.coderder.colorMeeting.exception.ErrorCode.USERNAME_ALREADY_EXISTS;
+import static com.coderder.colorMeeting.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public MemberResponseDto join(MemberJoinRequestDto requestDto) {
+    public MemberDto join(MemberJoinRequestDto requestDto) {
         // 로그인되어 있으면 돌려보내기
         // 컨트롤러에서 request.header 체크하여 수행하려 했으나
         // 스프링 시큐리티에서 수행해주는 것으로 확인함
@@ -50,47 +51,13 @@ public class MemberService {
         // 저장하기
         Member savedMember = memberRepository.save(member);
 
-        MemberResponseDto responseDto = MemberResponseDto.builder()
+        MemberDto responseDto = MemberDto.builder()
                 .id(savedMember.getId())
                 .username(savedMember.getUsername())
                 .nickname(savedMember.getNickname())
                 .build();
 
         return responseDto;
-    }
-
-    public List<MemberResponseDto> getMembersByNickname(String partOfNickname) {
-        List<Member> memberList = memberRepository.findByNicknameContaining(partOfNickname);
-
-        // TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하기
-        List<MemberResponseDto> memberResponseDtoList = new ArrayList<>();
-
-        for (Member member : memberList) {
-            MemberResponseDto memberResponseDto = MemberResponseDto.builder()
-                    .id(member.getId())
-                    .username(member.getUsername())
-                    .nickname(member.getNickname())
-                    .build();
-            memberResponseDtoList.add(memberResponseDto);
-        }
-
-        return memberResponseDtoList;
-    }
-
-    public MemberResponseDto getMyInformation(Long memberId) {
-
-        Member member = isPresentMember(memberId);
-        if (member == null) {
-            throw new NotFoundException(MEMBER_NOT_FOUND);
-        }
-
-        MemberResponseDto memberResponseDto = MemberResponseDto.builder()
-                .id(member.getId())
-                .username(member.getUsername())
-                .nickname(member.getNickname())
-                .build();
-
-        return memberResponseDto;
     }
 
     private Member isPresentMember(Long memberId) {
@@ -107,9 +74,96 @@ public class MemberService {
         }
     }
 
-    public Member getMembersByUsername(String exactUsername) {
+    public MemberResponseDto getMembersByNickname(String partOfNickname) {
+
+        List<Member> memberList = memberRepository.findByNicknameContaining(partOfNickname);
+
+        // TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하기
+        List<MemberDto> memberDtoList = new ArrayList<>();
+
+        for (Member member : memberList) {
+            MemberDto memberDto = MemberDto.builder()
+                    .id(member.getId())
+                    .username(member.getUsername())
+                    .nickname(member.getNickname())
+                    .build();
+            memberDtoList.add(memberDto);
+        }
+
+        MemberResponseDto response = MemberResponseDto.builder()
+                .members(memberDtoList)
+                .build();
+
+        return response;
+    }
+
+
+    public Member getMembersByExactUsername(String exactUsername) {
         Member member = memberRepository.findByUsername(exactUsername);
 
         return member;
+    }
+
+
+    public MemberResponseDto getMembersByUsername(String partOfUsername) {
+
+        List<Member> memberList = memberRepository.findByUsernameContaining(partOfUsername);
+
+        // TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하기
+        List<MemberDto> memberDtoList = new ArrayList<>();
+
+        for (Member member : memberList) {
+            MemberDto memberDto = MemberDto.builder()
+                    .id(member.getId())
+                    .username(member.getUsername())
+                    .nickname(member.getNickname())
+                    .build();
+            memberDtoList.add(memberDto);
+        }
+
+        MemberResponseDto response = MemberResponseDto.builder()
+                .members(memberDtoList)
+                .build();
+
+        return response;
+    }
+
+    public MemberDto getMyInformation(Long memberId) {
+
+        Member member = isPresentMember(memberId);
+        if (member == null) {
+            throw new NotFoundException(MEMBER_NOT_FOUND);
+        }
+
+        MemberDto memberDto = MemberDto.builder()
+                .id(member.getId())
+                .username(member.getUsername())
+                .nickname(member.getNickname())
+                .build();
+
+        return memberDto;
+    }
+
+    public MemberDto updateMyInformation(Long memberId, MemberUpdateDto memberUpdateDto) {
+        // 존재하는 member인가?
+        Member member = isPresentMember(memberId);
+        if (member == null) {
+            throw new NotFoundException(MEMBER_NOT_FOUND);
+        }
+
+        // 닉네임 업데이트
+        member.updateNickname(memberUpdateDto.getNickname());
+
+        // 비밀번호 업데이트
+        // member.updateNickname(memberUpdateDto.getPassword());
+
+        // 결과값
+        MemberDto response = MemberDto.builder()
+                .id(member.getId())
+                .username(member.getUsername())
+                .nickname(member.getNickname())
+                .build();
+
+        return response;
     }
 }
