@@ -22,9 +22,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-@RequiredArgsConstructor
 @EnableWebSecurity
 @Configuration
+@RequiredArgsConstructor
 public class WebSecurityConfig {
 
     @Autowired
@@ -55,8 +55,6 @@ public class WebSecurityConfig {
 
         //허용할 url 설정
         configuration.addAllowedOrigin("http://localhost:3000");
-        configuration.addAllowedOrigin("http://velterview.s3-website.ap-northeast-2.amazonaws.com");
-        configuration.addAllowedOrigin("http://velterview.s3-website.ap-northeast-2.amazonaws.com:3000");
         //허용할 헤더 설정
         configuration.addAllowedHeader("*");
         //허용할 http method
@@ -68,7 +66,7 @@ public class WebSecurityConfig {
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
         return source;
 
     }
