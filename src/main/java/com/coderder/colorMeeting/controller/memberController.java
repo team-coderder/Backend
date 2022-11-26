@@ -1,6 +1,8 @@
 package com.coderder.colorMeeting.controller;
 
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
+import com.coderder.colorMeeting.dto.request.MemberUpdateDto;
+import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,13 +27,19 @@ public class memberController {
 
     // 유저 검색 : 닉네임 일부로
     @RequestMapping(value="/search/nickname", method = RequestMethod.GET)
-    public ResponseEntity<?> getMembersByNickname(@RequestParam("nickname") String partOfNickname) {
+    public ResponseEntity<?> getMembersByNickname(@RequestParam("query") String partOfNickname) {
         return ResponseEntity.ok().body(memberService.getMembersByNickname(partOfNickname));
     }
 
     // 유저검색 : 정확한 아이디로
+    @RequestMapping(value="/search/username/exact", method = RequestMethod.GET)
+    public ResponseEntity<?> getMembersByExactUsername(@RequestParam("query") String exactUsername) {
+        return ResponseEntity.ok().body(memberService.getMembersByExactUsername(exactUsername));
+    }
+
+    // 유저검색 : 아이디 일부로
     @RequestMapping(value="/search/username", method = RequestMethod.GET)
-    public ResponseEntity<?> getMembersByUsername(@RequestParam("username") String exactUsername) {
+    public ResponseEntity<?> getMembersByUsername(@RequestParam("query") String exactUsername) {
         return ResponseEntity.ok().body(memberService.getMembersByUsername(exactUsername));
     }
 
@@ -41,5 +49,10 @@ public class memberController {
         return ResponseEntity.ok().body(memberService.getMyInformation(memberId));
     }
 
-
+    // 내 정보 수정하기
+    @RequestMapping(value="/mypage", method= RequestMethod.PATCH)
+    public ResponseEntity<?> updateMyInformation(
+            @RequestParam("memberId") Long memberId, @RequestBody MemberUpdateDto requestDto) {
+        return ResponseEntity.ok().body(memberService.updateMyInformation(memberId, requestDto));
+    }
 }

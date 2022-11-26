@@ -14,10 +14,11 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:3000"); // e.g. http://domain1.com
-        config.addAllowedOrigin("http://localhost:8080");
-        config.addAllowedOrigin("http://43.200.220.2:3000");
-        config.addAllowedOrigin("http://43.200.220.2:8080");
+//        config.addAllowedOrigin("http://localhost:3000"); // e.g. http://domain1.com
+//        config.addAllowedOrigin("http://localhost:8080");
+//        config.addAllowedOrigin("http://43.200.220.2:3000");
+//        config.addAllowedOrigin("http://43.200.220.2:8080");
+        config.addAllowedOrigin("*");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
