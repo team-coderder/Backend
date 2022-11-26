@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Repository;
 
 
@@ -15,6 +17,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             "from Member m join fetch m.teamMemberSet t " +
             "where t.team.id = :teamId")
     List<Member> findAllWithTeamId(@Param("teamId") Long teamId);
+
     Member findByUsername(String username);
 
     List<Member> findByNicknameContaining(String keyword);

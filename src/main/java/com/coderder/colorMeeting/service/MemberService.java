@@ -1,5 +1,9 @@
 package com.coderder.colorMeeting.service;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.coderder.colorMeeting.config.jwt.JwtProperties;
+import com.coderder.colorMeeting.dto.request.LoginRequestDto;
 import com.coderder.colorMeeting.dto.request.MemberJoinRequestDto;
 import com.coderder.colorMeeting.dto.request.MemberUpdateDto;
 import com.coderder.colorMeeting.dto.response.MemberDto;
@@ -10,9 +14,12 @@ import com.coderder.colorMeeting.model.Member;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +31,8 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtProperties jwtProperties;
 
     public MemberDto join(MemberJoinRequestDto requestDto) {
         // 로그인되어 있으면 돌려보내기
@@ -63,6 +72,11 @@ public class MemberService {
     private Member isPresentMember(Long memberId) {
         Optional<Member> member = memberRepository.findById(memberId);
         return member.orElse(null);
+    }
+
+    private Member isPresentMemberByUsername(String username) {
+        Member member = memberRepository.findByUsername(username);
+        return member;
     }
 
     private boolean checkDuplicatedUsername(String username) {
@@ -165,5 +179,44 @@ public class MemberService {
                 .build();
 
         return response;
+    }
+
+    public MemberDto login(LoginRequestDto requestDto, HttpServletResponse response) {
+        // username으로 사용자를 찾는다
+        String username = requestDto.getUsername();
+        Member member = isPresentMemberByUsername(username);
+        // 못 찾으면 예외 처리
+        if (member == null) {
+            throw new NotFoundException(MEMBER_NOT_FOUND);
+        }
+
+        // 비밀번호가 맞는지 검증한다
+        if(!member.validatePassword(passwordEncoder, requestDto.getPassword())){
+            throw new NotFoundException(MEMBER_NOT_FOUND);
+        }
+
+        // 토큰을 발급한다
+        String jwtToken = JWT.create()
+                .withSubject(username) // 토큰 이름. 크게 의미 없음
+                .withExpiresAt(new Date(System.currentTimeMillis()+ jwtProperties.EXPIRATION_TIME)) // 만료시간
+                .withClaim("id", member.getId()) // payload : id. pk
+                .withClaim("username", member.getUsername()) // payload : username. pk
+                .sign(Algorithm.HMAC512(jwtProperties.getSECRET())); // 검증값
+
+        response.addHeader(jwtProperties.HEADER_STRING, jwtProperties.TOKEN_PREFIX+jwtToken); // 헤더key, value
+
+
+        // 응답한다
+        MemberDto responseDto = MemberDto.builder()
+                .id(member.getId())
+                .username(member.getUsername())
+                .nickname(member.getNickname())
+                .build();
+
+        return responseDto;
+    }
+
+    private void TokenToHeaders(HttpServletResponse response, String accessToken, String refreshToken) {
+        response.addHeader(jwtProperties.HEADER_STRING, jwtProperties.TOKEN_PREFIX+accessToken);
     }
 }

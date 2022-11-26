@@ -12,9 +12,9 @@ public class JwtProperties {
     // try 2 : 읽어오기
     @Value("${jwt.secret.key}")
     private String SECRET;
-    static int EXPIRATION_TIME = 864000000; // 10일 (1/1000초)
-    static String TOKEN_PREFIX = "Bearer ";
-    static String HEADER_STRING = "Authorization";
+    public static int EXPIRATION_TIME = 864000000; // 10일 (1/1000초)
+    public static String TOKEN_PREFIX = "Bearer ";
+    public static String HEADER_STRING = "Authorization";
 
     public String getSECRET() {
         return SECRET;
