@@ -1,18 +1,15 @@
 package com.coderder.colorMeeting.config;
 
-import com.coderder.colorMeeting.config.jwt.JwtAuthenticationFilter;
-import com.coderder.colorMeeting.config.jwt.JwtAuthorizationFilter;
+import com.coderder.colorMeeting.config.jwt.JwtGivingAuthFilter;
 import com.coderder.colorMeeting.config.jwt.JwtProperties;
+import com.coderder.colorMeeting.config.jwt.JwtUtil;
 import com.coderder.colorMeeting.repository.MemberRepository;
-import com.coderder.colorMeeting.repository.UserTestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,8 +33,11 @@ public class WebSecurityConfig {
     @Autowired
     private JwtProperties jwtProperties;
 
+    @Autowired
+    private JwtUtil jwtUtil;
 
-	@Bean
+
+    @Bean
 	public BCryptPasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
@@ -75,7 +75,7 @@ public class WebSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors().configurationSource(corsConfigurationSource());
         http.csrf().disable()
-                .addFilterBefore(new JwtAuthorizationFilter(memberRepository, jwtProperties), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtGivingAuthFilter(memberRepository, jwtProperties, jwtUtil), UsernamePasswordAuthenticationFilter.class)
 //                .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtProperties))
 //                .addFilter(new JwtAuthorizationFilter(authenticationManager(), memberRepository, jwtProperties))
                 .sessionManagement()

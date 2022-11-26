@@ -3,6 +3,9 @@ package com.coderder.colorMeeting.config.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
+import com.coderder.colorMeeting.exception.ErrorCode;
+import com.coderder.colorMeeting.exception.NotFoundException;
+import com.coderder.colorMeeting.exception.UnAuthorizedException;
 import com.coderder.colorMeeting.model.Member;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,15 +23,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static com.coderder.colorMeeting.exception.ErrorCode.MEMBER_NOT_FOUND;
 
 
 @RequiredArgsConstructor
-public class JwtAuthorizationFilter extends OncePerRequestFilter {
+public class JwtGivingAuthFilter extends OncePerRequestFilter {
 
 
     // 의존성 주입
     private final MemberRepository memberRepository;
     private final JwtProperties jwtProperties;
+    private final JwtUtil jwtUtil;
 
 
 
@@ -43,8 +48,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         // jwt 토큰이 없으면
         if(header == null || !header.startsWith(JwtProperties.TOKEN_PREFIX)) {
             chain.doFilter(request, response);
-            // exception 처리하기
             return;
+            // exception 처리하기
         }
 
         // jwt 토큰이 있으면, 검증한다
@@ -71,6 +76,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         // exception 처리하기
         chain.doFilter(request, response);
+
 
     }
 

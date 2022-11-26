@@ -25,7 +25,6 @@ public class memberController {
 
     // 관리자만 접근 가능한 페이지
 
-
     // 유저 검색 : 닉네임 일부로
     @RequestMapping(value="/search/nickname", method = RequestMethod.GET)
     public ResponseEntity<?> getMembersByNickname(@RequestParam("query") String partOfNickname) {

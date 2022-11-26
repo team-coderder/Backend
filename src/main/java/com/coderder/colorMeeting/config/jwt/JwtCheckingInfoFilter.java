@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.Date;
 
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class JwtCheckingInfoFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JwtProperties jwtProperties;

@@ -8,6 +8,7 @@ import com.coderder.colorMeeting.dto.request.MemberJoinRequestDto;
 import com.coderder.colorMeeting.dto.request.MemberUpdateDto;
 import com.coderder.colorMeeting.dto.response.MemberDto;
 import com.coderder.colorMeeting.dto.response.MemberResponseDto;
+import com.coderder.colorMeeting.exception.ErrorCode;
 import com.coderder.colorMeeting.exception.ErrorResponse;
 import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.Member;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,7 +44,7 @@ public class MemberService {
         // username 중복체크하기
         boolean duplicatedUsername = checkDuplicatedUsername(requestDto.getUsername());
         if ( duplicatedUsername == true ) {
-            throw new ErrorResponse(USERNAME_ALREADY_EXISTS);
+            throw new ErrorResponse(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
 
         // 디폴트값 넣어주기 (암호화한 비밀번호, 권한 디폴트값)
@@ -187,11 +189,14 @@ public class MemberService {
         Member member = isPresentMemberByUsername(username);
         // 못 찾으면 예외 처리
         if (member == null) {
+            System.out.println("========================= 못 찾겠따");
             throw new NotFoundException(MEMBER_NOT_FOUND);
         }
 
         // 비밀번호가 맞는지 검증한다
         if(!member.validatePassword(passwordEncoder, requestDto.getPassword())){
+
+            System.out.println("========================= 비밀번호 틀림");
             throw new NotFoundException(MEMBER_NOT_FOUND);
         }
 
@@ -218,5 +223,10 @@ public class MemberService {
 
     private void TokenToHeaders(HttpServletResponse response, String accessToken, String refreshToken) {
         response.addHeader(jwtProperties.HEADER_STRING, jwtProperties.TOKEN_PREFIX+accessToken);
+    }
+
+
+    public String logout(HttpServletRequest request) {
+        return "로그아웃 되었습니다";
     }
 }
