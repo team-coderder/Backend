@@ -37,9 +37,9 @@ public class MemberService {
         }
 
         // 디폴트값 넣어주기 (암호화한 비밀번호, 권한 디폴트값)
-        System.out.println("회원가입 시작");
-        System.out.println("username : " + requestDto.getUsername());
-        System.out.println("password : " + requestDto.getPassword());
+//        System.out.println("회원가입 시작");
+//        System.out.println("username : " + requestDto.getUsername());
+//        System.out.println("password : " + requestDto.getPassword());
 
         Member member = Member.builder()
                 .username(requestDto.getUsername())
