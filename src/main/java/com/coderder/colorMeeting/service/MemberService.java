@@ -8,6 +8,7 @@ import com.coderder.colorMeeting.dto.request.MemberJoinRequestDto;
 import com.coderder.colorMeeting.dto.request.MemberUpdateDto;
 import com.coderder.colorMeeting.dto.response.MemberDto;
 import com.coderder.colorMeeting.dto.response.MemberResponseDto;
+import com.coderder.colorMeeting.dto.response.ResponseDto;
 import com.coderder.colorMeeting.exception.ErrorCode;
 import com.coderder.colorMeeting.exception.ErrorResponse;
 import com.coderder.colorMeeting.exception.NotFoundException;
@@ -191,11 +192,11 @@ public class MemberService {
         if (member == null) {
             System.out.println("========================= 못 찾겠따");
             throw new NotFoundException(MEMBER_NOT_FOUND);
+
         }
 
         // 비밀번호가 맞는지 검증한다
         if(!member.validatePassword(passwordEncoder, requestDto.getPassword())){
-
             System.out.println("========================= 비밀번호 틀림");
             throw new NotFoundException(MEMBER_NOT_FOUND);
         }
@@ -221,9 +222,6 @@ public class MemberService {
         return responseDto;
     }
 
-    private void TokenToHeaders(HttpServletResponse response, String accessToken, String refreshToken) {
-        response.addHeader(jwtProperties.HEADER_STRING, jwtProperties.TOKEN_PREFIX+accessToken);
-    }
 
 
     public String logout(HttpServletRequest request) {

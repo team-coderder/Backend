@@ -35,31 +35,38 @@ public class JwtGivingAuthFilter extends OncePerRequestFilter {
     private final JwtProperties jwtProperties;
     private final JwtUtil jwtUtil;
 
-
-
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
 
         // header에서 jwt토큰을 가져온다
         String header = request.getHeader(JwtProperties.HEADER_STRING);
+        String requestUri = request.getRequestURI();
 
+        if(requestUri.contains("api")){
+            // jwt 토큰이 없으면
+            if(header == null){
+                jwtUtil.exceptionResponse(response,ErrorCode.INVALID_LOGIN);
+                return;
+            }
 
-        // jwt 토큰이 없으면
-        if(header == null || !header.startsWith(JwtProperties.TOKEN_PREFIX)) {
-            chain.doFilter(request, response);
-            return;
-            // exception 처리하기
-        }
+            if(!header.startsWith(JwtProperties.TOKEN_PREFIX)){
+                jwtUtil.exceptionResponse(response, ErrorCode.INVALID_ACCESS_TOKEN);
+                return;
+            }
 
-        // jwt 토큰이 있으면, 검증한다
-        String token = request.getHeader(JwtProperties.HEADER_STRING)
-                .replace(JwtProperties.TOKEN_PREFIX, "");
+            // jwt 토큰이 있으면, 검증한다
+            String token = request.getHeader(JwtProperties.HEADER_STRING)
+                    .replace(JwtProperties.TOKEN_PREFIX, "");
+            String username = JWT.require(Algorithm.HMAC512(jwtProperties.getSECRET())).build().verify(token)
+                    .getClaim("username").asString();
 
-        String username = JWT.require(Algorithm.HMAC512(jwtProperties.getSECRET())).build().verify(token)
-                .getClaim("username").asString();
+            // 해당하는 유저가 없으면
+            if (username == null) {
+                jwtUtil.exceptionResponse(response, ErrorCode.MEMBER_NOT_FOUND);
+                return;
+            }
 
-        if(username != null) {
+            // 모든 예외 처리를 통과했으면
             Member userEntity = memberRepository.findByUsername(username);
 
             // 권한 처리
@@ -72,13 +79,57 @@ public class JwtGivingAuthFilter extends OncePerRequestFilter {
                             principalDetails.getAuthorities());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            chain.doFilter(request, response);
+
+        } else {
+        // FilterChain chain 해당 필터가 실행 후 다른 필터도 실행할 수 있도록 연결실켜주는 메서드
+        // auth가 포함되지 않은 uri는 인가를 거치지 않고 다음 필터로 넘어간다.
+        chain.doFilter(request,response);
         }
-
-        // exception 처리하기
-        chain.doFilter(request, response);
-
-
     }
+
+
+//    @Override
+//    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+//
+//        // header에서 jwt토큰을 가져온다
+//        String header = request.getHeader(JwtProperties.HEADER_STRING);
+//
+//
+//        // jwt 토큰이 없으면
+//        if(header == null || !header.startsWith(JwtProperties.TOKEN_PREFIX)) {
+//            chain.doFilter(request, response);
+//            return;
+//            // exception 처리하기
+//        }
+//
+//        // jwt 토큰이 있으면, 검증한다
+//        String token = request.getHeader(JwtProperties.HEADER_STRING)
+//                .replace(JwtProperties.TOKEN_PREFIX, "");
+//
+//        String username = JWT.require(Algorithm.HMAC512(jwtProperties.getSECRET())).build().verify(token)
+//                .getClaim("username").asString();
+//
+//        if(username != null) {
+//            Member userEntity = memberRepository.findByUsername(username);
+//
+//            // 권한 처리
+//            PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
+//
+//            Authentication authentication =
+//                    new UsernamePasswordAuthenticationToken(
+//                            principalDetails,
+//                            null,
+//                            principalDetails.getAuthorities());
+//
+//            SecurityContextHolder.getContext().setAuthentication(authentication);
+//        }
+//
+//        // exception 처리하기
+//        chain.doFilter(request, response);
+//
+//
+//    }
 
 }
 
