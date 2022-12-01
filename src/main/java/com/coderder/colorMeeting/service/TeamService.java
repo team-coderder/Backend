@@ -55,7 +55,6 @@ public class TeamService {
                 .teamRole(LEADER)
                 .build();
         teamMemberRepository.save(firstTeamMember);
-//        newTeam.addTeamMember(firstTeamMember);       // JPA에서 자동으로 넣어주는 게 아니기 때문에 논리적으로는 이 코드라인이 없어도 상관 X
 
         // 3. 응답 생성하기
         TeamSimpleResponseDto response = TeamSimpleResponseDto.builder()
@@ -221,20 +220,21 @@ public class TeamService {
         return new ResponseMessage("그룹(teamId : " + targetTeam.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료");
     }
 
-    public List<TeamSimpleResponseDto> getMyTeams(PrincipalDetails userDetails) {
+    public TeamResponseDto getMyTeams(PrincipalDetails userDetails) {
 
         Member me = userDetails.getMember();
 
         // 1. 나의 그룹들을 추출하여 Dto에 넣기
-        List<TeamSimpleResponseDto> response = new ArrayList<>();
+        List<TeamSimpleResponseDto> data = new ArrayList<>();
         List<TeamMember> teamMembers = teamMemberRepository.getAllByMember(me);
         for (TeamMember teamMember : teamMembers) {
             Team team = teamMember.getTeam();
-            response.add(TeamSimpleResponseDto.builder()
+            data.add(TeamSimpleResponseDto.builder()
                     .teamId(team.getId())
                     .name(team.getName())
                     .build());
         }
+        TeamResponseDto response = TeamResponseDto.builder().teams(data).build();
 
         // 2. response 생성 및 출력하기
         return response;
