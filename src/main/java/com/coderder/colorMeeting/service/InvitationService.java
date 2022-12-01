@@ -3,6 +3,7 @@ package com.coderder.colorMeeting.service;
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
 import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
 import com.coderder.colorMeeting.dto.response.InvitationDto;
+import com.coderder.colorMeeting.dto.response.InvitationListDto;
 import com.coderder.colorMeeting.dto.response.ResponseMessage;
 import com.coderder.colorMeeting.exception.BadRequestException;
 import com.coderder.colorMeeting.exception.ForbiddenException;
@@ -31,7 +32,7 @@ public class InvitationService {
     private final TeamMemberRepository teamMemberRepository;
     private final InvitationRepository invitationRepository;
 
-    public List<InvitationDto> showAllInvitations(PrincipalDetails userDetails) {
+    public InvitationListDto showAllInvitations(PrincipalDetails userDetails) {
 
         Member me = userDetails.getMember();
 
@@ -39,9 +40,9 @@ public class InvitationService {
         List<Invitation> invitations = invitationRepository.findAllByToMember(me);
 
         // 2. 나의 초대장들을 하나씩 추출하여 Dto에 넣기
-        List<InvitationDto> response = new ArrayList<>();
+        List<InvitationDto> data = new ArrayList<>();
         for (Invitation invitation : invitations) {
-            response.add(InvitationDto.builder()
+            data.add(InvitationDto.builder()
                     .invitationId(invitation.getId())
                     .fromTeamId(invitation.getFromTeam().getId())
                     .fromMemberId(invitation.getFromLeader().getId())
@@ -49,6 +50,7 @@ public class InvitationService {
                     .createdAt(invitation.getCreatedAt())
                     .build());
         }
+        InvitationListDto response = InvitationListDto.builder().invitations(data).build();
 
         // 3. response 출력하기
         return response;
