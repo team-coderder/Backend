@@ -3,6 +3,7 @@ package com.coderder.colorMeeting.config;
 import com.coderder.colorMeeting.config.jwt.JwtGivingAuthFilter;
 import com.coderder.colorMeeting.config.jwt.JwtProperties;
 import com.coderder.colorMeeting.config.jwt.JwtUtil;
+import com.coderder.colorMeeting.config.jwt.TokenProperties;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,10 +61,13 @@ public class WebSecurityConfig {
         //허용할 http method
         configuration.addAllowedMethod("*");
 //        //클라이언트가 접근 할 수 있는 서버 응답 헤더
+        configuration.addExposedHeader(JwtProperties.HEADER_STRING);
 //        configuration.addExposedHeader(TokenProperties.AUTH_HEADER);
 //        configuration.addExposedHeader(TokenProperties.REFRESH_HEADER);
         //사용자 자격 증명이 지원되는지 여부
         configuration.setAllowCredentials(true);
+
+//        configuration.addEposedHeader(JwtProperties.HEADER);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
