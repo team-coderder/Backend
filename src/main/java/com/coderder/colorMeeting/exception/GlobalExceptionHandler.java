@@ -1,10 +1,8 @@
 package com.coderder.colorMeeting.exception;
 
-import com.coderder.colorMeeting.dto.response.ResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
@@ -16,7 +14,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    public ResponseEntity<?> invalidGroupNameExceptionHandler(BadRequestException exception) {
+    public ResponseEntity<?> invalidGroupNameExceptisonHandler(BadRequestException exception) {
         return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode()), HttpStatus.BAD_REQUEST);
     }
 

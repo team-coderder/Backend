@@ -33,4 +33,9 @@ public class Team {
     public void updateName(String name) {
         this.name = name;
     }
+
+    public void addTeamMember(TeamMember teamMember) {
+        List<TeamMember> nowTeamMemberList = this.teamMemberList;
+        nowTeamMemberList.add(teamMember);
+    }
 }
