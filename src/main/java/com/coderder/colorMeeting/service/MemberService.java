@@ -9,6 +9,7 @@ import com.coderder.colorMeeting.dto.request.MemberUpdateDto;
 import com.coderder.colorMeeting.dto.response.MemberDto;
 import com.coderder.colorMeeting.dto.response.MemberResponseDto;
 import com.coderder.colorMeeting.dto.response.ResponseDto;
+import com.coderder.colorMeeting.exception.BadRequestException;
 import com.coderder.colorMeeting.exception.ErrorCode;
 import com.coderder.colorMeeting.exception.ErrorResponse;
 import com.coderder.colorMeeting.exception.NotFoundException;
@@ -45,7 +46,8 @@ public class MemberService {
         // username 중복체크하기
         boolean duplicatedUsername = checkDuplicatedUsername(requestDto.getUsername());
         if ( duplicatedUsername == true ) {
-            throw new ErrorResponse(ErrorCode.USERNAME_ALREADY_EXISTS);
+//            throw new ErrorResponse(USERNAME_ALREADY_EXISTS);
+            throw new BadRequestException(USERNAME_ALREADY_EXISTS);
         }
 
         // 디폴트값 넣어주기 (암호화한 비밀번호, 권한 디폴트값)
@@ -192,6 +194,7 @@ public class MemberService {
         if (member == null) {
             System.out.println("========================= 못 찾겠따");
             throw new NotFoundException(MEMBER_NOT_FOUND);
+//            throw new ErrorResponse(ErrorCode.MEMBER_NOT_FOUND);
 
         }
 
