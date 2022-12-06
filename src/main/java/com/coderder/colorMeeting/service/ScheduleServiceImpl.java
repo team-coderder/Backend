@@ -16,6 +16,7 @@ import com.coderder.colorMeeting.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class ScheduleServiceImpl implements ScheduleService{
                 .orElseThrow(()->new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
         PersonalSchedule personalSchedule = PersonalSchedule.builder()
                 .name(scheduleRequestDto.getName())
-                .weekday(scheduleRequestDto.getWeekday())
+                .weekday(scheduleRequestDto.getWeekday().toString())
                 .startTime(scheduleRequestDto.getStartTime())
                 .finishTime(scheduleRequestDto.getFinishTime())
                 .member(member)
@@ -110,9 +111,9 @@ public class ScheduleServiceImpl implements ScheduleService{
     private List<RecommendationDto> calculateEmptyTimes(List<PersonalSchedule> personalSchedules, int timeInterval){
         boolean[][] weekCalendar = new boolean[7][24*timeInterval];
         for(PersonalSchedule schedule : personalSchedules){
-            int weekday = convertWeekday(schedule.getWeekday());
-            int startBlock = convertTime(schedule.getStartTime(), timeInterval);
-            int finishBlock = convertTime(schedule.getFinishTime(), timeInterval);
+            int weekday = DayOfWeek.valueOf(schedule.getWeekday()).getValue()-1;
+            int startBlock = convertTimeToIndex(schedule.getStartTime(), timeInterval);
+            int finishBlock = convertTimeToIndex(schedule.getFinishTime(), timeInterval);
             for(int i=startBlock; i<=finishBlock; i++){
                 weekCalendar[weekday][i] = true;
             }
@@ -123,7 +124,7 @@ public class ScheduleServiceImpl implements ScheduleService{
             for(int j=0; j< weekCalendar[0].length-1; j++){
                 if(weekCalendar[i][j]) continue;
                 RecommendationDto time = RecommendationDto.builder()
-                        .weekday(convertToWeekday(i))
+                        .weekday(DayOfWeek.of(i+1).toString())
                         .start_time(convertToTime(j, timeInterval))
                         .finish_time(convertToTime(j+1, timeInterval))
                         .build();
@@ -132,32 +133,13 @@ public class ScheduleServiceImpl implements ScheduleService{
         }
         return times;
     }
-    private int convertWeekday(String weekday){
-        if(weekday.equals("mon")) return 0;
-        else if(weekday.equals("tue")) return 1;
-        else if(weekday.equals("wed")) return 2;
-        else if(weekday.equals("thu")) return 3;
-        else if(weekday.equals("fri")) return 4;
-        else if(weekday.equals("sat")) return 5;
-        else if(weekday.equals("sun")) return 6;
-        else return -1;
-    }
-    private int convertTime(LocalTime time, int timeInterval){
+    private int convertTimeToIndex(LocalTime time, int timeInterval){
         int min = time.getMinute();
         int hour = time.getHour();
         int blockIndex = hour*timeInterval + (min / (60/timeInterval));
         return blockIndex;
     }
-    private String convertToWeekday(int weekday){
-        if(weekday == 0) return "mon";
-        else if(weekday == 1) return "tue";
-        else if(weekday == 2) return "wed";
-        else if(weekday == 3) return "thu";
-        else if(weekday == 4) return "fri";
-        else if(weekday == 5) return "sat";
-        else if(weekday == 6) return "sun";
-        else return "";
-    }
+
     private LocalTime convertToTime(int timeBlock, int timeInterval){
         return LocalTime.of(timeBlock/timeInterval
                 , (timeBlock%timeInterval)*(60/timeInterval));

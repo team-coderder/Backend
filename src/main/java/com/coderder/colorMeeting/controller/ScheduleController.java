@@ -26,7 +26,7 @@ public class ScheduleController {
     @PatchMapping ("/api/schedule/myschedule")
     public ResponseEntity<ResponseMessage> makeMySchedule(@RequestBody ScheduleRequestDto scheduleRequestDto){
         scheduleService.insertScheduleBlock(scheduleRequestDto);
-        return ResponseEntity.ok().body(new ResponseMessage("개인 스케쥴 "+ scheduleRequestDto.getName() + "추가 완료"));
+        return ResponseEntity.ok().body(new ResponseMessage("개인 스케쥴 \""+ scheduleRequestDto.getName() + "\" 추가 완료"));
     }
 
     @GetMapping("/api/schedule/myteam")
@@ -44,7 +44,7 @@ public class ScheduleController {
     @PostMapping("/api/schedule/teamschedule")
     public ResponseEntity<ResponseMessage> makeTeamSchedule(@RequestBody TeamScheduleRequestDto teamScheduleDto){
         scheduleService.insertGroupSchedule(teamScheduleDto);
-        return ResponseEntity.ok().body(new ResponseMessage("팀 스케쥴 "+teamScheduleDto.getName()+" 추가 완료"));
+        return ResponseEntity.ok().body(new ResponseMessage("팀 스케쥴 \""+teamScheduleDto.getName()+"\" 추가 완료"));
     }
     @GetMapping("/api/schedule/teamschedule")
     public ResponseEntity<List<TeamScheduleDto>> getTeamSchedule(@RequestParam Long teamId){
