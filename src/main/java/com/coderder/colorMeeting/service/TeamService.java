@@ -8,6 +8,7 @@ import com.coderder.colorMeeting.exception.BadRequestException;
 import com.coderder.colorMeeting.exception.ForbiddenException;
 import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.*;
+import com.coderder.colorMeeting.repository.InvitationRepository;
 import com.coderder.colorMeeting.repository.TeamMemberRepository;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.TeamRepository;
@@ -28,6 +29,7 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final MemberRepository memberRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final InvitationRepository invitationRepository;
 
     @Transactional
     public TeamSimpleResponseDto createTeam(PrincipalDetails userDetails, TeamRequestDto requestDto) {
@@ -53,7 +55,6 @@ public class TeamService {
                 .teamRole(LEADER)
                 .build();
         teamMemberRepository.save(firstTeamMember);
-//        newTeam.addTeamMember(firstTeamMember);       // JPA에서 자동으로 넣어주는 게 아니기 때문에 논리적으로는 이 코드라인이 없어도 상관 X
 
         // 3. 응답 생성하기
         TeamSimpleResponseDto response = TeamSimpleResponseDto.builder()
@@ -72,24 +73,37 @@ public class TeamService {
 
         // 1. TeamMembers라는 객체에서 각 멤버들에 대한 정보를 추출하여 TeamMemberDto 리스트에 담기
         List<TeamMember> teamMembers = team.getTeamMemberList();
-        List<TeamMemberDto> members = new ArrayList<>();
+        List<TeamMemberDto> teamMemberDtos = new ArrayList<>();
         for (TeamMember teamMember : teamMembers) {
             Member member = teamMember.getMember();
-            TeamMemberDto teamMemberDto = TeamMemberDto.builder()
+            teamMemberDtos.add(TeamMemberDto.builder()
                     .memberId(member.getId())
                     .username(member.getUsername())
                     .nickname(member.getNickname())
                     .teamRole(String.valueOf(teamMember.getTeamRole()))
-                    .build();
-            members.add(teamMemberDto);
+                    .build());
+        }
+        // 2. 초대장 목록 불러와서 각 초대장 정보를 Dto 리스트에 담기
+        List<Invitation> invitations = invitationRepository.findAllByFromTeam(team);
+        List<InvitationDto> invitationDtos = new ArrayList<>();
+        for (Invitation invitation : invitations) {
+            invitationDtos.add(InvitationDto.builder()
+                    .invitationId(invitation.getId())
+                    .fromTeamId(invitation.getFromTeam().getId())
+                    .fromMemberId(invitation.getFromLeader().getId())
+                    .toMemberId(invitation.getToMember().getId())
+                    .createdAt(invitation.getCreatedAt())
+                    .build()
+                    );
         }
 
-        // 2. responseDto 빌드하기
+
+        // 3. responseDto 빌드하기
         TeamDetailResponseDto response = TeamDetailResponseDto.builder()
                 .teamId(team.getId())
                 .name(team.getName())
-                .teamMembers(members)
-                .invitations(null)
+                .teamMembers(teamMemberDtos)
+                .invitations(invitationDtos)
                 .build();
         return response;
     }
@@ -163,13 +177,14 @@ public class TeamService {
     @Transactional
     public ResponseMessage addMember(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
 
-        Member me = userDetails.getMember();
         Team targetTeam = findTeam(requestDto.getTeamId());
+        Member me = userDetails.getMember();
+        TeamMember myInfo = findTeamMember(me, targetTeam);
         Member targetMember = findMember(requestDto.getMemberIds().get(0));
 
         // 0. 예외처리
-        checkSameMember(me, targetMember);              // requestDto의 member가 사용자 본인이 아닐 경우
-        checkNewTeamMember(targetMember, targetTeam);   // 사용자 본인이 이미 requestDto의 Team에 속해있는 경우
+        checkLeaderRole(myInfo);                        //  유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
+        checkTeamMember(targetMember, targetTeam);      // 대상 유저가 이미 requestDto의 Team에 속해있는 경우
 
         // 1. 해당 그룹에 유저 추가하기
         TeamMember teamMember = TeamMember.builder()
@@ -206,20 +221,21 @@ public class TeamService {
         return new ResponseMessage("그룹(teamId : " + targetTeam.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료");
     }
 
-    public List<TeamSimpleResponseDto> getMyTeams(PrincipalDetails userDetails) {
+    public TeamResponseDto getMyTeams(PrincipalDetails userDetails) {
 
         Member me = userDetails.getMember();
 
         // 1. 나의 그룹들을 추출하여 Dto에 넣기
-        List<TeamSimpleResponseDto> response = new ArrayList<>();
+        List<TeamSimpleResponseDto> data = new ArrayList<>();
         List<TeamMember> teamMembers = teamMemberRepository.getAllByMember(me);
         for (TeamMember teamMember : teamMembers) {
             Team team = teamMember.getTeam();
-            response.add(TeamSimpleResponseDto.builder()
+            data.add(TeamSimpleResponseDto.builder()
                     .teamId(team.getId())
                     .name(team.getName())
                     .build());
         }
+        TeamResponseDto response = TeamResponseDto.builder().teams(data).build();
 
         // 2. response 생성 및 출력하기
         return response;
@@ -264,7 +280,7 @@ public class TeamService {
         }
     }
 
-    private void checkNewTeamMember(Member member, Team team) {
+    private void checkTeamMember(Member member, Team team) {
         TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
         if (teamMember != null) {
             throw new BadRequestException(ALREADY_TEAM_MEMBER);

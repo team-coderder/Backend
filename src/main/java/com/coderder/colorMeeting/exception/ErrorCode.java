@@ -32,6 +32,8 @@ public enum ErrorCode {
     NO_PERMISSION_FOR_THIS_REQUEST("NO_PERMISSION_FOR_THIS_REQUEST", "해당 요청에 대한 권한이 없습니다."),
 
     // 로그인 관련 오류
+    INVALID_ACCESS_TOKEN("INVALID_ACCESS_TOKEN", "유효하지 않은 Access Token 입니다."),
+    INVALID_LOGIN("INVALID_LOGIN", "로그인이 필요합니다."),
     LOGIN_REQUIRED("LOGIN_REQUIRED", "로그인이 필요합니다."),
     NOT_AUTHORIZED("NOT_AUTHORIZED", "권한이 없습니다."),
 

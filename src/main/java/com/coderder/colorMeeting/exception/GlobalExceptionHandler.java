@@ -14,7 +14,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    public ResponseEntity<?> invalidGroupNameExceptionHandler(BadRequestException exception) {
+    public ResponseEntity<?> invalidGroupNameExceptisonHandler(BadRequestException exception) {
         return new ResponseEntity<>(new ErrorResponse(exception.getErrorCode()), HttpStatus.BAD_REQUEST);
     }
 

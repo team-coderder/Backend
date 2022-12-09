@@ -6,6 +6,6 @@ import java.util.List;
 
 @Builder
 @Getter
-public class MemberResponseDto {
-    private List<MemberDto> members;
+public class TeamResponseDto {
+    private List<TeamSimpleResponseDto> teams;
 }
