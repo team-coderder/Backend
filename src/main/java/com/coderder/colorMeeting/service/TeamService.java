@@ -177,13 +177,14 @@ public class TeamService {
     @Transactional
     public ResponseMessage addMember(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
 
-        Member me = userDetails.getMember();
         Team targetTeam = findTeam(requestDto.getTeamId());
+        Member me = userDetails.getMember();
+        TeamMember myInfo = findTeamMember(me, targetTeam);
         Member targetMember = findMember(requestDto.getMemberIds().get(0));
 
         // 0. 예외처리
-        checkSameMember(me, targetMember);              // requestDto의 member가 사용자 본인이 아닐 경우
-        checkTeamMember(targetMember, targetTeam);   // 사용자 본인이 이미 requestDto의 Team에 속해있는 경우
+        checkLeaderRole(myInfo);                        //  유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
+        checkTeamMember(targetMember, targetTeam);      // 대상 유저가 이미 requestDto의 Team에 속해있는 경우
 
         // 1. 해당 그룹에 유저 추가하기
         TeamMember teamMember = TeamMember.builder()
