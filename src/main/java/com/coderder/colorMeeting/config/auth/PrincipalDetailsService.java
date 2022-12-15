@@ -22,7 +22,13 @@ public class PrincipalDetailsService implements UserDetailsService {
         System.out.println("================ PrincipalDetailsService : 진입 =====================");
         Member member = memberRepository.findByUsername(username);
 
-        // session.setAttribute("loginUser", user);
-        return new PrincipalDetails(member);
+        if (member == null) {
+            return null;
+        } else {
+            PrincipalDetails principalDetails = new PrincipalDetails(member);
+            // session.setAttribute("loginUser", user);
+
+            return principalDetails;
+        }
     }
 }
