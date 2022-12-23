@@ -5,6 +5,7 @@ import com.coderder.colorMeeting.exception.ErrorCode;
 import com.coderder.colorMeeting.exception.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;

@@ -5,8 +5,9 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-@Builder
+
 @Getter
+@Builder
 public class InvitationDto {
     private Long invitationId;
     private Long fromTeamId;

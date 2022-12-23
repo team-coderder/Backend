@@ -33,18 +33,23 @@ public class JwtCheckingInfoFilter extends UsernamePasswordAuthenticationFilter 
 
     // DB에 저장된 값과 일치하는가?
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-        throws AuthenticationException {
-
-        try {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
+//        throws AuthenticationException {
+//
+//        try {
             // System.out.println("============== attempt Authentication starts ===============");
             // 1) request에서 username, password 받아오기
             // ObjectMapper는 json을 파싱한다
             // User.class를 넣으면 username, password 외에 기타 정보도 다 가져온다. loginDto를 추가로 만들자
             ObjectMapper om = new ObjectMapper();
-            LoginRequestDto loginRequestDto = om.readValue(request.getInputStream(), LoginRequestDto.class);
+        LoginRequestDto loginRequestDto = null;
+        try {
+            loginRequestDto = om.readValue(request.getInputStream(), LoginRequestDto.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-            // 2) 토큰을 만들고 로그인을 시도한다
+        // 2) 토큰을 만들고 로그인을 시도한다
             // am.authenticate()는 토큰의 파라메터(getUsername, getPassword)를 차례대로 검증한다
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword());
@@ -61,22 +66,21 @@ public class JwtCheckingInfoFilter extends UsernamePasswordAuthenticationFilter 
             // 권한 관리를 위해 session에 저장한다. 권한 관리를 안 하면 굳이 세션에 저장하지 않아도 된다.
             return authentication;
 
-        } catch (StreamReadException e) {
-            e.printStackTrace();
-        } catch (DatabindException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+//        } catch (StreamReadException e) {
+//            // 이 부분에서 stackTrace가 추가되는 것으로 추정 ... 단, 주석처리로는 해결되지 않음
+////            e.printStackTrace();
+//        } catch (IOException e) {
+////            e.printStackTrace();
+//        }
+//
+//        return null;
     };
 
     // attemptAuthentication 다음에 실행되는 함수
     // jwt 토큰을 만들어서 request 요청한 사용자에게 jwt 토큰을 응답해준다
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult)
-            throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) {
+//            throws IOException, ServletException {
         // System.out.println("============== successful Authentication starts ===============");
 
         PrincipalDetails principalDetailis = (PrincipalDetails) authResult.getPrincipal();

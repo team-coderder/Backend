@@ -36,7 +36,7 @@ public class JwtGivingAuthFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 
         // header에서 jwt토큰을 가져온다
         String header = request.getHeader(JwtProperties.HEADER_STRING);

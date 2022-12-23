@@ -8,8 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+
 @Repository
 public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     Invitation findByToMemberAndFromTeam(Member toMember, Team fromTeam);
+    List<Invitation> findAllByToMember(Member toMember);
     List<Invitation> findAllByFromTeam(Team fromTeam);
 }
