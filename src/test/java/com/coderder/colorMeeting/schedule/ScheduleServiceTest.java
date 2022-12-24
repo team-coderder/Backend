@@ -4,6 +4,7 @@ import com.coderder.colorMeeting.dto.request.ScheduleRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamScheduleRequestDto;
 import com.coderder.colorMeeting.dto.response.ScheduleBlockDto;
 import com.coderder.colorMeeting.dto.response.TeamScheduleDto;
+import com.coderder.colorMeeting.exception.ErrorCode;
 import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.Member;
 import com.coderder.colorMeeting.model.PersonalSchedule;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -44,7 +46,7 @@ public class ScheduleServiceTest {
         Member member = insertMember("junggu", "1234", "정구");
 
         PersonalSchedule personalSchedule =
-                insertPersonalSchedule("test", "FRI", LocalTime.of(22, 00),LocalTime.of(22, 30), member);
+                insertPersonalSchedule("test", "FRIDAY", LocalTime.of(22, 00),LocalTime.of(22, 30), member);
 
         List<ScheduleBlockDto> blockDtoList = scheduleService.getBlockListByUserId(personalSchedule.getId());
 
@@ -57,68 +59,72 @@ public class ScheduleServiceTest {
 
     }
 
-//    @Test
-//    void insertScheduleBlockTest() {
-//        Member member = insertMember("junggu", "1234", "정구");
-//
-//        PersonalSchedule personalSchedule =
-//                insertPersonalSchedule("test", "FRI", LocalTime.of(22, 00), LocalTime.of(22, 30), member);
-//
-//
-//        ScheduleRequestDto scheduleRequestDto = new ScheduleRequestDto(member.getId(), personalSchedule.getWeekday(), personalSchedule.getName());
-//                .userId()
-//                .weekday(personalSchedule.getWeekday())
-//                .name()
-//                .startTime(personalSchedule.getStartTime())
-//                .finishTime(personalSchedule.getFinishTime())
-//                .memo(personalSchedule.getMemo())
-//                .build();
-//
-//        scheduleService.insertScheduleBlock(scheduleRequestDto);
-//        List<ScheduleBlockDto> blocks = scheduleService.getBlockListByUserId(member.getId());
-//        System.out.println(blocks);
-//
-//        assertThat(blocks.get(0).getName()).isEqualTo(personalSchedule.getName());
-//    }
+    @Test
+    void insertScheduleBlockTest() {
+        Member member = insertMember("junggu", "1234", "정구");
 
-//    @Test
-//    void insertScheduleWithInvalidUser(){
-//        Member member = insertMember("test_junggu", "1234", "정구");
-//
-//        PersonalSchedule personalSchedule =
-//                insertPersonalSchedule("test", "FRI", LocalTime.of(22, 00), LocalTime.of(22, 30), member);
-//
-//        ScheduleRequestDto scheduleRequestDto = ScheduleRequestDto.builder()
-//                .userId(member.getId()+1)
-//                .weekday(personalSchedule.getWeekday())
-//                .name(personalSchedule.getName())
-//                .startTime(personalSchedule.getStartTime())
-//                .finishTime(personalSchedule.getFinishTime())
-//                .memo(personalSchedule.getMemo())
-//                .build();
-//
-//        org.junit.jupiter.api.Assertions.assertThrows(NotFoundException.class, () -> {
-//            scheduleService.insertScheduleBlock(scheduleRequestDto);
-//        });
-//    }
+        PersonalSchedule personalSchedule =
+                insertPersonalSchedule("test", "FRIDAY", LocalTime.of(22, 00), LocalTime.of(22, 30), member);
 
-//    @Test
-//    void insertScheduleWithInvalidTime(){
-//        Member member = insertMember("test_junggu", "1234", "정구");
-//
-//        PersonalSchedule personalSchedule =
-//                insertPersonalSchedule("test", "FRI", LocalTime.of(22, 00), LocalTime.of(22, 30), member);
-//
-//        //일단 dto 로 들어올때부터 오류가 발생할 예정
-//        ScheduleRequestDto scheduleRequestDto = ScheduleRequestDto.builder()
-//                .userId(member.getId()+1)
-//                .weekday(personalSchedule.getWeekday())
-//                .name(personalSchedule.getName())
-//                .startTime(personalSchedule.getStartTime())
-//                .finishTime(personalSchedule.getFinishTime())
-//                .memo(personalSchedule.getMemo())
-//                .build();
-//    }
+
+        ScheduleRequestDto scheduleRequestDto = new ScheduleRequestDto(
+                member.getId(),
+                personalSchedule.getName(),
+                personalSchedule.getWeekday(),
+                personalSchedule.getStartTime().toString(),
+                personalSchedule.getFinishTime().toString(),
+                personalSchedule.getMemo()
+        );
+
+        scheduleService.insertScheduleBlock(scheduleRequestDto);
+        List<ScheduleBlockDto> blocks = scheduleService.getBlockListByUserId(member.getId());
+        System.out.println(blocks);
+
+        assertThat(blocks.get(0).getName()).isEqualTo(personalSchedule.getName());
+    }
+
+    @Test
+    void insertScheduleWithInvalidUser(){
+        Member member = insertMember("test_junggu", "1234", "정구");
+
+        ScheduleRequestDto scheduleRequestDto = new ScheduleRequestDto(
+                member.getId()+1234321,
+                "test",
+                "FRI",
+                "22:00",
+                "22:30",
+                ""
+        );
+
+        ErrorCode errorCode = org.junit.jupiter.api.Assertions.assertThrows(NotFoundException.class, () -> {
+            scheduleService.insertScheduleBlock(scheduleRequestDto);
+        }).getErrorCode();
+
+        org.junit.jupiter.api.Assertions.assertEquals(errorCode, ErrorCode.MEMBER_NOT_FOUND);
+    }
+
+    @Test
+    void insertScheduleWithInvalidTime(){
+        Member member = insertMember("test_junggu", "1234", "정구");
+
+        PersonalSchedule personalSchedule =
+                insertPersonalSchedule("test", "FRIDAY", LocalTime.of(22, 00), LocalTime.of(22, 30), member);
+
+        ScheduleRequestDto scheduleRequestDto = new ScheduleRequestDto(
+                member.getId(),
+                personalSchedule.getName(),
+                personalSchedule.getWeekday(),
+                personalSchedule.getStartTime().toString(),
+                personalSchedule.getFinishTime().toString(),
+                personalSchedule.getMemo()
+        );
+
+        ErrorCode errorCode = org.junit.jupiter.api.Assertions.assertThrows(NotFoundException.class, () -> {
+            scheduleService.insertScheduleBlock(scheduleRequestDto);
+        }).getErrorCode();
+
+        org.junit.jupiter.api.Assertions.assertEquals(errorCode, ErrorCode.JSON_CONVERSION_ERROR);
+    }
 
     @Test
     void insertScheduleWithInvalidWeekday(){
@@ -135,6 +141,25 @@ public class ScheduleServiceTest {
 
     }
 
+    @Test
+    void getTeamAllScheduleWithNonExistingTeam(){
+
+    }
+
+    @Test
+    void getTeamScheduleWithNonExistingTeam(){
+
+    }
+
+    @Test
+    void getRecommandationWithNonExistingTeam(){
+
+    }
+
+    @Test
+    void getRecommandationWithWrongSpendingTime(){
+        
+    }
 
 
     @Test

@@ -6,6 +6,7 @@ import com.coderder.colorMeeting.dto.request.TeamTimeDto;
 import com.coderder.colorMeeting.dto.response.RecommendationDto;
 import com.coderder.colorMeeting.dto.response.ScheduleBlockDto;
 import com.coderder.colorMeeting.dto.response.TeamScheduleDto;
+import com.coderder.colorMeeting.exception.BadRequestException;
 import com.coderder.colorMeeting.exception.ErrorCode;
 import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.Member;
@@ -43,15 +44,35 @@ public class ScheduleServiceImpl implements ScheduleService{
     public void insertScheduleBlock(ScheduleRequestDto scheduleRequestDto) {
         Member member = memberRepository.findById(scheduleRequestDto.getUserId())
                 .orElseThrow(()->new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
+        isValidTime(scheduleRequestDto.getStartTime());
+        isValidTime(scheduleRequestDto.getFinishTime());
+        if(!isValidWeekDay(scheduleRequestDto.getWeekday()))
+            throw new BadRequestException(ErrorCode.JSON_CONVERSION_ERROR);
+
         PersonalSchedule personalSchedule = PersonalSchedule.builder()
                 .name(scheduleRequestDto.getName())
-                .weekday(scheduleRequestDto.getWeekday().toString())
-                .startTime(scheduleRequestDto.getStartTime())
-                .finishTime(scheduleRequestDto.getFinishTime())
+                .weekday(scheduleRequestDto.getWeekday())
+                .startTime(LocalTime.parse(scheduleRequestDto.getStartTime(), DateTimeFormatter.ofPattern("HH:mm")))
+                .finishTime(LocalTime.parse(scheduleRequestDto.getFinishTime(), DateTimeFormatter.ofPattern("HH:mm")))
                 .member(member)
                 .build();
         personalScheduleRepository.save(personalSchedule);
     }
+
+    private void isValidTime(String time) {
+        Integer hour;
+        Integer min;
+        try{
+            hour = Integer.parseInt(time.split(":")[0]);
+            min = Integer.parseInt(time.split(":")[1]);
+        } catch (Exception e){
+            throw new BadRequestException(ErrorCode.JSON_CONVERSION_ERROR);
+        }
+
+        if(hour < 0 || hour >=24 || min < 0 || min >=60) throw new BadRequestException(ErrorCode.JSON_CONVERSION_ERROR);
+    }
+    private void check
 
     @Override
     public List<ScheduleBlockDto> getBlockListByUserId(Long userId) {

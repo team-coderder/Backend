@@ -38,7 +38,9 @@ public enum ErrorCode {
     NOT_AUTHORIZED("NOT_AUTHORIZED", "권한이 없습니다."),
 
     // 회원가입 로직 : 중복 아이디
-    USERNAME_ALREADY_EXISTS("USERNAME_ALREADY_EXISTS", "이미 존재하는 유저입니다");
+    USERNAME_ALREADY_EXISTS("USERNAME_ALREADY_EXISTS", "이미 존재하는 유저입니다"),
+
+    JSON_CONVERSION_ERROR("JSON_CONVERTION_ERROR", "요청에 잘못된 입력이 있습니다.");
 
     private final String code;
     private final String message;
