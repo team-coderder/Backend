@@ -56,11 +56,10 @@ class TeamServiceImpl implements TeamService {
         teamMemberRepository.save(firstTeamMember);
 
         // 3. 응답 생성하기
-        TeamSimpleResponseDto response = TeamSimpleResponseDto.builder()
+        return TeamSimpleResponseDto.builder()
                 .teamId(newTeam.getId())
                 .name(newTeam.getName())
                 .build();
-        return response;
     }
 
     @Override
@@ -72,30 +71,11 @@ class TeamServiceImpl implements TeamService {
 
         // 1. TeamMembers라는 객체에서 각 멤버들에 대한 정보를 추출하여 TeamMemberDto 리스트에 담기
         List<TeamMember> teamMembers = team.getTeamMemberList();
-        List<TeamMemberDto> teamMemberDtos = new ArrayList<>();
-        for (TeamMember teamMember : teamMembers) {
-            Member member = teamMember.getMember();
-            teamMemberDtos.add(TeamMemberDto.builder()
-                    .memberId(member.getId())
-                    .username(member.getUsername())
-                    .nickname(member.getNickname())
-                    .teamRole(String.valueOf(teamMember.getTeamRole()))
-                    .build());
-        }
+        List<TeamMemberDto> teamMemberDtos = buildTeamMemberDtos(teamMembers);
+
         // 2. 초대장 목록 불러와서 각 초대장 정보를 Dto 리스트에 담기
         List<Invitation> invitations = invitationRepository.findAllByFromTeam(team);
-        List<InvitationDto> invitationDtos = new ArrayList<>();
-        for (Invitation invitation : invitations) {
-            invitationDtos.add(InvitationDto.builder()
-                    .invitationId(invitation.getId())
-                    .fromTeamId(invitation.getFromTeam().getId())
-                    .fromMemberId(invitation.getFromLeader().getId())
-                    .toMemberId(invitation.getToMember().getId())
-                    .createdAt(invitation.getCreatedAt())
-                    .build()
-                    );
-        }
-
+        List<InvitationDto> invitationDtos = buildInvitationDtos(invitations);
 
         // 3. responseDto 빌드하기
         TeamDetailResponseDto response = TeamDetailResponseDto.builder()
@@ -121,11 +101,10 @@ class TeamServiceImpl implements TeamService {
         team.updateName(requestDto.getName());
 
         // 2. response 빌드하기
-        TeamSimpleResponseDto response = TeamSimpleResponseDto.builder()
+        return TeamSimpleResponseDto.builder()
                 .teamId(team.getId())
                 .name(team.getName())
                 .build();
-        return response;
     }
 
     @Override
@@ -154,23 +133,12 @@ class TeamServiceImpl implements TeamService {
 
         // 1. TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하여 Dto에 담기
         List<TeamMember> teamMembers = team.getTeamMemberList();
-        List<TeamMemberDto> members = new ArrayList<>();
-        for (TeamMember teamMember : teamMembers) {
-            Member member = teamMember.getMember();
-            TeamMemberDto teamMemberDto = TeamMemberDto.builder()
-                    .memberId(member.getId())
-                    .username(member.getUsername())
-                    .nickname(member.getNickname())
-                    .teamRole(String.valueOf(teamMember.getTeamRole()))
-                    .build();
-            members.add(teamMemberDto);
-        }
+        List<TeamMemberDto> teamMemberDtos = buildTeamMemberDtos(teamMembers);
 
         // 2. response 빌드하기
-        TeamMembersResponseDto response = TeamMembersResponseDto.builder()
-                .teamMembers(members)
+        return TeamMembersResponseDto.builder()
+                .teamMembers(teamMemberDtos)
                 .build();
-        return response;
     }
 
     @Override
@@ -227,19 +195,11 @@ class TeamServiceImpl implements TeamService {
         Member me = userDetails.getMember();
 
         // 1. 나의 그룹들을 추출하여 Dto에 넣기
-        List<TeamSimpleResponseDto> data = new ArrayList<>();
         List<TeamMember> teamMembers = teamMemberRepository.getAllByMember(me);
-        for (TeamMember teamMember : teamMembers) {
-            Team team = teamMember.getTeam();
-            data.add(TeamSimpleResponseDto.builder()
-                    .teamId(team.getId())
-                    .name(team.getName())
-                    .build());
-        }
-        TeamResponseDto response = TeamResponseDto.builder().teams(data).build();
+        List<TeamSimpleResponseDto> data = buildTeamSimpleResponseDto(teamMembers);
 
         // 2. response 생성 및 출력하기
-        return response;
+        return TeamResponseDto.builder().teams(data).build();
     }
 
     @Override
@@ -294,4 +254,46 @@ class TeamServiceImpl implements TeamService {
             throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
         }
     }
+
+    private List<TeamMemberDto> buildTeamMemberDtos(List<TeamMember> teamMembers) {
+        List<TeamMemberDto> teamMemberDtos = new ArrayList<>();
+        for (TeamMember teamMember : teamMembers) {
+            Member member = teamMember.getMember();
+            teamMemberDtos.add(TeamMemberDto.builder()
+                    .memberId(member.getId())
+                    .username(member.getUsername())
+                    .nickname(member.getNickname())
+                    .teamRole(String.valueOf(teamMember.getTeamRole()))
+                    .build());
+        }
+        return teamMemberDtos;
+    }
+
+    private List<InvitationDto> buildInvitationDtos(List<Invitation> invitations) {
+        List<InvitationDto> invitationDtos = new ArrayList<>();
+        for (Invitation invitation : invitations) {
+            invitationDtos.add(InvitationDto.builder()
+                    .invitationId(invitation.getId())
+                    .fromTeamId(invitation.getFromTeam().getId())
+                    .fromMemberId(invitation.getFromLeader().getId())
+                    .toMemberId(invitation.getToMember().getId())
+                    .createdAt(invitation.getCreatedAt())
+                    .build()
+            );
+        }
+        return invitationDtos;
+    }
+
+    private List<TeamSimpleResponseDto> buildTeamSimpleResponseDto(List<TeamMember> teamMembers) {
+        List<TeamSimpleResponseDto> data = new ArrayList<>();
+        for (TeamMember teamMember : teamMembers) {
+            Team team = teamMember.getTeam();
+            data.add(TeamSimpleResponseDto.builder()
+                    .teamId(team.getId())
+                    .name(team.getName())
+                    .build());
+        }
+        return data;
+    }
+
 }
