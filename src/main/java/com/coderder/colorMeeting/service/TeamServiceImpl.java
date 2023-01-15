@@ -120,7 +120,10 @@ class TeamServiceImpl implements TeamService {
         // 1. 그룹 삭제하기
         teamRepository.delete(team);
 
-        // 2. response 생성 및 출력하기
+        // 2. 해당 그룹에 대한 멤버 정보도 삭제하기
+        teamMemberRepository.deleteAllByTeam(team);
+
+        // 3. response 생성 및 출력하기
         return new ResponseMessage("그룹(teamId : " + team.getId() + ") 삭제 완료");
     }
 
