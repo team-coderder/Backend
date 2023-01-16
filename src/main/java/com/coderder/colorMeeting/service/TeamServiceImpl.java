@@ -1,12 +1,11 @@
 package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
+import com.coderder.colorMeeting.util.DataFinder;
 import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.exception.BadRequestException;
-import com.coderder.colorMeeting.exception.ForbiddenException;
-import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.*;
 import com.coderder.colorMeeting.repository.InvitationRepository;
 import com.coderder.colorMeeting.repository.TeamMemberRepository;
@@ -29,6 +28,7 @@ class TeamServiceImpl implements TeamService {
     private final MemberRepository memberRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final InvitationRepository invitationRepository;
+    private final DataFinder dataFinder;
 
     @Override
     public TeamSimpleResponseDto createTeam(PrincipalDetails userDetails, TeamRequestDto requestDto) {
@@ -66,8 +66,8 @@ class TeamServiceImpl implements TeamService {
     public TeamDetailResponseDto showTeamInfo(PrincipalDetails userDetails, Long teamId) {
 
         Member me = userDetails.getMember();
-        Team team = findTeam(teamId);
-        TeamMember myInfo = findTeamMember(me, team);
+        Team team = dataFinder.findTeam(teamId);
+        TeamMember myInfo = dataFinder.findTeamMember(me, team);
 
         // 1. TeamMembers라는 객체에서 각 멤버들에 대한 정보를 추출하여 TeamMemberDto 리스트에 담기
         List<TeamMember> teamMembers = team.getTeamMemberList();
@@ -91,11 +91,11 @@ class TeamServiceImpl implements TeamService {
     public TeamSimpleResponseDto updateTeam(PrincipalDetails userDetails, Long teamId, TeamRequestDto requestDto) {
 
         Member me = userDetails.getMember();
-        Team team = findTeam(teamId);
-        TeamMember myInfo = findTeamMember(me, team);
+        Team team = dataFinder.findTeam(teamId);
+        TeamMember myInfo = dataFinder.findTeamMember(me, team);
 
         // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
-        checkLeaderRole(myInfo);
+        dataFinder.checkLeaderRole(myInfo);
 
         // 1. 그룹의 이름 수정
         team.updateName(requestDto.getName());
@@ -111,11 +111,11 @@ class TeamServiceImpl implements TeamService {
     public ResponseMessage deleteTeam(PrincipalDetails userDetails, Long teamId) {
 
         Member me = userDetails.getMember();
-        Team team = findTeam(teamId);
-        TeamMember myInfo = findTeamMember(me, team);
+        Team team = dataFinder.findTeam(teamId);
+        TeamMember myInfo = dataFinder.findTeamMember(me, team);
 
         // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
-        checkLeaderRole(myInfo);
+        dataFinder.checkLeaderRole(myInfo);
 
         // 1. 그룹 삭제하기
         teamRepository.delete(team);
@@ -131,8 +131,8 @@ class TeamServiceImpl implements TeamService {
     public TeamMembersResponseDto getTeamMembers(PrincipalDetails userDetails, Long teamId) {
 
         Member me = userDetails.getMember();
-        Team team = findTeam(teamId);
-        TeamMember myInfo = findTeamMember(me, team);
+        Team team = dataFinder.findTeam(teamId);
+        TeamMember myInfo = dataFinder.findTeamMember(me, team);
 
         // 1. TeamMembers라는 객체에서 각 멤버들에 대한 정보 추출하여 Dto에 담기
         List<TeamMember> teamMembers = team.getTeamMemberList();
@@ -147,14 +147,14 @@ class TeamServiceImpl implements TeamService {
     @Override
     public ResponseMessage addMember(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
 
-        Team targetTeam = findTeam(requestDto.getTeamId());
+        Team targetTeam = dataFinder.findTeam(requestDto.getTeamId());
         Member me = userDetails.getMember();
-        TeamMember myInfo = findTeamMember(me, targetTeam);
-        Member targetMember = findMember(requestDto.getMemberIds().get(0));
+        TeamMember myInfo = dataFinder.findTeamMember(me, targetTeam);
+        Member targetMember = dataFinder.findMember(requestDto.getMemberIds().get(0));
 
         // 0. 예외처리
-        checkLeaderRole(myInfo);                        //  유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
-        checkTeamMember(targetMember, targetTeam);      // 대상 유저가 이미 requestDto의 Team에 속해있는 경우
+        dataFinder.checkLeaderRole(myInfo);                        //  유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
+        dataFinder.checkTeamMember(targetMember, targetTeam);      // 대상 유저가 이미 requestDto의 Team에 속해있는 경우
 
         // 1. 해당 그룹에 유저 추가하기
         TeamMember teamMember = TeamMember.builder()
@@ -172,17 +172,17 @@ class TeamServiceImpl implements TeamService {
     public ResponseMessage memberOut(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
 
         Member me = userDetails.getMember();
-        Team targetTeam = findTeam(requestDto.getTeamId());
-        TeamMember myInfo = findTeamMember(me, targetTeam);
+        Team targetTeam = dataFinder.findTeam(requestDto.getTeamId());
+        TeamMember myInfo = dataFinder.findTeamMember(me, targetTeam);
 
         // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
-        checkLeaderRole(myInfo);
+        dataFinder.checkLeaderRole(myInfo);
 
         // 1. 해당 그룹에서 멤버들 제외하기
         List<Long> memberIds = requestDto.getMemberIds();
         int cnt = 0;
         for (Long memberId : memberIds) {
-            Member targetMemer = findMember(memberId);
+            Member targetMemer = dataFinder.findMember(memberId);
             TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(targetMemer, targetTeam);
             teamMemberRepository.delete(teamMember);
             cnt++;
@@ -209,53 +209,14 @@ class TeamServiceImpl implements TeamService {
     public ResponseMessage leaveTeam(PrincipalDetails userDetails, Long teamId) {
 
         Member me = userDetails.getMember();
-        Team targetTeam = findTeam(teamId);
-        TeamMember myInfo = findTeamMember(me, targetTeam);
+        Team targetTeam = dataFinder.findTeam(teamId);
+        TeamMember myInfo = dataFinder.findTeamMember(me, targetTeam);
 
         // 1. TeamMember 삭제하기
         teamMemberRepository.delete(myInfo);
 
         // 2. response 생성 및 출력하기
         return new ResponseMessage("그룹(teamId : " + targetTeam.getId() +")에서 탈퇴 완료");
-    }
-
-    private Team findTeam(Long teamId) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new NotFoundException(TEAM_NOT_FOUND));
-        return team;
-    }
-
-    private Member findMember(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
-        return member;
-    }
-
-    private TeamMember findTeamMember(Member member, Team team) {
-        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
-        if (teamMember == null) {
-            throw new NotFoundException(TEAM_MEMBER_NOT_FOUND);
-        }
-        return teamMember;
-    }
-
-    private void checkLeaderRole(TeamMember teamMember) {
-        if (teamMember.getTeamRole() != LEADER) {
-            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
-        }
-    }
-
-    private void checkTeamMember(Member member, Team team) {
-        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
-        if (teamMember != null) {
-            throw new BadRequestException(ALREADY_TEAM_MEMBER);
-        }
-    }
-
-    private void checkSameMember(Member member1, Member member2) {
-        if (member1.getId() != member2.getId()) {
-            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
-        }
     }
 
     private List<TeamMemberDto> buildTeamMemberDtos(List<TeamMember> teamMembers) {
