@@ -1,13 +1,11 @@
 package com.coderder.colorMeeting.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @Builder
 @AllArgsConstructor
-public class ErrorResponse extends RuntimeException {
+public class ErrorResponse {
     private String code;
     private String message;
 
