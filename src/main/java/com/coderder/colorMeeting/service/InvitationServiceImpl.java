@@ -65,6 +65,7 @@ public class InvitationServiceImpl extends CommonService implements InvitationSe
         for (Long memberId : memberIds) {
             Member targetMember = findMember(memberId);
             checkInvitation(targetMember, targetTeam);      // 예외처리 : 이미 초대장이 있다면 오류 발생
+            checkTeamMember(targetMember, targetTeam);      // 예외처리 : 이미 그룹에 속해 있다면 오류 발생
             Invitation new_invitation = Invitation.builder()
                     .fromTeam(targetTeam)
                     .fromLeader(me)
