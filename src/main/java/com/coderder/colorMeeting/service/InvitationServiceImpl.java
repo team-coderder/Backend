@@ -53,8 +53,11 @@ public class InvitationServiceImpl extends CommonService implements InvitationSe
         Team targetTeam = findTeam(requestDto.getTeamId());
         TeamMember myInfo = findTeamMember(me, targetTeam);
 
-        // 0. 예외처리 : 유저가 해당 팀의 리더가 아닐 경우 오류 발생
-        checkLeaderRole(myInfo);
+        // 0. 예외처리
+        checkLeaderRole(myInfo);    // 유저가 해당 팀의 리더가 아닐 경우 오류 발생
+        if (requestDto.getMemberIds().contains(me.getId())) {    // 초대장을 보내는 상대가 나 자신일 경우 오류 발생
+            throw new BadRequestException(CANNOT_INVITE_ONESELF);
+        }
 
         // 1. 초대장 생성하기
         List<Long> memberIds = requestDto.getMemberIds();

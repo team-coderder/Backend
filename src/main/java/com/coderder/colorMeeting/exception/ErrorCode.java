@@ -27,6 +27,7 @@ public enum ErrorCode {
     // Invitation 관련 오류
     ALREADY_INVITED("ALREADY_INVITED", "이미 초대 처리 완료된 회원이 있습니다."),
     INVITATION_NOT_FOUND("INVITATION_NOT_FOUND", "존재하지 않는 초대장 ID입니다."),
+    CANNOT_INVITE_ONESELF("CANNOT_INVITE_ONESELF", "나 자신은 초대할 수 없습니다."),
 
     // 관리자가 아닌데 수정, 삭제 요청 등 권한 오류
     NO_PERMISSION_FOR_THIS_REQUEST("NO_PERMISSION_FOR_THIS_REQUEST", "해당 요청에 대한 권한이 없습니다."),
