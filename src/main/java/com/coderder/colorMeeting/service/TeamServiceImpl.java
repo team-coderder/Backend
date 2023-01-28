@@ -159,27 +159,35 @@ class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
-    public ResponseMessage memberOut(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
+    public ResponseMessage memberOut(PrincipalDetails userDetails, Long teamId, Long memberId) {
 
         Member me = userDetails.getMember();
-        Team targetTeam = findTeam(requestDto.getTeamId());
+        Team targetTeam = findTeam(teamId);
         TeamMember myInfo = findTeamMember(me, targetTeam);
 
-        // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
-        checkLeaderRole(myInfo);
-
-        // 1. 해당 그룹에서 멤버들 제외하기
-        List<Long> memberIds = requestDto.getMemberIds();
-        int cnt = 0;
-        for (Long memberId : memberIds) {
-            Member targetMemer = findMember(memberId);
-            TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(targetMemer, targetTeam);
-            teamMemberRepository.delete(teamMember);
-            cnt++;
+        // 0. 예외 처리
+        checkLeaderRole(myInfo);    // 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
+        if (me.getId() == memberId) {
+            throw new ForbiddenException(FORBIDDEN_TEAMROLE_FOR_THIS_REQUEST);  // LEADER가 자기 자신을 탈퇴시킬 경우 예외 처리
         }
 
+        // 1. 해당 그룹에서 멤버들 제외하기 - 한 명만 다루는 로직
+        Member targetMemer = findMember(memberId);
+        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(targetMemer, targetTeam);
+        teamMemberRepository.delete(teamMember);
+
+//        // 1. 해당 그룹에서 멤버들 제외하기 - 여러 명 다루는 로직
+//        List<Long> memberIds = requestDto.getMemberIds();
+//        int cnt = 0;
+//        for (Long memberId : memberIds) {
+//            Member targetMemer = findMember(memberId);
+//            TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(targetMemer, targetTeam);
+//            teamMemberRepository.delete(teamMember);
+//            cnt++;
+//        }
+//
         // 2. response 생성 및 출력하기
-        return new ResponseMessage("그룹(id : " + targetTeam.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료");
+        return new ResponseMessage("그룹(id : " + targetTeam.getId() +")에서 멤버(id : " + memberId + ") 탈퇴 처리 완료");
     }
 
     @Override
@@ -204,7 +212,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
 
         // 0. 내가 리더라면, 팀에서 탈퇴할 수 없도록 함
         if (myInfo.getTeamRole() == LEADER) {
-            throw new ForbiddenException(INVALID_TEAMROLE_FOR_THIS_REQUEST);
+            throw new ForbiddenException(FORBIDDEN_TEAMROLE_FOR_THIS_REQUEST);
         }
 
         // 1. TeamMember 삭제하기
