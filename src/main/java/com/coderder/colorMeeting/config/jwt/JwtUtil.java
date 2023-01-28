@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-//@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
@@ -23,6 +22,7 @@ public class JwtUtil {
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+        response.setStatus(401);
         response.getWriter().write(httpResponse);
 
     }
