@@ -27,7 +27,7 @@ public interface TeamService {
     ResponseMessage addMember(PrincipalDetails userDetails, TeamMemberRequestDto requestDto);
 
     @Transactional
-    ResponseMessage memberOut(PrincipalDetails userDetails, TeamMemberRequestDto requestDto);
+    ResponseMessage memberOut(PrincipalDetails userDetails, Long teamId, Long memberId);
 
     @Transactional
     TeamResponseDto getMyTeams(PrincipalDetails userDetails);

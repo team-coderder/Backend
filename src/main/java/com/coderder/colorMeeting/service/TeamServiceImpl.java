@@ -6,13 +6,11 @@ import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.exception.BadRequestException;
 import com.coderder.colorMeeting.exception.ForbiddenException;
-import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.*;
 import com.coderder.colorMeeting.repository.InvitationRepository;
-import com.coderder.colorMeeting.repository.TeamMemberRepository;
 import com.coderder.colorMeeting.repository.MemberRepository;
+import com.coderder.colorMeeting.repository.TeamMemberRepository;
 import com.coderder.colorMeeting.repository.TeamRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,13 +20,11 @@ import static com.coderder.colorMeeting.exception.ErrorCode.*;
 import static com.coderder.colorMeeting.model.TeamRole.LEADER;
 
 @Service
-@RequiredArgsConstructor
-class TeamServiceImpl implements TeamService {
+class TeamServiceImpl extends CommonService implements TeamService {
 
-    private final TeamRepository teamRepository;
-    private final MemberRepository memberRepository;
-    private final TeamMemberRepository teamMemberRepository;
-    private final InvitationRepository invitationRepository;
+    public TeamServiceImpl(TeamRepository teamRepository, MemberRepository memberRepository, TeamMemberRepository teamMemberRepository, InvitationRepository invitationRepository) {
+        super(teamRepository, memberRepository, teamMemberRepository, invitationRepository);
+    }
 
     @Override
     public TeamSimpleResponseDto createTeam(PrincipalDetails userDetails, TeamRequestDto requestDto) {
@@ -56,10 +52,7 @@ class TeamServiceImpl implements TeamService {
         teamMemberRepository.save(firstTeamMember);
 
         // 3. 응답 생성하기
-        return TeamSimpleResponseDto.builder()
-                .teamId(newTeam.getId())
-                .name(newTeam.getName())
-                .build();
+        return new TeamSimpleResponseDto(newTeam);
     }
 
     @Override
@@ -78,13 +71,13 @@ class TeamServiceImpl implements TeamService {
         List<InvitationDto> invitationDtos = buildInvitationDtos(invitations);
 
         // 3. responseDto 빌드하기
-        TeamDetailResponseDto response = TeamDetailResponseDto.builder()
-                .teamId(team.getId())
+        return TeamDetailResponseDto.builder()
+                .id(team.getId())
                 .name(team.getName())
+                .myRole(myInfo.getTeamRole().toString())
                 .teamMembers(teamMemberDtos)
                 .invitations(invitationDtos)
                 .build();
-        return response;
     }
 
     @Override
@@ -101,10 +94,7 @@ class TeamServiceImpl implements TeamService {
         team.updateName(requestDto.getName());
 
         // 2. response 빌드하기
-        return TeamSimpleResponseDto.builder()
-                .teamId(team.getId())
-                .name(team.getName())
-                .build();
+        return new TeamSimpleResponseDto(team);
     }
 
     @Override
@@ -120,8 +110,11 @@ class TeamServiceImpl implements TeamService {
         // 1. 그룹 삭제하기
         teamRepository.delete(team);
 
-        // 2. response 생성 및 출력하기
-        return new ResponseMessage("그룹(teamId : " + team.getId() + ") 삭제 완료");
+        // 2. 해당 그룹에 대한 멤버 정보도 삭제하기
+        teamMemberRepository.deleteAllByTeam(team);
+
+        // 3. response 생성 및 출력하기
+        return new ResponseMessage("그룹(id : " + team.getId() + ") 삭제 완료");
     }
 
     @Override
@@ -162,31 +155,39 @@ class TeamServiceImpl implements TeamService {
         teamMemberRepository.save(teamMember);
 
         // 2. response 생성 및 출력하기
-        return new ResponseMessage("그룹(teamId : " + targetTeam.getId() + ")의 멤버로 추가 완료");
+        return new ResponseMessage("그룹(id : " + targetTeam.getId() + ")의 멤버로 추가 완료");
     }
 
     @Override
-    public ResponseMessage memberOut(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
+    public ResponseMessage memberOut(PrincipalDetails userDetails, Long teamId, Long memberId) {
 
         Member me = userDetails.getMember();
-        Team targetTeam = findTeam(requestDto.getTeamId());
+        Team targetTeam = findTeam(teamId);
         TeamMember myInfo = findTeamMember(me, targetTeam);
 
-        // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
-        checkLeaderRole(myInfo);
-
-        // 1. 해당 그룹에서 멤버들 제외하기
-        List<Long> memberIds = requestDto.getMemberIds();
-        int cnt = 0;
-        for (Long memberId : memberIds) {
-            Member targetMemer = findMember(memberId);
-            TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(targetMemer, targetTeam);
-            teamMemberRepository.delete(teamMember);
-            cnt++;
+        // 0. 예외 처리
+        checkLeaderRole(myInfo);    // 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
+        if (me.getId() == memberId) {
+            throw new ForbiddenException(FORBIDDEN_TEAMROLE_FOR_THIS_REQUEST);  // LEADER가 자기 자신을 탈퇴시킬 경우 예외 처리
         }
 
+        // 1. 해당 그룹에서 멤버들 제외하기 - 한 명만 다루는 로직
+        Member targetMemer = findMember(memberId);
+        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(targetMemer, targetTeam);
+        teamMemberRepository.delete(teamMember);
+
+//        // 1. 해당 그룹에서 멤버들 제외하기 - 여러 명 다루는 로직
+//        List<Long> memberIds = requestDto.getMemberIds();
+//        int cnt = 0;
+//        for (Long memberId : memberIds) {
+//            Member targetMemer = findMember(memberId);
+//            TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(targetMemer, targetTeam);
+//            teamMemberRepository.delete(teamMember);
+//            cnt++;
+//        }
+//
         // 2. response 생성 및 출력하기
-        return new ResponseMessage("그룹(teamId : " + targetTeam.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료");
+        return new ResponseMessage("그룹(id : " + targetTeam.getId() +")에서 멤버(id : " + memberId + ") 탈퇴 처리 완료");
     }
 
     @Override
@@ -209,50 +210,17 @@ class TeamServiceImpl implements TeamService {
         Team targetTeam = findTeam(teamId);
         TeamMember myInfo = findTeamMember(me, targetTeam);
 
+        // 0. 내가 리더라면, 팀에서 탈퇴할 수 없도록 함
+        if (myInfo.getTeamRole() == LEADER) {
+            throw new ForbiddenException(FORBIDDEN_TEAMROLE_FOR_THIS_REQUEST);
+        }
+
         // 1. TeamMember 삭제하기
         teamMemberRepository.delete(myInfo);
 
-        // 2. response 생성 및 출력하기
-        return new ResponseMessage("그룹(teamId : " + targetTeam.getId() +")에서 탈퇴 완료");
-    }
 
-    private Team findTeam(Long teamId) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new NotFoundException(TEAM_NOT_FOUND));
-        return team;
-    }
-
-    private Member findMember(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
-        return member;
-    }
-
-    private TeamMember findTeamMember(Member member, Team team) {
-        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
-        if (teamMember == null) {
-            throw new NotFoundException(TEAM_MEMBER_NOT_FOUND);
-        }
-        return teamMember;
-    }
-
-    private void checkLeaderRole(TeamMember teamMember) {
-        if (teamMember.getTeamRole() != LEADER) {
-            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
-        }
-    }
-
-    private void checkTeamMember(Member member, Team team) {
-        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
-        if (teamMember != null) {
-            throw new BadRequestException(ALREADY_TEAM_MEMBER);
-        }
-    }
-
-    private void checkSameMember(Member member1, Member member2) {
-        if (member1.getId() != member2.getId()) {
-            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
-        }
+        // 3. response 생성 및 출력하기
+        return new ResponseMessage("그룹(id : " + targetTeam.getId() +")에서 탈퇴 완료");
     }
 
     private List<TeamMemberDto> buildTeamMemberDtos(List<TeamMember> teamMembers) {
@@ -260,7 +228,7 @@ class TeamServiceImpl implements TeamService {
         for (TeamMember teamMember : teamMembers) {
             Member member = teamMember.getMember();
             teamMemberDtos.add(TeamMemberDto.builder()
-                    .memberId(member.getId())
+                    .id(member.getId())
                     .username(member.getUsername())
                     .nickname(member.getNickname())
                     .teamRole(String.valueOf(teamMember.getTeamRole()))
@@ -273,10 +241,10 @@ class TeamServiceImpl implements TeamService {
         List<InvitationDto> invitationDtos = new ArrayList<>();
         for (Invitation invitation : invitations) {
             invitationDtos.add(InvitationDto.builder()
-                    .invitationId(invitation.getId())
-                    .fromTeamId(invitation.getFromTeam().getId())
-                    .fromMemberId(invitation.getFromLeader().getId())
-                    .toMemberId(invitation.getToMember().getId())
+                    .id(invitation.getId())
+                    .team(new TeamSimpleResponseDto(invitation.getFromTeam()))
+                    .fromMember(new MemberDto(invitation.getFromLeader()))
+                    .toMember(new MemberDto(invitation.getToMember()))
                     .createdAt(invitation.getCreatedAt())
                     .build()
             );
@@ -288,10 +256,7 @@ class TeamServiceImpl implements TeamService {
         List<TeamSimpleResponseDto> data = new ArrayList<>();
         for (TeamMember teamMember : teamMembers) {
             Team team = teamMember.getTeam();
-            data.add(TeamSimpleResponseDto.builder()
-                    .teamId(team.getId())
-                    .name(team.getName())
-                    .build());
+            data.add(new TeamSimpleResponseDto(team));
         }
         return data;
     }
