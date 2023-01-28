@@ -35,7 +35,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
     public TeamSimpleResponseDto createTeam(PrincipalDetails userDetails, TeamRequestDto requestDto) {
 
         // 0. request 오류시 예외처리
-        if (requestDto.getName() == null || requestDto.getName().equals(" ")) {
+        if (requestDto.getName() == null || requestDto.getName().equals(" ") || requestDto.getName().equals("")) {
             throw new BadRequestException(INVALID_TEAM_NAME);
         }
 
