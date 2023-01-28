@@ -11,7 +11,9 @@ import com.coderder.colorMeeting.repository.InvitationRepository;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.TeamMemberRepository;
 import com.coderder.colorMeeting.repository.TeamRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,9 @@ import java.util.List;
 import static com.coderder.colorMeeting.exception.ErrorCode.*;
 import static com.coderder.colorMeeting.model.TeamRole.LEADER;
 
+@Slf4j
 @Service
+@Transactional(readOnly = true)
 class TeamServiceImpl extends CommonService implements TeamService {
 
     public TeamServiceImpl(TeamRepository teamRepository, MemberRepository memberRepository, TeamMemberRepository teamMemberRepository, InvitationRepository invitationRepository) {
@@ -27,6 +31,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
+    @Transactional
     public TeamSimpleResponseDto createTeam(PrincipalDetails userDetails, TeamRequestDto requestDto) {
 
         // 0. request 오류시 예외처리
@@ -81,6 +86,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
+    @Transactional
     public TeamSimpleResponseDto updateTeam(PrincipalDetails userDetails, Long teamId, TeamRequestDto requestDto) {
 
         Member me = userDetails.getMember();
@@ -98,6 +104,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
+    @Transactional
     public ResponseMessage deleteTeam(PrincipalDetails userDetails, Long teamId) {
 
         Member me = userDetails.getMember();
@@ -108,7 +115,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
         checkLeaderRole(myInfo);
 
         // 1. 그룹 삭제하기
-        teamRepository.delete(team);
+        teamRepository.deleteById(team.getId());
 
         // 2. 해당 그룹에 대한 멤버 정보도 삭제하기
         teamMemberRepository.deleteAllByTeam(team);
@@ -135,6 +142,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
+    @Transactional
     public ResponseMessage addMember(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
 
         Team targetTeam = findTeam(requestDto.getTeamId());
@@ -159,6 +167,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
+    @Transactional
     public ResponseMessage memberOut(PrincipalDetails userDetails, Long teamId, Long memberId) {
 
         Member me = userDetails.getMember();
@@ -204,6 +213,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
+    @Transactional
     public ResponseMessage leaveTeam(PrincipalDetails userDetails, Long teamId) {
 
         Member me = userDetails.getMember();
@@ -217,7 +227,6 @@ class TeamServiceImpl extends CommonService implements TeamService {
 
         // 1. TeamMember 삭제하기
         teamMemberRepository.delete(myInfo);
-
 
         // 3. response 생성 및 출력하기
         return new ResponseMessage("그룹(id : " + targetTeam.getId() +")에서 탈퇴 완료");
