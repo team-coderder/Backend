@@ -8,7 +8,7 @@ import java.util.List;
 @Builder
 @Getter
 public class TeamDetailResponseDto {
-    private Long teamId;
+    private Long id;
     private String name;
     private List<TeamMemberDto> teamMembers;
     private List<InvitationDto> invitations;

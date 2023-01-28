@@ -2,9 +2,7 @@ package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
 import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
-import com.coderder.colorMeeting.dto.response.InvitationDto;
-import com.coderder.colorMeeting.dto.response.InvitationListDto;
-import com.coderder.colorMeeting.dto.response.ResponseMessage;
+import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.exception.BadRequestException;
 import com.coderder.colorMeeting.exception.ForbiddenException;
 import com.coderder.colorMeeting.exception.NotFoundException;
@@ -43,10 +41,10 @@ public class InvitationService {
         List<InvitationDto> data = new ArrayList<>();
         for (Invitation invitation : invitations) {
             data.add(InvitationDto.builder()
-                    .invitationId(invitation.getId())
-                    .fromTeamId(invitation.getFromTeam().getId())
-                    .fromMemberId(invitation.getFromLeader().getId())
-                    .toMemberId(invitation.getToMember().getId())
+                    .id(invitation.getId())
+                    .team(new TeamSimpleResponseDto(invitation.getFromTeam()))
+                    .fromMember(new MemberDto(invitation.getFromLeader()))
+                    .toMember(new MemberDto(invitation.getToMember()))
                     .createdAt(invitation.getCreatedAt())
                     .build());
         }
@@ -82,7 +80,7 @@ public class InvitationService {
         }
 
         // 2. response 생성 및 출력하기
-        return new ResponseMessage("그룹(teamId : " + targetTeam.getId() +")에 멤버 " + cnt + "명 초대 완료");
+        return new ResponseMessage("그룹(id : " + targetTeam.getId() +")에 멤버 " + cnt + "명 초대 완료");
     }
 
     public ResponseMessage acceptInvitation(PrincipalDetails userDetails, Long invitationId) {
@@ -107,7 +105,7 @@ public class InvitationService {
         invitationRepository.delete(invitation);
 
         // 3. response 생성 및 출력하기
-        return new ResponseMessage("그룹(teamId : " + invitation.getFromTeam().getId() +")의 초대장 수락 완료");
+        return new ResponseMessage("그룹(id : " + invitation.getFromTeam().getId() +")의 초대장 수락 완료");
     }
 
     public ResponseMessage refuseInvitation(PrincipalDetails userDetails, Long invitationId) {
@@ -123,7 +121,7 @@ public class InvitationService {
         invitationRepository.delete(invitation);
 
         // 2. response 생성 및 출력하기
-        return new ResponseMessage("그룹(teamId : " + invitation.getFromTeam().getId() +")의 초대장 거절 완료");
+        return new ResponseMessage("그룹(id : " + invitation.getFromTeam().getId() +")의 초대장 거절 완료");
     }
 
     public ResponseMessage cancelInvitation(PrincipalDetails userDetails, Long invitationId) {
@@ -139,7 +137,7 @@ public class InvitationService {
         invitationRepository.delete(invitation);
 
         // 2. response 생성 및 출력하기
-        return new ResponseMessage("그룹(teamId : " + invitation.getFromTeam().getId() +")의 초대장 회수 완료");
+        return new ResponseMessage("그룹(id : " + invitation.getFromTeam().getId() +")의 초대장 회수 완료");
     }
 
     private Team findTeam(Long teamId) {

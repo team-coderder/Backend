@@ -1,4 +1,4 @@
-package com.coderder.colorMeeting.util;
+package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.exception.BadRequestException;
 import com.coderder.colorMeeting.exception.ForbiddenException;
@@ -10,17 +10,23 @@ import com.coderder.colorMeeting.repository.InvitationRepository;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.TeamMemberRepository;
 import com.coderder.colorMeeting.repository.TeamRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import static com.coderder.colorMeeting.exception.ErrorCode.*;
 import static com.coderder.colorMeeting.exception.ErrorCode.NO_PERMISSION_FOR_THIS_REQUEST;
 import static com.coderder.colorMeeting.model.TeamRole.LEADER;
 
-public class DataFinder {
+@Service
+@RequiredArgsConstructor
+public class CommonService {
 
-    private TeamRepository teamRepository;
-    private MemberRepository memberRepository;
-    private TeamMemberRepository teamMemberRepository;
-    private InvitationRepository invitationRepository;
+    final TeamRepository teamRepository;
+    final MemberRepository memberRepository;
+    final TeamMemberRepository teamMemberRepository;
+    final InvitationRepository invitationRepository;
 
     public Team findTeam(Long teamId) {
         Team team = teamRepository.findById(teamId)
