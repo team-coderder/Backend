@@ -1,7 +1,7 @@
 package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
-import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
+import com.coderder.colorMeeting.dto.request.MembersRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.exception.BadRequestException;
@@ -114,11 +114,14 @@ class TeamServiceImpl extends CommonService implements TeamService {
         // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
         checkLeaderRole(myInfo);
 
-        // 1. 그룹 삭제하기
-        teamRepository.deleteById(team.getId());
-
-        // 2. 해당 그룹에 대한 멤버 정보도 삭제하기
+        // 1. 해당 그룹에 대한 멤버 정보부터 삭제하기
         teamMemberRepository.deleteAllByTeam(team);
+
+        // 2. 해당 그룹으로 발송된 초대장 삭제하기
+        invitationRepository.deleteAllByFromTeam(team);
+
+        // 3. 그룹 삭제하기
+        teamRepository.deleteById(team.getId());
 
         // 3. response 생성 및 출력하기
         return new ResponseMessage("그룹(id : " + team.getId() + ") 삭제 완료");
@@ -143,9 +146,9 @@ class TeamServiceImpl extends CommonService implements TeamService {
 
     @Override
     @Transactional
-    public ResponseMessage addMember(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
+    public ResponseMessage addMember(PrincipalDetails userDetails, Long teamId, MembersRequestDto requestDto) {
 
-        Team targetTeam = findTeam(requestDto.getTeamId());
+        Team targetTeam = findTeam(teamId);
         Member me = userDetails.getMember();
         TeamMember myInfo = findTeamMember(me, targetTeam);
         Member targetMember = findMember(requestDto.getMemberIds().get(0));
