@@ -10,6 +10,7 @@ import java.util.List;
 public class TeamDetailResponseDto {
     private Long id;
     private String name;
+    private String myRole;
     private List<TeamMemberDto> teamMembers;
     private List<InvitationDto> invitations;
 }
