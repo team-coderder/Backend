@@ -5,6 +5,7 @@ import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.exception.BadRequestException;
+import com.coderder.colorMeeting.exception.ForbiddenException;
 import com.coderder.colorMeeting.model.*;
 import com.coderder.colorMeeting.repository.InvitationRepository;
 import com.coderder.colorMeeting.repository.MemberRepository;
@@ -201,10 +202,16 @@ class TeamServiceImpl extends CommonService implements TeamService {
         Team targetTeam = findTeam(teamId);
         TeamMember myInfo = findTeamMember(me, targetTeam);
 
+        // 0. 내가 리더라면, 팀에서 탈퇴할 수 없도록 함
+        if (myInfo.getTeamRole() == LEADER) {
+            throw new ForbiddenException(INVALID_TEAMROLE_FOR_THIS_REQUEST);
+        }
+
         // 1. TeamMember 삭제하기
         teamMemberRepository.delete(myInfo);
 
-        // 2. response 생성 및 출력하기
+
+        // 3. response 생성 및 출력하기
         return new ResponseMessage("그룹(id : " + targetTeam.getId() +")에서 탈퇴 완료");
     }
 
