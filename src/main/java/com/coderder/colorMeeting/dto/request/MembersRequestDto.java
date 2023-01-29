@@ -7,5 +7,4 @@ import java.util.List;
 @Getter
 public class MembersRequestDto {
     private List<Long> memberIds;
-
 }

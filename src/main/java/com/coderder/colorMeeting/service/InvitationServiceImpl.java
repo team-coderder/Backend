@@ -1,21 +1,17 @@
 package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
-import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
+import com.coderder.colorMeeting.dto.request.MembersRequestDto;
 import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.exception.BadRequestException;
-import com.coderder.colorMeeting.exception.ForbiddenException;
-import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.*;
 import com.coderder.colorMeeting.repository.InvitationRepository;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.TeamMemberRepository;
 import com.coderder.colorMeeting.repository.TeamRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.coderder.colorMeeting.exception.ErrorCode.*;
@@ -47,10 +43,10 @@ public class InvitationServiceImpl extends CommonService implements InvitationSe
     }
 
     @Override
-    public ResponseMessage createInvitation(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
+    public ResponseMessage createInvitation(PrincipalDetails userDetails, Long teamId, MembersRequestDto requestDto) {
 
         Member me = userDetails.getMember();
-        Team targetTeam = findTeam(requestDto.getTeamId());
+        Team targetTeam = findTeam(teamId);
         TeamMember myInfo = findTeamMember(me, targetTeam);
 
         // 0. 예외처리
