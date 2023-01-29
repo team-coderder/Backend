@@ -30,6 +30,7 @@ public enum ErrorCode {
 
     // 관리자가 아닌데 수정, 삭제 요청 등 권한 오류
     NO_PERMISSION_FOR_THIS_REQUEST("NO_PERMISSION_FOR_THIS_REQUEST", "해당 요청에 대한 권한이 없습니다."),
+    FORBIDDEN_TEAMROLE_FOR_THIS_REQUEST("FORBIDDEN_TEAMROLE_FOR_THIS_REQUEST", "리더는 팀을 나갈 수 없습니다."),
 
     // 로그인 관련 오류
     INVALID_ACCESS_TOKEN("INVALID_ACCESS_TOKEN", "유효하지 않은 Access Token 입니다."),

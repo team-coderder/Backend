@@ -1,7 +1,7 @@
 package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
-import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
+import com.coderder.colorMeeting.dto.request.MembersRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.dto.response.*;
 
@@ -24,10 +24,10 @@ public interface TeamService {
     TeamMembersResponseDto getTeamMembers(PrincipalDetails userDetails, Long teamId);
 
     @Transactional
-    ResponseMessage addMember(PrincipalDetails userDetails, TeamMemberRequestDto requestDto);
+    ResponseMessage addMember(PrincipalDetails userDetails, Long teamId, MembersRequestDto requestDto);
 
     @Transactional
-    ResponseMessage memberOut(PrincipalDetails userDetails, TeamMemberRequestDto requestDto);
+    ResponseMessage memberOut(PrincipalDetails userDetails, Long teamId, Long memberId);
 
     @Transactional
     TeamResponseDto getMyTeams(PrincipalDetails userDetails);

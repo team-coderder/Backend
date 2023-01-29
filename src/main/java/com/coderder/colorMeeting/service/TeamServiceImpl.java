@@ -1,19 +1,19 @@
 package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
-import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
+import com.coderder.colorMeeting.dto.request.MembersRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.exception.BadRequestException;
 import com.coderder.colorMeeting.exception.ForbiddenException;
-import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.*;
 import com.coderder.colorMeeting.repository.InvitationRepository;
-import com.coderder.colorMeeting.repository.TeamMemberRepository;
 import com.coderder.colorMeeting.repository.MemberRepository;
+import com.coderder.colorMeeting.repository.TeamMemberRepository;
 import com.coderder.colorMeeting.repository.TeamRepository;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,20 +21,21 @@ import java.util.List;
 import static com.coderder.colorMeeting.exception.ErrorCode.*;
 import static com.coderder.colorMeeting.model.TeamRole.LEADER;
 
+@Slf4j
 @Service
-@RequiredArgsConstructor
-class TeamServiceImpl implements TeamService {
+@Transactional(readOnly = true)
+class TeamServiceImpl extends CommonService implements TeamService {
 
-    private final TeamRepository teamRepository;
-    private final MemberRepository memberRepository;
-    private final TeamMemberRepository teamMemberRepository;
-    private final InvitationRepository invitationRepository;
+    public TeamServiceImpl(TeamRepository teamRepository, MemberRepository memberRepository, TeamMemberRepository teamMemberRepository, InvitationRepository invitationRepository) {
+        super(teamRepository, memberRepository, teamMemberRepository, invitationRepository);
+    }
 
     @Override
+    @Transactional
     public TeamSimpleResponseDto createTeam(PrincipalDetails userDetails, TeamRequestDto requestDto) {
 
         // 0. request 오류시 예외처리
-        if (requestDto.getName() == null || requestDto.getName().equals(" ")) {
+        if (requestDto.getName() == null || requestDto.getName().equals(" ") || requestDto.getName().equals("")) {
             throw new BadRequestException(INVALID_TEAM_NAME);
         }
 
@@ -56,10 +57,7 @@ class TeamServiceImpl implements TeamService {
         teamMemberRepository.save(firstTeamMember);
 
         // 3. 응답 생성하기
-        return TeamSimpleResponseDto.builder()
-                .teamId(newTeam.getId())
-                .name(newTeam.getName())
-                .build();
+        return new TeamSimpleResponseDto(newTeam);
     }
 
     @Override
@@ -78,16 +76,17 @@ class TeamServiceImpl implements TeamService {
         List<InvitationDto> invitationDtos = buildInvitationDtos(invitations);
 
         // 3. responseDto 빌드하기
-        TeamDetailResponseDto response = TeamDetailResponseDto.builder()
-                .teamId(team.getId())
+        return TeamDetailResponseDto.builder()
+                .id(team.getId())
                 .name(team.getName())
+                .myRole(myInfo.getTeamRole().toString())
                 .teamMembers(teamMemberDtos)
                 .invitations(invitationDtos)
                 .build();
-        return response;
     }
 
     @Override
+    @Transactional
     public TeamSimpleResponseDto updateTeam(PrincipalDetails userDetails, Long teamId, TeamRequestDto requestDto) {
 
         Member me = userDetails.getMember();
@@ -101,13 +100,11 @@ class TeamServiceImpl implements TeamService {
         team.updateName(requestDto.getName());
 
         // 2. response 빌드하기
-        return TeamSimpleResponseDto.builder()
-                .teamId(team.getId())
-                .name(team.getName())
-                .build();
+        return new TeamSimpleResponseDto(team);
     }
 
     @Override
+    @Transactional
     public ResponseMessage deleteTeam(PrincipalDetails userDetails, Long teamId) {
 
         Member me = userDetails.getMember();
@@ -117,11 +114,17 @@ class TeamServiceImpl implements TeamService {
         // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
         checkLeaderRole(myInfo);
 
-        // 1. 그룹 삭제하기
-        teamRepository.delete(team);
+        // 1. 해당 그룹에 대한 멤버 정보부터 삭제하기
+        teamMemberRepository.deleteAllByTeam(team);
 
-        // 2. response 생성 및 출력하기
-        return new ResponseMessage("그룹(teamId : " + team.getId() + ") 삭제 완료");
+        // 2. 해당 그룹으로 발송된 초대장 삭제하기
+        invitationRepository.deleteAllByFromTeam(team);
+
+        // 3. 그룹 삭제하기
+        teamRepository.deleteById(team.getId());
+
+        // 3. response 생성 및 출력하기
+        return new ResponseMessage("그룹(id : " + team.getId() + ") 삭제 완료");
     }
 
     @Override
@@ -142,9 +145,10 @@ class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public ResponseMessage addMember(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
+    @Transactional
+    public ResponseMessage addMember(PrincipalDetails userDetails, Long teamId, MembersRequestDto requestDto) {
 
-        Team targetTeam = findTeam(requestDto.getTeamId());
+        Team targetTeam = findTeam(teamId);
         Member me = userDetails.getMember();
         TeamMember myInfo = findTeamMember(me, targetTeam);
         Member targetMember = findMember(requestDto.getMemberIds().get(0));
@@ -162,31 +166,40 @@ class TeamServiceImpl implements TeamService {
         teamMemberRepository.save(teamMember);
 
         // 2. response 생성 및 출력하기
-        return new ResponseMessage("그룹(teamId : " + targetTeam.getId() + ")의 멤버로 추가 완료");
+        return new ResponseMessage("그룹(id : " + targetTeam.getId() + ")의 멤버로 추가 완료");
     }
 
     @Override
-    public ResponseMessage memberOut(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
+    @Transactional
+    public ResponseMessage memberOut(PrincipalDetails userDetails, Long teamId, Long memberId) {
 
         Member me = userDetails.getMember();
-        Team targetTeam = findTeam(requestDto.getTeamId());
+        Team targetTeam = findTeam(teamId);
         TeamMember myInfo = findTeamMember(me, targetTeam);
 
-        // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
-        checkLeaderRole(myInfo);
-
-        // 1. 해당 그룹에서 멤버들 제외하기
-        List<Long> memberIds = requestDto.getMemberIds();
-        int cnt = 0;
-        for (Long memberId : memberIds) {
-            Member targetMemer = findMember(memberId);
-            TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(targetMemer, targetTeam);
-            teamMemberRepository.delete(teamMember);
-            cnt++;
+        // 0. 예외 처리
+        checkLeaderRole(myInfo);    // 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
+        if (me.getId() == memberId) {
+            throw new ForbiddenException(FORBIDDEN_TEAMROLE_FOR_THIS_REQUEST);  // LEADER가 자기 자신을 탈퇴시킬 경우 예외 처리
         }
 
+        // 1. 해당 그룹에서 멤버들 제외하기 - 한 명만 다루는 로직
+        Member targetMemer = findMember(memberId);
+        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(targetMemer, targetTeam);
+        teamMemberRepository.delete(teamMember);
+
+//        // 1. 해당 그룹에서 멤버들 제외하기 - 여러 명 다루는 로직
+//        List<Long> memberIds = requestDto.getMemberIds();
+//        int cnt = 0;
+//        for (Long memberId : memberIds) {
+//            Member targetMemer = findMember(memberId);
+//            TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(targetMemer, targetTeam);
+//            teamMemberRepository.delete(teamMember);
+//            cnt++;
+//        }
+//
         // 2. response 생성 및 출력하기
-        return new ResponseMessage("그룹(teamId : " + targetTeam.getId() +")에서 멤버 " + cnt + "명 탈퇴 처리 완료");
+        return new ResponseMessage("그룹(id : " + targetTeam.getId() +")에서 멤버(id : " + memberId + ") 탈퇴 처리 완료");
     }
 
     @Override
@@ -203,56 +216,23 @@ class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    @Transactional
     public ResponseMessage leaveTeam(PrincipalDetails userDetails, Long teamId) {
 
         Member me = userDetails.getMember();
         Team targetTeam = findTeam(teamId);
         TeamMember myInfo = findTeamMember(me, targetTeam);
 
+        // 0. 내가 리더라면, 팀에서 탈퇴할 수 없도록 함
+        if (myInfo.getTeamRole() == LEADER) {
+            throw new ForbiddenException(FORBIDDEN_TEAMROLE_FOR_THIS_REQUEST);
+        }
+
         // 1. TeamMember 삭제하기
         teamMemberRepository.delete(myInfo);
 
-        // 2. response 생성 및 출력하기
-        return new ResponseMessage("그룹(teamId : " + targetTeam.getId() +")에서 탈퇴 완료");
-    }
-
-    private Team findTeam(Long teamId) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new NotFoundException(TEAM_NOT_FOUND));
-        return team;
-    }
-
-    private Member findMember(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
-        return member;
-    }
-
-    private TeamMember findTeamMember(Member member, Team team) {
-        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
-        if (teamMember == null) {
-            throw new NotFoundException(TEAM_MEMBER_NOT_FOUND);
-        }
-        return teamMember;
-    }
-
-    private void checkLeaderRole(TeamMember teamMember) {
-        if (teamMember.getTeamRole() != LEADER) {
-            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
-        }
-    }
-
-    private void checkTeamMember(Member member, Team team) {
-        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
-        if (teamMember != null) {
-            throw new BadRequestException(ALREADY_TEAM_MEMBER);
-        }
-    }
-
-    private void checkSameMember(Member member1, Member member2) {
-        if (member1.getId() != member2.getId()) {
-            throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
-        }
+        // 3. response 생성 및 출력하기
+        return new ResponseMessage("그룹(id : " + targetTeam.getId() +")에서 탈퇴 완료");
     }
 
     private List<TeamMemberDto> buildTeamMemberDtos(List<TeamMember> teamMembers) {
@@ -260,7 +240,7 @@ class TeamServiceImpl implements TeamService {
         for (TeamMember teamMember : teamMembers) {
             Member member = teamMember.getMember();
             teamMemberDtos.add(TeamMemberDto.builder()
-                    .memberId(member.getId())
+                    .id(member.getId())
                     .username(member.getUsername())
                     .nickname(member.getNickname())
                     .teamRole(String.valueOf(teamMember.getTeamRole()))
@@ -273,10 +253,10 @@ class TeamServiceImpl implements TeamService {
         List<InvitationDto> invitationDtos = new ArrayList<>();
         for (Invitation invitation : invitations) {
             invitationDtos.add(InvitationDto.builder()
-                    .invitationId(invitation.getId())
-                    .fromTeamId(invitation.getFromTeam().getId())
-                    .fromMemberId(invitation.getFromLeader().getId())
-                    .toMemberId(invitation.getToMember().getId())
+                    .id(invitation.getId())
+                    .team(new TeamSimpleResponseDto(invitation.getFromTeam()))
+                    .fromMember(new MemberDto(invitation.getFromLeader()))
+                    .toMember(new MemberDto(invitation.getToMember()))
                     .createdAt(invitation.getCreatedAt())
                     .build()
             );
@@ -288,10 +268,7 @@ class TeamServiceImpl implements TeamService {
         List<TeamSimpleResponseDto> data = new ArrayList<>();
         for (TeamMember teamMember : teamMembers) {
             Team team = teamMember.getTeam();
-            data.add(TeamSimpleResponseDto.builder()
-                    .teamId(team.getId())
-                    .name(team.getName())
-                    .build());
+            data.add(new TeamSimpleResponseDto(team));
         }
         return data;
     }

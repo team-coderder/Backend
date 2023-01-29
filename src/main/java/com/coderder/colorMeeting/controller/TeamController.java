@@ -1,7 +1,7 @@
 package com.coderder.colorMeeting.controller;
 
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
-import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
+import com.coderder.colorMeeting.dto.request.MembersRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.service.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -42,13 +42,13 @@ public class TeamController {
     }
 
     @RequestMapping(value = "/members", method = RequestMethod.PATCH)
-    public ResponseEntity<?> addMember(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestBody TeamMemberRequestDto requestDto) {
-        return ResponseEntity.ok().body(teamService.addMember(userDetails, requestDto));
+    public ResponseEntity<?> addMember(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestParam Long teamId, @RequestBody MembersRequestDto requestDto) {
+        return ResponseEntity.ok().body(teamService.addMember(userDetails, teamId, requestDto));
     }
 
     @RequestMapping(value = "/members", method = RequestMethod.DELETE)
-    public ResponseEntity<?> memberOut(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestBody TeamMemberRequestDto requestDto) {
-        return ResponseEntity.ok().body(teamService.memberOut(userDetails, requestDto));
+    public ResponseEntity<?> memberOut(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestParam Long teamId, Long memberId) {
+        return ResponseEntity.ok().body(teamService.memberOut(userDetails, teamId, memberId));
     }
 
     @RequestMapping(value = "/myteams", method = RequestMethod.GET)

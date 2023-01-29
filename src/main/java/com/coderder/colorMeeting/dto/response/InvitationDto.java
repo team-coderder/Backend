@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class InvitationDto {
-    private Long invitationId;
-    private Long fromTeamId;
-    private Long fromMemberId;
-    private Long toMemberId;
+    private Long id;
+    private TeamSimpleResponseDto team;
+    private MemberDto fromMember;
+    private MemberDto toMember;
     private LocalDateTime createdAt;
 }
