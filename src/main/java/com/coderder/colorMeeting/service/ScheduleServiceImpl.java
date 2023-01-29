@@ -78,24 +78,52 @@ public class ScheduleServiceImpl implements ScheduleService{
         List<Member> members = memberRepository.findAllWithTeamId(teamId);
         List<PersonalSchedule> schedules = personalScheduleRepository.findAllByMemberIn(members);
 
-        List<ScheduleBlockDto> blockDtoList
-                = new ArrayList<>();
+        return getAllGroupMemberSchedule(schedules);
+    }
+
+    private List<ScheduleBlockDto> getAllGroupMemberSchedule(List<PersonalSchedule> schedules) {
+        boolean[][] minuteCalendar = new boolean[7][24 * 60];
+
         for(PersonalSchedule schedule : schedules){
-            ScheduleBlockDto blockDto = ScheduleBlockDto.builder()
-                    .name(schedule.getName())
-                    .userId(schedule.getMember().getUsername())
-                    .weekday(schedule.getWeekday())
-                    .startTime(schedule.getStartTime()
-                            .format(DateTimeFormatter.ofPattern("HH:mm")))
-                    .finishTime(schedule.getFinishTime()
-                            .format(DateTimeFormatter.ofPattern("HH:mm")))
-                    .memo(schedule.getMemo())
-                    .groupId(schedule.getGroupScheduleId())
-                    .build();
-            blockDtoList.add(blockDto);
+            int weekday = convertWeekday(schedule.getWeekday());
+            int startBlock = convertTime(schedule.getStartTime(), 60);
+            int finishBlock = convertTime(schedule.getFinishTime(), 60);
+            for(int i=startBlock; i<=finishBlock; i++){
+                minuteCalendar[weekday][i] = true;
+            }
         }
 
-        return blockDtoList;
+        return calendarToScheduleDto(minuteCalendar);
+    }
+
+    private List<ScheduleBlockDto> calendarToScheduleDto(boolean[][] calendar) {
+        List<ScheduleBlockDto> scheduleBlockDtoList = new ArrayList<>();
+        for(int weekday=0; weekday< calendar.length; weekday++){
+            boolean isConnectedSchedule = false;
+            int start = 0;
+            int end = 0;
+            for(int minute = 0 ; minute < calendar[0].length; minute++){
+                if(!calendar[weekday][minute]){
+                    if(isConnectedSchedule) {
+                        end = minute-1;
+                        ScheduleBlockDto scheduleBlock = ScheduleBlockDto.builder()
+                                .startTime(convertToTime(start, 60).toString())
+                                .finishTime(convertToTime(end, 60).toString())
+                                .name("")
+                                .memo("")
+                                .userId("")
+                                .weekday(convertToWeekday(weekday))
+                                .build();
+                        scheduleBlockDtoList.add(scheduleBlock);
+                    }
+                    isConnectedSchedule = false;
+                } else if(!isConnectedSchedule) {
+                    start = minute;
+                    isConnectedSchedule = true;
+                }
+            }
+        }
+        return scheduleBlockDtoList;
     }
 
     @Override
@@ -133,13 +161,13 @@ public class ScheduleServiceImpl implements ScheduleService{
         return times;
     }
     private int convertWeekday(String weekday){
-        if(weekday.equals("mon")) return 0;
-        else if(weekday.equals("tue")) return 1;
-        else if(weekday.equals("wed")) return 2;
-        else if(weekday.equals("thu")) return 3;
-        else if(weekday.equals("fri")) return 4;
-        else if(weekday.equals("sat")) return 5;
-        else if(weekday.equals("sun")) return 6;
+        if(weekday.equalsIgnoreCase("mon") || weekday.equalsIgnoreCase("monday")) return 0;
+        else if(weekday.equalsIgnoreCase("tue") || weekday.equalsIgnoreCase("tuesday")) return 1;
+        else if(weekday.equalsIgnoreCase("wed") || weekday.equalsIgnoreCase("wednesday")) return 2;
+        else if(weekday.equalsIgnoreCase("thu") || weekday.equalsIgnoreCase("thursday")) return 3;
+        else if(weekday.equalsIgnoreCase("fri") || weekday.equalsIgnoreCase("friday")) return 4;
+        else if(weekday.equalsIgnoreCase("sat") || weekday.equalsIgnoreCase("saturday")) return 5;
+        else if(weekday.equalsIgnoreCase("sun") || weekday.equalsIgnoreCase("sunday")) return 6;
         else return -1;
     }
     private int convertTime(LocalTime time, int timeInterval){
