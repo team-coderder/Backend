@@ -237,42 +237,4 @@ class TeamServiceImpl extends CommonService implements TeamService {
         return new ResponseMessage("그룹(id : " + targetTeam.getId() +")에서 탈퇴 완료");
     }
 
-    private List<TeamMemberDto> buildTeamMemberDtos(List<TeamMember> teamMembers) {
-        List<TeamMemberDto> teamMemberDtos = new ArrayList<>();
-        for (TeamMember teamMember : teamMembers) {
-            Member member = teamMember.getMember();
-            teamMemberDtos.add(TeamMemberDto.builder()
-                    .id(member.getId())
-                    .username(member.getUsername())
-                    .nickname(member.getNickname())
-                    .teamRole(String.valueOf(teamMember.getTeamRole()))
-                    .build());
-        }
-        return teamMemberDtos;
-    }
-
-    private List<InvitationDto> buildInvitationDtos(List<Invitation> invitations) {
-        List<InvitationDto> invitationDtos = new ArrayList<>();
-        for (Invitation invitation : invitations) {
-            invitationDtos.add(InvitationDto.builder()
-                    .id(invitation.getId())
-                    .team(new TeamSimpleResponseDto(invitation.getFromTeam()))
-                    .fromMember(new MemberDto(invitation.getFromLeader()))
-                    .toMember(new MemberDto(invitation.getToMember()))
-                    .createdAt(invitation.getCreatedAt())
-                    .build()
-            );
-        }
-        return invitationDtos;
-    }
-
-    private List<TeamSimpleResponseDto> buildTeamSimpleResponseDto(List<TeamMember> teamMembers) {
-        List<TeamSimpleResponseDto> data = new ArrayList<>();
-        for (TeamMember teamMember : teamMembers) {
-            Team team = teamMember.getTeam();
-            data.add(new TeamSimpleResponseDto(team));
-        }
-        return data;
-    }
-
 }
