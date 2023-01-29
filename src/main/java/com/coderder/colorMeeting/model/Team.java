@@ -34,8 +34,4 @@ public class Team {
         this.name = name;
     }
 
-    public void addTeamMember(TeamMember teamMember) {
-        List<TeamMember> nowTeamMemberList = this.teamMemberList;
-        nowTeamMemberList.add(teamMember);
-    }
 }
