@@ -46,22 +46,22 @@ public class CommonService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
         return member;
-    }
-
-    protected TeamMember findTeamMember(Member member, Team team) {
+   }
+   
+   protected TeamMember findTeamMember(Member member, Team team) {
         TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
         if (teamMember == null) {
             throw new NotFoundException(TEAM_MEMBER_NOT_FOUND);
         }
         return teamMember;
     }
-
+    
     protected void checkLeaderRole(TeamMember teamMember) {
         if (teamMember.getTeamRole() != LEADER) {
             throw new ForbiddenException(NO_PERMISSION_FOR_THIS_REQUEST);
         }
     }
-
+    
     protected void checkTeamMember(Member member, Team team) {
         TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team);
         if (teamMember != null) {
@@ -125,5 +125,4 @@ public class CommonService {
         }
         return data;
     }
-
 }

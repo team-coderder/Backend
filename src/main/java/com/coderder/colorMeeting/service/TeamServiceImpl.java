@@ -1,7 +1,7 @@
 package com.coderder.colorMeeting.service;
 
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
-import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
+import com.coderder.colorMeeting.dto.request.MembersRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamRequestDto;
 import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.exception.BadRequestException;
@@ -11,7 +11,11 @@ import com.coderder.colorMeeting.repository.InvitationRepository;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import com.coderder.colorMeeting.repository.TeamMemberRepository;
 import com.coderder.colorMeeting.repository.TeamRepository;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +23,9 @@ import java.util.List;
 import static com.coderder.colorMeeting.exception.ErrorCode.*;
 import static com.coderder.colorMeeting.model.TeamRole.LEADER;
 
+@Slf4j
 @Service
+@Transactional(readOnly = true)
 class TeamServiceImpl extends CommonService implements TeamService {
 
     public TeamServiceImpl(TeamRepository teamRepository, MemberRepository memberRepository, TeamMemberRepository teamMemberRepository, InvitationRepository invitationRepository) {
@@ -27,10 +33,11 @@ class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
+    @Transactional
     public TeamSimpleResponseDto createTeam(PrincipalDetails userDetails, TeamRequestDto requestDto) {
 
         // 0. request 오류시 예외처리
-        if (requestDto.getName() == null || requestDto.getName().equals(" ")) {
+        if (requestDto.getName() == null || requestDto.getName().equals(" ") || requestDto.getName().equals("")) {
             throw new BadRequestException(INVALID_TEAM_NAME);
         }
 
@@ -81,6 +88,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
+    @Transactional
     public TeamSimpleResponseDto updateTeam(PrincipalDetails userDetails, Long teamId, TeamRequestDto requestDto) {
 
         Member me = userDetails.getMember();
@@ -98,6 +106,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
+    @Transactional
     public ResponseMessage deleteTeam(PrincipalDetails userDetails, Long teamId) {
 
         Member me = userDetails.getMember();
@@ -107,11 +116,14 @@ class TeamServiceImpl extends CommonService implements TeamService {
         // 0. 유저가 해당 그룹의 LEADER가 아닐 경우 예외처리
         checkLeaderRole(myInfo);
 
-        // 1. 그룹 삭제하기
-        teamRepository.delete(team);
-
-        // 2. 해당 그룹에 대한 멤버 정보도 삭제하기
+        // 1. 해당 그룹에 대한 멤버 정보부터 삭제하기
         teamMemberRepository.deleteAllByTeam(team);
+
+        // 2. 해당 그룹으로 발송된 초대장 삭제하기
+        invitationRepository.deleteAllByFromTeam(team);
+
+        // 3. 그룹 삭제하기
+        teamRepository.deleteById(team.getId());
 
         // 3. response 생성 및 출력하기
         return new ResponseMessage("그룹(id : " + team.getId() + ") 삭제 완료");
@@ -135,9 +147,10 @@ class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
-    public ResponseMessage addMember(PrincipalDetails userDetails, TeamMemberRequestDto requestDto) {
+    @Transactional
+    public ResponseMessage addMember(PrincipalDetails userDetails, Long teamId, MembersRequestDto requestDto) {
 
-        Team targetTeam = findTeam(requestDto.getTeamId());
+        Team targetTeam = findTeam(teamId);
         Member me = userDetails.getMember();
         TeamMember myInfo = findTeamMember(me, targetTeam);
         Member targetMember = findMember(requestDto.getMemberIds().get(0));
@@ -159,6 +172,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
+    @Transactional
     public ResponseMessage memberOut(PrincipalDetails userDetails, Long teamId, Long memberId) {
 
         Member me = userDetails.getMember();
@@ -204,6 +218,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
+    @Transactional
     public ResponseMessage leaveTeam(PrincipalDetails userDetails, Long teamId) {
 
         Member me = userDetails.getMember();
@@ -218,9 +233,46 @@ class TeamServiceImpl extends CommonService implements TeamService {
         // 1. TeamMember 삭제하기
         teamMemberRepository.delete(myInfo);
 
-
-        // 3. response 생성 및 출력하기
+        // 2. response 생성 및 출력하기
         return new ResponseMessage("그룹(id : " + targetTeam.getId() +")에서 탈퇴 완료");
+    }
+
+    private List<TeamMemberDto> buildTeamMemberDtos(List<TeamMember> teamMembers) {
+        List<TeamMemberDto> teamMemberDtos = new ArrayList<>();
+        for (TeamMember teamMember : teamMembers) {
+            Member member = teamMember.getMember();
+            teamMemberDtos.add(TeamMemberDto.builder()
+                    .id(member.getId())
+                    .username(member.getUsername())
+                    .nickname(member.getNickname())
+                    .teamRole(String.valueOf(teamMember.getTeamRole()))
+                    .build());
+        }
+        return teamMemberDtos;
+    }
+
+    private List<InvitationDto> buildInvitationDtos(List<Invitation> invitations) {
+        List<InvitationDto> invitationDtos = new ArrayList<>();
+        for (Invitation invitation : invitations) {
+            invitationDtos.add(InvitationDto.builder()
+                    .id(invitation.getId())
+                    .team(new TeamSimpleResponseDto(invitation.getFromTeam()))
+                    .fromMember(new MemberDto(invitation.getFromLeader()))
+                    .toMember(new MemberDto(invitation.getToMember()))
+                    .createdAt(invitation.getCreatedAt())
+                    .build()
+            );
+        }
+        return invitationDtos;
+    }
+
+    private List<TeamSimpleResponseDto> buildTeamSimpleResponseDto(List<TeamMember> teamMembers) {
+        List<TeamSimpleResponseDto> data = new ArrayList<>();
+        for (TeamMember teamMember : teamMembers) {
+            Team team = teamMember.getTeam();
+            data.add(new TeamSimpleResponseDto(team));
+        }
+        return data;
     }
 
 }
