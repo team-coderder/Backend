@@ -79,7 +79,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
 
         // 3. responseDto 빌드하기
         return TeamDetailResponseDto.builder()
-                .id(team.getId())
+                .teamId(team.getId())
                 .name(team.getName())
                 .myRole(myInfo.getTeamRole().toString())
                 .teamMembers(teamMemberDtos)

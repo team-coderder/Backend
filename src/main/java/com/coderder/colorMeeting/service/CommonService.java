@@ -93,7 +93,7 @@ public class CommonService {
         for (TeamMember teamMember : teamMembers) {
             Member member = teamMember.getMember();
             teamMemberDtos.add(TeamMemberDto.builder()
-                    .id(member.getId())
+                    .memberId(member.getId())
                     .username(member.getUsername())
                     .nickname(member.getNickname())
                     .teamRole(String.valueOf(teamMember.getTeamRole()))
@@ -106,7 +106,7 @@ public class CommonService {
         List<InvitationDto> invitationDtos = new ArrayList<>();
         for (Invitation invitation : invitations) {
             invitationDtos.add(InvitationDto.builder()
-                    .id(invitation.getId())
+                    .invitationId(invitation.getId())
                     .team(new TeamSimpleResponseDto(invitation.getFromTeam()))
                     .fromMember(new MemberDto(invitation.getFromLeader()))
                     .toMember(new MemberDto(invitation.getToMember()))
