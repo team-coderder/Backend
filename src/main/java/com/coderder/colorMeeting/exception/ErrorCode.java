@@ -27,9 +27,11 @@ public enum ErrorCode {
     // Invitation 관련 오류
     ALREADY_INVITED("ALREADY_INVITED", "이미 초대 처리 완료된 회원이 있습니다."),
     INVITATION_NOT_FOUND("INVITATION_NOT_FOUND", "존재하지 않는 초대장 ID입니다."),
+    CANNOT_INVITE_ONESELF("CANNOT_INVITE_ONESELF", "나 자신은 초대할 수 없습니다."),
 
     // 관리자가 아닌데 수정, 삭제 요청 등 권한 오류
     NO_PERMISSION_FOR_THIS_REQUEST("NO_PERMISSION_FOR_THIS_REQUEST", "해당 요청에 대한 권한이 없습니다."),
+    FORBIDDEN_TEAMROLE_FOR_THIS_REQUEST("FORBIDDEN_TEAMROLE_FOR_THIS_REQUEST", "리더는 팀을 나갈 수 없습니다."),
 
     // 로그인 관련 오류
     INVALID_ACCESS_TOKEN("INVALID_ACCESS_TOKEN", "유효하지 않은 Access Token 입니다."),
@@ -38,7 +40,18 @@ public enum ErrorCode {
     NOT_AUTHORIZED("NOT_AUTHORIZED", "권한이 없습니다."),
 
     // 회원가입 로직 : 중복 아이디
-    USERNAME_ALREADY_EXISTS("USERNAME_ALREADY_EXISTS", "이미 존재하는 유저입니다");
+    USERNAME_ALREADY_EXISTS("USERNAME_ALREADY_EXISTS", "이미 존재하는 유저입니다"),
+
+    // Spring 기본 오류
+    INVALID_INPUT_VALUE("INVALID_INPUT_VALUE", "유효하지 않은 입력값입니다."),
+    TYPE_MISMATCH("TYPE_MISMATCH", "입력된 enum값이 유효하지 않습니다."),
+    METHOD_NOT_ALLOWED("METHOD_NOT_ALLOWED", "유효하지 않은 HTTP method입니다."),
+    HANDLE_ACCESS_DENIED("HANDLE_ACCESS_DENIED", "Authentication 객체가 필요한 권한을 보유하지 않았습니다."),
+    INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR", "Server Error"),
+
+    // 잘못된 URL 오류
+    URL_NOT_FOUND("URL_NOT_FOUND", "유효하지 않은 URL입니다.");
+
 
     private final String code;
     private final String message;

@@ -64,14 +64,7 @@ public class MemberService {
 
         // 저장하기
         Member savedMember = memberRepository.save(member);
-
-        MemberDto responseDto = MemberDto.builder()
-                .id(savedMember.getId())
-                .username(savedMember.getUsername())
-                .nickname(savedMember.getNickname())
-                .build();
-
-        return responseDto;
+        return new MemberDto(savedMember);
     }
 
     private Member isPresentMember(Long memberId) {
@@ -101,12 +94,7 @@ public class MemberService {
         List<MemberDto> memberDtoList = new ArrayList<>();
 
         for (Member member : memberList) {
-            MemberDto memberDto = MemberDto.builder()
-                    .id(member.getId())
-                    .username(member.getUsername())
-                    .nickname(member.getNickname())
-                    .build();
-            memberDtoList.add(memberDto);
+            memberDtoList.add(new MemberDto(member));
         }
 
         MemberResponseDto response = MemberResponseDto.builder()
@@ -132,12 +120,7 @@ public class MemberService {
         List<MemberDto> memberDtoList = new ArrayList<>();
 
         for (Member member : memberList) {
-            MemberDto memberDto = MemberDto.builder()
-                    .id(member.getId())
-                    .username(member.getUsername())
-                    .nickname(member.getNickname())
-                    .build();
-            memberDtoList.add(memberDto);
+            memberDtoList.add(new MemberDto(member));
         }
 
         MemberResponseDto response = MemberResponseDto.builder()
@@ -154,13 +137,7 @@ public class MemberService {
             throw new NotFoundException(MEMBER_NOT_FOUND);
         }
 
-        MemberDto memberDto = MemberDto.builder()
-                .id(member.getId())
-                .username(member.getUsername())
-                .nickname(member.getNickname())
-                .build();
-
-        return memberDto;
+        return new MemberDto(member);
     }
 
     public MemberDto updateMyInformation(Long memberId, MemberUpdateDto memberUpdateDto) {
@@ -176,14 +153,7 @@ public class MemberService {
         // 비밀번호 업데이트
         // member.updateNickname(memberUpdateDto.getPassword());
 
-        // 결과값
-        MemberDto response = MemberDto.builder()
-                .id(member.getId())
-                .username(member.getUsername())
-                .nickname(member.getNickname())
-                .build();
-
-        return response;
+        return new MemberDto(member);
     }
 
     public MemberDto login(LoginRequestDto requestDto, HttpServletResponse response) {
@@ -214,15 +184,8 @@ public class MemberService {
 
         response.addHeader(jwtProperties.HEADER_STRING, jwtProperties.TOKEN_PREFIX+jwtToken); // 헤더key, value
 
-
         // 응답한다
-        MemberDto responseDto = MemberDto.builder()
-                .id(member.getId())
-                .username(member.getUsername())
-                .nickname(member.getNickname())
-                .build();
-
-        return responseDto;
+        return new MemberDto(member);
     }
 
 
