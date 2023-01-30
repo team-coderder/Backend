@@ -3,9 +3,7 @@ package com.coderder.colorMeeting.service;
 import com.coderder.colorMeeting.dto.request.ScheduleRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamScheduleRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamTimeDto;
-import com.coderder.colorMeeting.dto.response.RecommendationDto;
-import com.coderder.colorMeeting.dto.response.ScheduleBlockDto;
-import com.coderder.colorMeeting.dto.response.TeamScheduleDto;
+import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.exception.ErrorCode;
 import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.Member;
@@ -17,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +37,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 
     @Override
     public void insertScheduleBlock(ScheduleRequestDto scheduleRequestDto) {
-        Member member = memberRepository.findById(scheduleRequestDto.getUserId())
+        Member member = memberRepository.findById(scheduleRequestDto.getMemberId())
                 .orElseThrow(()->new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
         PersonalSchedule personalSchedule = PersonalSchedule.builder()
                 .name(scheduleRequestDto.getName())
@@ -53,20 +50,19 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
 
     @Override
-    public List<ScheduleBlockDto> getBlockListByUserId(Long userId) {
+    public List<PersonalScheduleDto> getBlockListByUserId(Long userId) {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(()->new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
         List<PersonalSchedule> blockList = personalScheduleRepository.findAllByMember(member);
-        List<ScheduleBlockDto> blockDtoList = new ArrayList<>();
+        List<PersonalScheduleDto> blockDtoList = new ArrayList<>();
         for(PersonalSchedule block : blockList){
-            ScheduleBlockDto tmpBlock = ScheduleBlockDto.builder()
-                    .userId(block.getMember().getUsername())
+            PersonalScheduleDto tmpBlock = PersonalScheduleDto.builder()
+                    .memberId(block.getMember().getUsername())
                     .name(block.getName())
                     .weekday(block.getWeekday())
-                    .startTime(block.getStartTime().toString())
-                    .finishTime(block.getFinishTime().toString())
+                    .startTime(block.getStartTime())
+                    .finishTime(block.getFinishTime())
                     .memo(block.getMemo())
-                    .groupId(block.getGroupScheduleId())
                     .build();
             blockDtoList.add(tmpBlock);
         }
@@ -107,11 +103,8 @@ public class ScheduleServiceImpl implements ScheduleService{
                     if(isConnectedSchedule) {
                         end = minute-1;
                         ScheduleBlockDto scheduleBlock = ScheduleBlockDto.builder()
-                                .startTime(convertToTime(start, 60).toString())
-                                .finishTime(convertToTime(end, 60).toString())
-                                .name("")
-                                .memo("")
-                                .userId("")
+                                .startTime(convertToTime(start, 60))
+                                .finishTime(convertToTime(end, 60))
                                 .weekday(convertToWeekday(weekday))
                                 .build();
                         scheduleBlockDtoList.add(scheduleBlock);
@@ -127,15 +120,15 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
 
     @Override
-    public List<RecommendationDto> getTeamEmptyTimes(TeamTimeDto teamTimeDto) {
+    public List<ScheduleBlockDto> getTeamEmptyTimes(TeamTimeDto teamTimeDto) {
         List<Member> members = memberRepository.findAllWithTeamId(teamTimeDto.getTeamId());
         List<PersonalSchedule> teamSchedules = personalScheduleRepository.findAllByMemberIn(members);
 
-        List<RecommendationDto> recommendationDtos = calculateEmptyTimes(teamSchedules, 2);
+        List<ScheduleBlockDto> recommendationDtos = calculateEmptyTimes(teamSchedules, 2);
         return recommendationDtos;
     }
 
-    private List<RecommendationDto> calculateEmptyTimes(List<PersonalSchedule> personalSchedules, int timeInterval){
+    private List<ScheduleBlockDto> calculateEmptyTimes(List<PersonalSchedule> personalSchedules, int timeInterval){
         boolean[][] weekCalendar = new boolean[7][24*timeInterval];
         for(PersonalSchedule schedule : personalSchedules){
             int weekday = convertWeekday(schedule.getWeekday());
@@ -146,14 +139,14 @@ public class ScheduleServiceImpl implements ScheduleService{
             }
         }
 
-        List<RecommendationDto> times = new ArrayList<>();
+        List<ScheduleBlockDto> times = new ArrayList<>();
         for(int i=0; i<weekCalendar.length; i++){
             for(int j=0; j< weekCalendar[0].length-1; j++){
                 if(weekCalendar[i][j]) continue;
-                RecommendationDto time = RecommendationDto.builder()
+                ScheduleBlockDto time = ScheduleBlockDto.builder()
                         .weekday(convertToWeekday(i))
-                        .start_time(convertToTime(j, timeInterval))
-                        .finish_time(convertToTime(j+1, timeInterval))
+                        .startTime(convertToTime(j, timeInterval))
+                        .finishTime(convertToTime(j+1, timeInterval))
                         .build();
                 times.add(time);
             }

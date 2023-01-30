@@ -13,11 +13,11 @@ public class TeamScheduleRequestDto {
     private Long teamId;
     private String name;
     private String weekday;
-    @JsonProperty("start")
+    @JsonProperty("startTime")
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime startTime;
 
-    @JsonProperty("finish")
+    @JsonProperty("finishTime")
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime finishTime;
     private String memo;
