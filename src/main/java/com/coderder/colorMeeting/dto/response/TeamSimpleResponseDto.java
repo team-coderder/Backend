@@ -7,11 +7,11 @@ import lombok.Getter;
 //@Builder
 @Getter
 public class TeamSimpleResponseDto {
-    private Long id;
+    private Long teamId;
     private String name;
 
     public TeamSimpleResponseDto(Team team) {
-        this.id = team.getId();
+        this.teamId = team.getId();
         this.name = team.getName();
     }
 }
