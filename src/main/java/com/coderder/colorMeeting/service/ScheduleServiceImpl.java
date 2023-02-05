@@ -32,9 +32,14 @@ public class ScheduleServiceImpl implements ScheduleService{
 
     @Override
     public void insertScheduleBlock(Member member, ScheduleRequestDto scheduleRequestDto) {
-        String weekday = scheduleRequestDto.getStartTime().split("\\+")[0];
-        String startTime = scheduleRequestDto.getStartTime().split("\\+")[1];
-        String endTime = scheduleRequestDto.getStartTime().split("\\+")[1];
+        String[] start = scheduleRequestDto.getStartTime().split("\\+");
+        String[] end = scheduleRequestDto.getFinishTime().split("\\+");
+
+        //todo : must handle localtime invalid format exception
+
+        String weekday = start[0];
+        LocalTime startTime = LocalTime.parse(start[1]);
+        LocalTime endTime = LocalTime.parse(end[1]);
         PersonalSchedule personalSchedule = PersonalSchedule.builder()
                 .name(scheduleRequestDto.getTitle())
                 .weekday(weekday)
