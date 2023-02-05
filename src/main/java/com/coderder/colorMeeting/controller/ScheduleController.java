@@ -35,10 +35,11 @@ public class ScheduleController {
         return ResponseEntity.ok().body(scheduleListDto);
     }
 
-    @PatchMapping ("/api/schedule/myschedule")
-    public ResponseEntity<ResponseMessage> makeMySchedule(@RequestBody ScheduleRequestDto scheduleRequestDto){
-        scheduleService.insertScheduleBlock(scheduleRequestDto);
-        return ResponseEntity.ok().body(new ResponseMessage("개인 스케쥴 "+ scheduleRequestDto.getName() + "추가 완료"));
+    @PostMapping("/api/schedule/myschedule")
+    public ResponseEntity<ResponseMessage> makeMySchedule(@AuthenticationPrincipal PrincipalDetails userDetails,
+                                                          @RequestBody ScheduleRequestDto scheduleRequestDto){
+        scheduleService.insertScheduleBlock(userDetails.getMember(), scheduleRequestDto);
+        return ResponseEntity.ok().body(new ResponseMessage("개인 스케쥴 "+ scheduleRequestDto.getTitle() + "추가 완료"));
     }
 
     @GetMapping("/api/schedule/myteam")

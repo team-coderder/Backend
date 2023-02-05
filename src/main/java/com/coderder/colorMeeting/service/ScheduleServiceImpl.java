@@ -30,20 +30,16 @@ public class ScheduleServiceImpl implements ScheduleService{
     @Autowired
     private TeamScheduleRepository teamScheduleRepository;
 
-
-    public void insertScheduleBlock(PersonalSchedule personalSchedule){
-        personalScheduleRepository.save(personalSchedule);
-    }
-
     @Override
-    public void insertScheduleBlock(ScheduleRequestDto scheduleRequestDto) {
-        Member member = memberRepository.findById(scheduleRequestDto.getMemberId())
-                .orElseThrow(()->new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+    public void insertScheduleBlock(Member member, ScheduleRequestDto scheduleRequestDto) {
+        String weekday = scheduleRequestDto.getStartTime().split("\\+")[0];
+        String startTime = scheduleRequestDto.getStartTime().split("\\+")[1];
+        String endTime = scheduleRequestDto.getStartTime().split("\\+")[1];
         PersonalSchedule personalSchedule = PersonalSchedule.builder()
-                .name(scheduleRequestDto.getName())
-                .weekday(scheduleRequestDto.getWeekday())
-                .startTime(scheduleRequestDto.getStartTime())
-                .finishTime(scheduleRequestDto.getFinishTime())
+                .name(scheduleRequestDto.getTitle())
+                .weekday(weekday)
+                .startTime(startTime)
+                .finishTime(endTime)
                 .member(member)
                 .build();
         personalScheduleRepository.save(personalSchedule);

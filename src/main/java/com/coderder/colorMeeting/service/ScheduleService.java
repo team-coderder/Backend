@@ -7,16 +7,15 @@ import com.coderder.colorMeeting.dto.response.PersonalScheduleDto;
 import com.coderder.colorMeeting.dto.response.RecommendationDto;
 import com.coderder.colorMeeting.dto.response.ScheduleBlockDto;
 import com.coderder.colorMeeting.dto.response.TeamScheduleDto;
+import com.coderder.colorMeeting.model.Member;
 import com.coderder.colorMeeting.model.PersonalSchedule;
 
 import java.util.List;
 
 public interface ScheduleService {
 
+    void insertScheduleBlock(Member member, ScheduleRequestDto scheduleRequestDto);
 
-    void insertScheduleBlock(PersonalSchedule personalSchedule);
-
-    void insertScheduleBlock(ScheduleRequestDto scheduleRequestDtoDto);
     List<PersonalScheduleDto> getBlockListByUserId(Long userId);
 
     List<ScheduleBlockDto> getBlockListByTeamId(Long teamId);
@@ -26,4 +25,6 @@ public interface ScheduleService {
     void insertGroupSchedule(TeamScheduleRequestDto teamScheduleDto);
 
     List<TeamScheduleDto> getTeamScheduleList(Long teamId);
+
+
 }
