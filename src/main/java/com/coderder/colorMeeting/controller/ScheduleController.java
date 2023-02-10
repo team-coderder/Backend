@@ -22,7 +22,7 @@ public class ScheduleController {
     @GetMapping("/api/schedule/calendar")
     public ResponseEntity<ScheduleListDto> getUserSchedule(@RequestParam(value="memberId") Long userId){
         ScheduleListDto scheduleListDto = ScheduleListDto.builder()
-                .blocks(scheduleService.getBlockListByUserId(userId))
+                .schedule(scheduleService.getBlockListByUserId(userId))
                 .build();
         return ResponseEntity.ok().body(scheduleListDto);
     }
@@ -30,7 +30,7 @@ public class ScheduleController {
     @GetMapping("/api/schedule/myschedule")
     public ResponseEntity<ScheduleListDto> getMySchedule(@AuthenticationPrincipal PrincipalDetails userDetails){
         ScheduleListDto scheduleListDto = ScheduleListDto.builder()
-                .blocks(scheduleService.getBlockListByUserId(userDetails.getMember().getId()))
+                .schedule(scheduleService.getBlockListByUserId(userDetails.getMember().getId()))
                 .build();
         return ResponseEntity.ok().body(scheduleListDto);
     }
@@ -43,18 +43,17 @@ public class ScheduleController {
     }
 
     @GetMapping("/api/schedule/myteam")
-    public ResponseEntity<ScheduleListDto> getTeamUserAllSchedule(@RequestParam Long teamId)
+    public ResponseEntity<List<PersonalScheduleListDto>> getTeamUserAllSchedule(@RequestParam Long teamId)
     {
-        List<ScheduleBlockDto> scheduleBlockDtoList = scheduleService.getBlockListByTeamId(teamId);
-        ScheduleListDto scheduleListDto = ScheduleListDto.builder()
-                .blocks(scheduleBlockDtoList).build();
-        return ResponseEntity.ok().body(scheduleListDto);
+        List<PersonalScheduleListDto> scheduleBlockDtoList = scheduleService.getBlockListByTeamId(teamId);
+
+        return ResponseEntity.ok().body(scheduleBlockDtoList);
     }
     @GetMapping("/api/schedule/recommendations")
     public ResponseEntity<ScheduleListDto> getRecommendations(@RequestBody TeamTimeDto teamTimeDto){
         List<ScheduleBlockDto> recommendationList = scheduleService.getTeamEmptyTimes(teamTimeDto);
         ScheduleListDto scheduleListDto = ScheduleListDto.builder()
-                .blocks(recommendationList).build();
+                .schedule(recommendationList).build();
         return ResponseEntity.ok().body(scheduleListDto);
     }
     @PostMapping("/api/schedule/teamschedule")
@@ -65,7 +64,7 @@ public class ScheduleController {
     @GetMapping("/api/schedule/teamschedule")
     public ResponseEntity<ScheduleListDto> getTeamSchedule(@RequestParam Long teamId){
         ScheduleListDto scheduleListDto = ScheduleListDto.builder()
-                .blocks(scheduleService.getTeamScheduleList(teamId))
+                .schedule(scheduleService.getTeamScheduleList(teamId))
                 .build();
         return ResponseEntity.ok().body(scheduleListDto);
     }

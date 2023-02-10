@@ -15,8 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService{
@@ -59,10 +62,11 @@ public class ScheduleServiceImpl implements ScheduleService{
         for(PersonalSchedule block : blockList){
             PersonalScheduleDto tmpBlock = PersonalScheduleDto.builder()
                     .memberId(block.getMember().getUsername())
-                    .name(block.getName())
-                    .weekday(block.getWeekday())
-                    .startTime(block.getStartTime())
-                    .finishTime(block.getFinishTime())
+                    .title(block.getName())
+                    .startTime(block.getWeekday() + "+"
+                            + block.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
+                    .finishTime(block.getWeekday() + "+"
+                            + block.getFinishTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
                     .memo(block.getMemo())
                     .build();
             blockDtoList.add(tmpBlock);
@@ -71,7 +75,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
 
     @Override
-    public List<ScheduleBlockDto> getBlockListByTeamId(Long teamId) {
+    public List<ScheduleBlockDto> getBlockListByTeamIdWithoutOverlap(Long teamId) {
         List<Member> members = memberRepository.findAllWithTeamId(teamId);
         List<PersonalSchedule> schedules = personalScheduleRepository.findAllByMemberIn(members);
 
@@ -104,9 +108,8 @@ public class ScheduleServiceImpl implements ScheduleService{
                     if(isConnectedSchedule) {
                         end = minute-1;
                         ScheduleBlockDto scheduleBlock = ScheduleBlockDto.builder()
-                                .startTime(convertToTime(start, 60))
-                                .finishTime(convertToTime(end, 60))
-                                .weekday(convertToWeekday(weekday))
+                                .startTime(convertToTime(start, 60).toString())
+                                .finishTime(convertToTime(end, 60).toString())
                                 .build();
                         scheduleBlockDtoList.add(scheduleBlock);
                     }
@@ -145,9 +148,8 @@ public class ScheduleServiceImpl implements ScheduleService{
             for(int j=0; j< weekCalendar[0].length-1; j++){
                 if(weekCalendar[i][j]) continue;
                 ScheduleBlockDto time = ScheduleBlockDto.builder()
-                        .weekday(convertToWeekday(i))
-                        .startTime(convertToTime(j, timeInterval))
-                        .finishTime(convertToTime(j+1, timeInterval))
+                        .startTime(convertToTime(j, timeInterval).toString())
+                        .finishTime(convertToTime(j+1, timeInterval).toString())
                         .build();
                 times.add(time);
             }
@@ -207,7 +209,6 @@ public class ScheduleServiceImpl implements ScheduleService{
         for(TeamSchedule teamSchedule : teamSchedules){
             TeamScheduleDto teamScheduleDto = TeamScheduleDto.builder()
                     .name(teamSchedule.getName())
-                    .weekday(teamSchedule.getWeekday())
                     .startTime(teamSchedule.getStartTime())
                     .finishTime(teamSchedule.getFinishTime())
                     .memo(teamSchedule.getMemo())
@@ -215,5 +216,40 @@ public class ScheduleServiceImpl implements ScheduleService{
             teamScheduleDtoList.add(teamScheduleDto);
         }
         return teamScheduleDtoList;
+    }
+
+    @Override
+    public List<PersonalScheduleListDto> getBlockListByTeamId(Long teamId) {
+        List<PersonalScheduleListDto> personalScheduleList = new ArrayList<>();
+        List<Member> members = memberRepository.findAllWithTeamId(teamId);
+        List<PersonalSchedule> schedules = personalScheduleRepository.findAllByMemberIn(members);
+
+        Map<String, List<PersonalScheduleDto>> teammateScheduleMap = new HashMap<>();
+        for(PersonalSchedule schedule : schedules){
+            List<PersonalScheduleDto> scheduleListDto;
+            if(!teammateScheduleMap.containsKey(schedule.getMember().getUsername())){
+                scheduleListDto = new ArrayList<>();
+                teammateScheduleMap.put(schedule.getMember().getUsername(), scheduleListDto);
+            } else {
+                scheduleListDto = teammateScheduleMap.get(schedule.getMember().getUsername());
+            }
+            scheduleListDto.add(PersonalScheduleDto.builder()
+                            .id(schedule.getId())
+                            .title(schedule.getName())
+                            .startTime(schedule.getWeekday()+"+" + schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
+                            .finishTime(schedule.getWeekday()+"+" + schedule.getFinishTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
+                            .memberId(schedule.getMember().getUsername())
+                            .memo(schedule.getMemo())
+                    .build());
+        }
+
+        for(String username : teammateScheduleMap.keySet()) {
+            PersonalScheduleListDto personalScheduleListDto = PersonalScheduleListDto.builder()
+                    .username(username)
+                    .schedule(teammateScheduleMap.get(username))
+                    .build();
+            personalScheduleList.add(personalScheduleListDto);
+        }
+        return personalScheduleList;
     }
 }
