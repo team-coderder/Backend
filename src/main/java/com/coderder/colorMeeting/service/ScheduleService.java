@@ -27,4 +27,12 @@ public interface ScheduleService {
 
 
     List<PersonalScheduleListDto> getBlockListByTeamId(Long teamId);
+
+    void updateScheduleBlock(Member member, ScheduleRequestDto scheduleRequestDto);
+
+    void deleteScheduleBlock(Member member, Long scheduleId);
+
+    void updateGroupSchedule(TeamScheduleRequestDto teamScheduleDto);
+
+    void deleteGroupSchedule(Long scheduleId);
 }

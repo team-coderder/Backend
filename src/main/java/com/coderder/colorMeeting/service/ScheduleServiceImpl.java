@@ -192,12 +192,21 @@ public class ScheduleServiceImpl implements ScheduleService{
     public void insertGroupSchedule(TeamScheduleRequestDto teamScheduleDto) {
         Team team = teamRepository.findById(teamScheduleDto.getTeamId())
                 .orElseThrow(()->new NotFoundException(ErrorCode.TEAM_NOT_FOUND));
+
+        String[] start = teamScheduleDto.getStartTime().split("\\+");
+        String[] end = teamScheduleDto.getFinishTime().split("\\+");
+
+        //todo : must handle localtime invalid format exception
+
+        String weekday = start[0];
+        LocalTime startTime = LocalTime.parse(start[1]);
+        LocalTime endTime = LocalTime.parse(end[1]);
         TeamSchedule teamSchedule = TeamSchedule.builder()
-                .name(teamScheduleDto.getName())
-                .weekday(teamScheduleDto.getWeekday())
-                .startTime(teamScheduleDto.getStartTime())
-                .finishTime(teamScheduleDto.getFinishTime())
-                .team(team)
+                .id(teamScheduleDto.getId())
+                .name(teamScheduleDto.getTitle())
+                .weekday(weekday)
+                .startTime(startTime)
+                .finishTime(endTime)
                 .build();
         teamScheduleRepository.save(teamSchedule);
     }
@@ -209,8 +218,10 @@ public class ScheduleServiceImpl implements ScheduleService{
         for(TeamSchedule teamSchedule : teamSchedules){
             TeamScheduleDto teamScheduleDto = TeamScheduleDto.builder()
                     .name(teamSchedule.getName())
-                    .startTime(teamSchedule.getStartTime())
-                    .finishTime(teamSchedule.getFinishTime())
+                    .startTime(teamSchedule.getWeekday() +"+"
+                            +teamSchedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
+                    .finishTime(teamSchedule.getWeekday() +"+"
+                            + teamSchedule.getFinishTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
                     .memo(teamSchedule.getMemo())
                     .build();
             teamScheduleDtoList.add(teamScheduleDto);
@@ -236,8 +247,10 @@ public class ScheduleServiceImpl implements ScheduleService{
             scheduleListDto.add(PersonalScheduleDto.builder()
                             .id(schedule.getId())
                             .title(schedule.getName())
-                            .startTime(schedule.getWeekday()+"+" + schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
-                            .finishTime(schedule.getWeekday()+"+" + schedule.getFinishTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
+                            .startTime(schedule.getWeekday()+"+"
+                                    + schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
+                            .finishTime(schedule.getWeekday()+"+"
+                                    + schedule.getFinishTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
                             .memberId(schedule.getMember().getUsername())
                             .memo(schedule.getMemo())
                     .build());
@@ -251,5 +264,62 @@ public class ScheduleServiceImpl implements ScheduleService{
             personalScheduleList.add(personalScheduleListDto);
         }
         return personalScheduleList;
+    }
+
+    @Override
+    public void updateScheduleBlock(Member member, ScheduleRequestDto scheduleRequestDto) {
+        if(scheduleRequestDto.getId() == null){
+            //todo : throw exception when scheduleBlock Id is null
+        }
+        String[] start = scheduleRequestDto.getStartTime().split("\\+");
+        String[] end = scheduleRequestDto.getFinishTime().split("\\+");
+
+        //todo : must handle localtime invalid format exception
+
+        String weekday = start[0];
+        LocalTime startTime = LocalTime.parse(start[1]);
+        LocalTime endTime = LocalTime.parse(end[1]);
+        PersonalSchedule personalSchedule = PersonalSchedule.builder()
+                .id(scheduleRequestDto.getId())
+                .name(scheduleRequestDto.getTitle())
+                .weekday(weekday)
+                .startTime(startTime)
+                .finishTime(endTime)
+                .member(member)
+                .build();
+        personalScheduleRepository.save(personalSchedule);
+    }
+
+    @Override
+    public void deleteScheduleBlock(Member member, Long scheduleId) {
+        personalScheduleRepository.deleteById(scheduleId);
+    }
+
+    @Override
+    public void updateGroupSchedule(TeamScheduleRequestDto teamScheduleDto) {
+        if(teamScheduleDto.getId() == null){
+            //todo : throw exception when scheduleBlock Id is null
+        }
+        String[] start = teamScheduleDto.getStartTime().split("\\+");
+        String[] end = teamScheduleDto.getFinishTime().split("\\+");
+
+        //todo : must handle localtime invalid format exception
+
+        String weekday = start[0];
+        LocalTime startTime = LocalTime.parse(start[1]);
+        LocalTime endTime = LocalTime.parse(end[1]);
+        TeamSchedule teamSchedule = TeamSchedule.builder()
+                .id(teamScheduleDto.getId())
+                .name(teamScheduleDto.getTitle())
+                .weekday(weekday)
+                .startTime(startTime)
+                .finishTime(endTime)
+                .build();
+        teamScheduleRepository.save(teamSchedule);
+    }
+
+    @Override
+    public void deleteGroupSchedule(Long scheduleId) {
+        teamScheduleRepository.deleteById(scheduleId);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Data
 @NoArgsConstructor
 public class ScheduleRequestDto {
+    private Long id;
     private String title;
     @JsonProperty("start")
     private String startTime;
