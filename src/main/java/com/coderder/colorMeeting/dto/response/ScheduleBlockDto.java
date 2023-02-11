@@ -7,6 +7,6 @@ import lombok.experimental.SuperBuilder;
 @Getter
 public class ScheduleBlockDto {
     private Long id;
-    private String startTime;
-    private String finishTime;
+    private String start;
+    private String end;
 }

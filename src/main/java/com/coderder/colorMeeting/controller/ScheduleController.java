@@ -73,7 +73,7 @@ public class ScheduleController {
     @PostMapping("/api/schedule/teamschedule")
     public ResponseEntity<ResponseMessage> makeTeamSchedule(@RequestBody TeamScheduleRequestDto teamScheduleDto){
         scheduleService.insertGroupSchedule(teamScheduleDto);
-        return ResponseEntity.ok().body(new ResponseMessage("팀 스케쥴 "+teamScheduleDto.getTitle()+" 추가 완료"));
+        return ResponseEntity.ok().body(new ResponseMessage("team schedule "+teamScheduleDto.getTitle()+" insert complete"));
     }
     @GetMapping("/api/schedule/teamschedule")
     public ResponseEntity<ScheduleListDto> getTeamSchedule(@RequestParam Long teamId){
@@ -86,7 +86,7 @@ public class ScheduleController {
     @PatchMapping("/api/schedule/teamschedule")
     public ResponseEntity<ResponseMessage> changeTeamSchedule(@RequestParam TeamScheduleRequestDto teamScheduleDto){
         scheduleService.updateGroupSchedule(teamScheduleDto);
-        return ResponseEntity.ok().body(new ResponseMessage("팀 스케쥴 "+teamScheduleDto.getTitle()+" 추가 완료"));
+        return ResponseEntity.ok().body(new ResponseMessage("team schedule "+teamScheduleDto.getTitle()+" update complete"));
     }
 
     @DeleteMapping("/api/schedule/teamschedule")

@@ -61,11 +61,12 @@ public class ScheduleServiceImpl implements ScheduleService{
         List<PersonalScheduleDto> blockDtoList = new ArrayList<>();
         for(PersonalSchedule block : blockList){
             PersonalScheduleDto tmpBlock = PersonalScheduleDto.builder()
+                    .id(block.getId())
                     .memberId(block.getMember().getUsername())
                     .title(block.getName())
-                    .startTime(block.getWeekday() + "+"
+                    .start(block.getWeekday() + "+"
                             + block.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
-                    .finishTime(block.getWeekday() + "+"
+                    .end(block.getWeekday() + "+"
                             + block.getFinishTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
                     .memo(block.getMemo())
                     .build();
@@ -108,8 +109,8 @@ public class ScheduleServiceImpl implements ScheduleService{
                     if(isConnectedSchedule) {
                         end = minute-1;
                         ScheduleBlockDto scheduleBlock = ScheduleBlockDto.builder()
-                                .startTime(convertToTime(start, 60).toString())
-                                .finishTime(convertToTime(end, 60).toString())
+                                .start(convertToTime(start, 60).toString())
+                                .end(convertToTime(end, 60).toString())
                                 .build();
                         scheduleBlockDtoList.add(scheduleBlock);
                     }
@@ -148,8 +149,8 @@ public class ScheduleServiceImpl implements ScheduleService{
             for(int j=0; j< weekCalendar[0].length-1; j++){
                 if(weekCalendar[i][j]) continue;
                 ScheduleBlockDto time = ScheduleBlockDto.builder()
-                        .startTime(convertToTime(j, timeInterval).toString())
-                        .finishTime(convertToTime(j+1, timeInterval).toString())
+                        .start(convertToTime(j, timeInterval).toString())
+                        .end(convertToTime(j+1, timeInterval).toString())
                         .build();
                 times.add(time);
             }
@@ -207,6 +208,7 @@ public class ScheduleServiceImpl implements ScheduleService{
                 .weekday(weekday)
                 .startTime(startTime)
                 .finishTime(endTime)
+                .team(team)
                 .build();
         teamScheduleRepository.save(teamSchedule);
     }
@@ -217,10 +219,11 @@ public class ScheduleServiceImpl implements ScheduleService{
         List<TeamScheduleDto> teamScheduleDtoList = new ArrayList<>();
         for(TeamSchedule teamSchedule : teamSchedules){
             TeamScheduleDto teamScheduleDto = TeamScheduleDto.builder()
-                    .name(teamSchedule.getName())
-                    .startTime(teamSchedule.getWeekday() +"+"
+                    .id(teamSchedule.getId())
+                    .title(teamSchedule.getName())
+                    .start(teamSchedule.getWeekday() +"+"
                             +teamSchedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
-                    .finishTime(teamSchedule.getWeekday() +"+"
+                    .end(teamSchedule.getWeekday() +"+"
                             + teamSchedule.getFinishTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
                     .memo(teamSchedule.getMemo())
                     .build();
@@ -247,9 +250,9 @@ public class ScheduleServiceImpl implements ScheduleService{
             scheduleListDto.add(PersonalScheduleDto.builder()
                             .id(schedule.getId())
                             .title(schedule.getName())
-                            .startTime(schedule.getWeekday()+"+"
+                            .start(schedule.getWeekday()+"+"
                                     + schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
-                            .finishTime(schedule.getWeekday()+"+"
+                            .end(schedule.getWeekday()+"+"
                                     + schedule.getFinishTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
                             .memberId(schedule.getMember().getUsername())
                             .memo(schedule.getMemo())
