@@ -56,18 +56,15 @@ public class WebSecurityConfig {
 
         //허용할 url 설정
         configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("https://d2bevc8l715g2k.cloudfront.net");
         //허용할 헤더 설정
         configuration.addAllowedHeader("*");
         //허용할 http method
         configuration.addAllowedMethod("*");
-//        //클라이언트가 접근 할 수 있는 서버 응답 헤더
+        //클라이언트가 접근 할 수 있는 서버 응답 헤더
         configuration.addExposedHeader(JwtProperties.HEADER_STRING);
-//        configuration.addExposedHeader(TokenProperties.AUTH_HEADER);
-//        configuration.addExposedHeader(TokenProperties.REFRESH_HEADER);
         //사용자 자격 증명이 지원되는지 여부
         configuration.setAllowCredentials(true);
-
-//        configuration.addEposedHeader(JwtProperties.HEADER);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

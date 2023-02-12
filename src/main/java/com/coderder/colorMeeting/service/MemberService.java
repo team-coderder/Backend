@@ -17,6 +17,7 @@ import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.Member;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.junit.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -130,7 +131,7 @@ public class MemberService {
 
         return response;
     }
-
+    
     public MemberDto getMyInformation(PrincipalDetails userDetails) {
         return new MemberDto(userDetails.getMember());
     }
