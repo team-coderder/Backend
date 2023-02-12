@@ -1,13 +1,12 @@
 package com.coderder.colorMeeting.dto.response;
 
 import lombok.Getter;
-import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @Getter
-@ToString
-public class TeamScheduleDto extends ScheduleBlockDto{
+public class PersonalScheduleDto extends ScheduleBlockDto {
+    private String memberId;
     private String title;
     private String memo;
 }
