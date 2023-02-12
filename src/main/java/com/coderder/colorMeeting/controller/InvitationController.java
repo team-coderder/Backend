@@ -1,7 +1,7 @@
 package com.coderder.colorMeeting.controller;
 
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
-import com.coderder.colorMeeting.dto.request.TeamMemberRequestDto;
+import com.coderder.colorMeeting.dto.request.MembersRequestDto;
 import com.coderder.colorMeeting.service.InvitationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +21,8 @@ public class InvitationController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<?> createInvitation(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestBody TeamMemberRequestDto requestDto) {
-        return ResponseEntity.ok().body(invitationService.createInvitation(userDetails, requestDto));
+    public ResponseEntity<?> createInvitation(@AuthenticationPrincipal PrincipalDetails userDetails, @RequestParam Long teamId, @RequestBody MembersRequestDto requestDto) {
+        return ResponseEntity.ok().body(invitationService.createInvitation(userDetails, teamId, requestDto));
     }
 
     @RequestMapping(value = "/accept", method = RequestMethod.PATCH)
