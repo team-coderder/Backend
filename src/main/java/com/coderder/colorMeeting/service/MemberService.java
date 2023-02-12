@@ -2,6 +2,7 @@ package com.coderder.colorMeeting.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.coderder.colorMeeting.config.auth.PrincipalDetails;
 import com.coderder.colorMeeting.config.jwt.JwtProperties;
 import com.coderder.colorMeeting.dto.request.LoginRequestDto;
 import com.coderder.colorMeeting.dto.request.MemberJoinRequestDto;
@@ -16,6 +17,7 @@ import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.Member;
 import com.coderder.colorMeeting.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.junit.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -129,31 +131,22 @@ public class MemberService {
 
         return response;
     }
-
-    public MemberDto getMyInformation(Long memberId) {
-
-        Member member = isPresentMember(memberId);
-        if (member == null) {
-            throw new NotFoundException(MEMBER_NOT_FOUND);
-        }
-
-        return new MemberDto(member);
+    
+    public MemberDto getMyInformation(PrincipalDetails userDetails) {
+        return new MemberDto(userDetails.getMember());
     }
 
-    public MemberDto updateMyInformation(Long memberId, MemberUpdateDto memberUpdateDto) {
-        // 존재하는 member인가?
-        Member member = isPresentMember(memberId);
-        if (member == null) {
-            throw new NotFoundException(MEMBER_NOT_FOUND);
-        }
+    public MemberDto updateMyInformation(PrincipalDetails userDetails, MemberUpdateDto memberUpdateDto) {
+        // 다른 사람 정보는 안 되고, 내 정보만 수정할 수 있음
+        Member me = userDetails.getMember();
 
         // 닉네임 업데이트
-        member.updateNickname(memberUpdateDto.getNickname());
+        me.updateNickname(memberUpdateDto.getNickname());
 
         // 비밀번호 업데이트
         // member.updateNickname(memberUpdateDto.getPassword());
 
-        return new MemberDto(member);
+        return new MemberDto(me);
     }
 
     public MemberDto login(LoginRequestDto requestDto, HttpServletResponse response) {
