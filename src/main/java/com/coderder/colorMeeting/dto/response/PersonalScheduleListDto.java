@@ -5,8 +5,6 @@ import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @Getter
-public class ScheduleBlockDto {
-    private Long id;
-    private String start;
-    private String end;
+public class PersonalScheduleListDto extends ScheduleListDto{
+    private String username;
 }

@@ -38,8 +38,8 @@ public class defaultController {
 
 
     // 로그아웃 : refresh token 구현 시 확장성을 위해 구현
-    @RequestMapping(value="/logout", method = RequestMethod.POST)
-    public String logout(HttpServletRequest request) {
-        return memberService.logout(request);
-    }
+//    @RequestMapping(value="/logout", method = RequestMethod.POST)
+//    public String logout(HttpServletRequest request) {
+//        return memberService.logout(request);
+//    }
 }
