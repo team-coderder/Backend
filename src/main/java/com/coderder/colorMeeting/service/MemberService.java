@@ -2,6 +2,7 @@ package com.coderder.colorMeeting.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.coderder.colorMeeting.config.auth.PrincipalDetails;
 import com.coderder.colorMeeting.config.jwt.JwtProperties;
 import com.coderder.colorMeeting.dto.request.LoginRequestDto;
 import com.coderder.colorMeeting.dto.request.MemberJoinRequestDto;
@@ -130,9 +131,12 @@ public class MemberService {
         return response;
     }
 
-    public MemberDto getMyInformation(Long memberId) {
+    public MemberDto getMyInformation(PrincipalDetails userDetails, Long memberId) {
+        // 다른 사람 정보는 안 되고, 내 정보만 조회할 수 있음
+        Member me = userDetails.getMember();
 
-        Member member = isPresentMember(memberId);
+        // 없는 사용자 정보를 요청하면, return 404 notFound
+        Member member = isPresentMember(me.getId());
         if (member == null) {
             throw new NotFoundException(MEMBER_NOT_FOUND);
         }
@@ -140,9 +144,13 @@ public class MemberService {
         return new MemberDto(member);
     }
 
-    public MemberDto updateMyInformation(Long memberId, MemberUpdateDto memberUpdateDto) {
+    public MemberDto updateMyInformation(PrincipalDetails userDetails, Long memberId, MemberUpdateDto memberUpdateDto) {
+
+        // 다른 사람 정보는 안 되고, 내 정보만 수할 수 있음
+        Member me = userDetails.getMember();
+
         // 존재하는 member인가?
-        Member member = isPresentMember(memberId);
+        Member member = isPresentMember(me.getId());
         if (member == null) {
             throw new NotFoundException(MEMBER_NOT_FOUND);
         }

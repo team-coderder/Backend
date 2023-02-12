@@ -7,6 +7,7 @@ import com.coderder.colorMeeting.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -45,14 +46,15 @@ public class memberController {
 
     // 내 정보 조회하기
     @RequestMapping(value="/mypage", method= RequestMethod.GET)
-    public ResponseEntity<?> getMyInformation(@RequestParam("memberId") Long memberId) {
-        return ResponseEntity.ok().body(memberService.getMyInformation(memberId));
+    public ResponseEntity<?> getMyInformation(@AuthenticationPrincipal PrincipalDetails userDetails,
+                                                @RequestParam("memberId") Long memberId) {
+        return ResponseEntity.ok().body(memberService.getMyInformation(userDetails, memberId));
     }
 
     // 내 정보 수정하기
     @RequestMapping(value="/mypage", method= RequestMethod.PATCH)
-    public ResponseEntity<?> updateMyInformation(
-            @RequestParam("memberId") Long memberId, @RequestBody MemberUpdateDto requestDto) {
-        return ResponseEntity.ok().body(memberService.updateMyInformation(memberId, requestDto));
+    public ResponseEntity<?> updateMyInformation(@AuthenticationPrincipal PrincipalDetails userDetails,
+                                                    @RequestParam("memberId") Long memberId, @RequestBody MemberUpdateDto requestDto) {
+        return ResponseEntity.ok().body(memberService.updateMyInformation(userDetails, memberId, requestDto));
     }
 }
