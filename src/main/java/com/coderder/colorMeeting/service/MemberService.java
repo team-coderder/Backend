@@ -131,37 +131,21 @@ public class MemberService {
         return response;
     }
 
-    public MemberDto getMyInformation(PrincipalDetails userDetails, Long memberId) {
-        // 다른 사람 정보는 안 되고, 내 정보만 조회할 수 있음
-        Member me = userDetails.getMember();
-
-        // 없는 사용자 정보를 요청하면, return 404 notFound
-        Member member = isPresentMember(me.getId());
-        if (member == null) {
-            throw new NotFoundException(MEMBER_NOT_FOUND);
-        }
-
-        return new MemberDto(member);
+    public MemberDto getMyInformation(PrincipalDetails userDetails) {
+        return new MemberDto(userDetails.getMember());
     }
 
-    public MemberDto updateMyInformation(PrincipalDetails userDetails, Long memberId, MemberUpdateDto memberUpdateDto) {
-
-        // 다른 사람 정보는 안 되고, 내 정보만 수할 수 있음
+    public MemberDto updateMyInformation(PrincipalDetails userDetails, MemberUpdateDto memberUpdateDto) {
+        // 다른 사람 정보는 안 되고, 내 정보만 수정할 수 있음
         Member me = userDetails.getMember();
 
-        // 존재하는 member인가?
-        Member member = isPresentMember(me.getId());
-        if (member == null) {
-            throw new NotFoundException(MEMBER_NOT_FOUND);
-        }
-
         // 닉네임 업데이트
-        member.updateNickname(memberUpdateDto.getNickname());
+        me.updateNickname(memberUpdateDto.getNickname());
 
         // 비밀번호 업데이트
         // member.updateNickname(memberUpdateDto.getPassword());
 
-        return new MemberDto(member);
+        return new MemberDto(me);
     }
 
     public MemberDto login(LoginRequestDto requestDto, HttpServletResponse response) {

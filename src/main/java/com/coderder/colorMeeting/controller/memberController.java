@@ -46,15 +46,14 @@ public class memberController {
 
     // 내 정보 조회하기
     @RequestMapping(value="/mypage", method= RequestMethod.GET)
-    public ResponseEntity<?> getMyInformation(@AuthenticationPrincipal PrincipalDetails userDetails,
-                                                @RequestParam("memberId") Long memberId) {
-        return ResponseEntity.ok().body(memberService.getMyInformation(userDetails, memberId));
+    public ResponseEntity<?> getMyInformation(@AuthenticationPrincipal PrincipalDetails userDetails) {
+        return ResponseEntity.ok().body(memberService.getMyInformation(userDetails));
     }
 
     // 내 정보 수정하기
     @RequestMapping(value="/mypage", method= RequestMethod.PATCH)
     public ResponseEntity<?> updateMyInformation(@AuthenticationPrincipal PrincipalDetails userDetails,
-                                                    @RequestParam("memberId") Long memberId, @RequestBody MemberUpdateDto requestDto) {
-        return ResponseEntity.ok().body(memberService.updateMyInformation(userDetails, memberId, requestDto));
+                                                    @RequestBody MemberUpdateDto requestDto) {
+        return ResponseEntity.ok().body(memberService.updateMyInformation(userDetails, requestDto));
     }
 }
