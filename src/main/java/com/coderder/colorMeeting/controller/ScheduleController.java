@@ -84,7 +84,7 @@ public class ScheduleController {
     }
 
     @PatchMapping("/api/schedule/teamschedule")
-    public ResponseEntity<ResponseMessage> changeTeamSchedule(@RequestParam TeamScheduleRequestDto teamScheduleDto){
+    public ResponseEntity<ResponseMessage> changeTeamSchedule(@RequestBody TeamScheduleRequestDto teamScheduleDto){
         scheduleService.updateGroupSchedule(teamScheduleDto);
         return ResponseEntity.ok().body(new ResponseMessage("team schedule "+teamScheduleDto.getTitle()+" update complete"));
     }
