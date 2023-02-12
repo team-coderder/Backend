@@ -100,6 +100,7 @@ class TeamServiceImpl extends CommonService implements TeamService {
 
         // 1. 그룹의 이름 수정
         team.updateName(requestDto.getName());
+        teamRepository.save(team);
 
         // 2. response 빌드하기
         return new TeamSimpleResponseDto(team);
