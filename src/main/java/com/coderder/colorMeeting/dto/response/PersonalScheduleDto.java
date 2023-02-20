@@ -7,6 +7,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 public class PersonalScheduleDto extends ScheduleBlockDto {
     private String memberId;
+    private String nickname;
     private String title;
     private String memo;
 }

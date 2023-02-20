@@ -15,7 +15,7 @@ public interface ScheduleService {
 
     void insertScheduleBlock(Member member, ScheduleRequestDto scheduleRequestDto);
 
-    List<PersonalScheduleDto> getBlockListByUserId(Long userId);
+    List<PersonalScheduleDto> getBlockListByUserId(Member member);
 
     List<ScheduleBlockDto> getBlockListByTeamIdWithoutOverlap(Long teamId);
 

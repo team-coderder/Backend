@@ -54,15 +54,14 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
 
     @Override
-    public List<PersonalScheduleDto> getBlockListByUserId(Long userId) {
-        Member member = memberRepository.findById(userId)
-                .orElseThrow(()->new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+    public List<PersonalScheduleDto> getBlockListByUserId(Member member) {
         List<PersonalSchedule> blockList = personalScheduleRepository.findAllByMember(member);
         List<PersonalScheduleDto> blockDtoList = new ArrayList<>();
         for(PersonalSchedule block : blockList){
             PersonalScheduleDto tmpBlock = PersonalScheduleDto.builder()
                     .id(block.getId())
                     .memberId(block.getMember().getUsername())
+                    .nickname(member.getNickname())
                     .title(block.getName())
                     .start(block.getWeekday() + "+"
                             + block.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
@@ -255,6 +254,7 @@ public class ScheduleServiceImpl implements ScheduleService{
                             .end(schedule.getWeekday()+"+"
                                     + schedule.getFinishTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
                             .memberId(schedule.getMember().getUsername())
+                            .nickname(schedule.getMember().getNickname())
                             .memo(schedule.getMemo())
                     .build());
         }
