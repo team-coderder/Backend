@@ -28,8 +28,6 @@ public class WebSecurityConfig {
     @Autowired
     private MemberRepository memberRepository;
 
-//    @Autowired
-//    private CorsConfig corsConfig;
 
     @Autowired
     private JwtProperties jwtProperties;
@@ -57,6 +55,7 @@ public class WebSecurityConfig {
         //허용할 url 설정
         configuration.addAllowedOrigin("http://localhost:3000");
         configuration.addAllowedOrigin("https://d2bevc8l715g2k.cloudfront.net");
+        configuration.addAllowedOrigin("http://d2bevc8l715g2k.cloudfront.net");
         //허용할 헤더 설정
         configuration.addAllowedHeader("*");
         //허용할 http method
@@ -74,16 +73,28 @@ public class WebSecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors().configurationSource(corsConfigurationSource());
-        http.csrf().disable()
+        http
+            .cors()
+                .configurationSource(corsConfigurationSource());
+        http
+            .csrf()
+                .disable()
                 .addFilterBefore(new JwtGivingAuthFilter(memberRepository, jwtProperties, jwtUtil), UsernamePasswordAuthenticationFilter.class)
 //                .addFilter(new JwtAuthenticationFilter(authenticationManager(), jwtProperties))
 //                .addFilter(new JwtAuthorizationFilter(authenticationManager(), memberRepository, jwtProperties))
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.authorizeRequests((authz)->authz
+        http
+            .authorizeRequests((authz)->authz
                 .antMatchers("/api/**").authenticated()
                 .anyRequest().permitAll());
+
+        http
+            .formLogin()
+                .disable()
+            .logout()
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login");
 
         return http.build();
     }
