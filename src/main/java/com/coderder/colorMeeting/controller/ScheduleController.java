@@ -20,9 +20,10 @@ public class ScheduleController {
     private ScheduleService scheduleService;
 
     @GetMapping("/api/schedule/calendar")
-    public ResponseEntity<ScheduleListDto> getUserSchedule(@RequestParam(value="memberId") Long userId){
+    public ResponseEntity<ScheduleListDto> getUserSchedule(@AuthenticationPrincipal PrincipalDetails userDetails,
+                                                           @RequestParam(value="memberId") Long userId){
         ScheduleListDto scheduleListDto = ScheduleListDto.builder()
-                .schedule(scheduleService.getBlockListByUserId(userId))
+                .schedule(scheduleService.getBlockListByUserId(userDetails.getMember()))
                 .build();
         return ResponseEntity.ok().body(scheduleListDto);
     }
@@ -30,7 +31,7 @@ public class ScheduleController {
     @GetMapping("/api/schedule/myschedule")
     public ResponseEntity<ScheduleListDto> getMySchedule(@AuthenticationPrincipal PrincipalDetails userDetails){
         ScheduleListDto scheduleListDto = ScheduleListDto.builder()
-                .schedule(scheduleService.getBlockListByUserId(userDetails.getMember().getId()))
+                .schedule(scheduleService.getBlockListByUserId(userDetails.getMember()))
                 .build();
         return ResponseEntity.ok().body(scheduleListDto);
     }
@@ -71,7 +72,8 @@ public class ScheduleController {
         return ResponseEntity.ok().body(scheduleListDto);
     }
     @PostMapping("/api/schedule/teamschedule")
-    public ResponseEntity<ResponseMessage> makeTeamSchedule(@RequestBody TeamScheduleRequestDto teamScheduleDto){
+    public ResponseEntity<ResponseMessage> makeTeamSchedule(@RequestParam Long teamId, @RequestBody TeamScheduleRequestDto teamScheduleDto){
+        teamScheduleDto.setTeamId(teamId);
         scheduleService.insertGroupSchedule(teamScheduleDto);
         return ResponseEntity.ok().body(new ResponseMessage("team schedule "+teamScheduleDto.getTitle()+" insert complete"));
     }
