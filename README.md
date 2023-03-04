@@ -44,11 +44,13 @@
 
 
 ## 🏰 아키텍쳐
-<details>
+<!-- <details>
 <summary> <b>아키텍쳐 바로보기</b> </summary>
     <img src="https://user-images.githubusercontent.com/100582309/196345657-eaf613d7-01bc-4118-8df8-b08198704d5f.png"> 
-</details>
+</details> -->
 
+
+<img src="https://user-images.githubusercontent.com/100582309/196345657-eaf613d7-01bc-4118-8df8-b08198704d5f.png"> 
 
 <br><br>
 
@@ -56,11 +58,12 @@
 
 ## 📕 ER 다이어그램     
     
-<details>
+<!-- <details>
 <summary> <b>ERD 바로보기</b> </summary>
     <img src="https://user-images.githubusercontent.com/100582309/196347173-6b00b013-187e-4a4c-92b0-ab36f4a84779.png"> 
-</details>
+</details> -->
 
+<img src="https://user-images.githubusercontent.com/100582309/196347173-6b00b013-187e-4a4c-92b0-ab36f4a84779.png"> 
 
 <br><br>
 
