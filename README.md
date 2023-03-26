@@ -110,7 +110,7 @@
 
 |이름|포지션|분담|@ Email|Github|
 |------|------|------|------|------|
-|[<img src="https://github.com/JungguKang.png" width="80">](https://github.com/JungguKang) <br> 강정구|BackEnd|검색(쿼리 최적화)<br>부하 테스트<br>캐싱<br/>||https://github.com/JungguKang|
-|[<img src="https://github.com/JinJiyeon.png" width="80">](https://github.com/JinJiyeon) <br> 진지연|BackEnd|검색(쿼리 최적화)<br>부하 테스트<br>동시성 제어||https://github.com/JinJiyeon|
-|[<img src="https://github.com/deingvelop.png" width="80">](https://github.com/deingvelop) <br> 송민진|BackEnd|검색(쿼리 최적화)<br>부하 테스트<br>로깅|m_6595@naver.com|https://github.com/deingvelop|
+|[<img src="https://github.com/JungguKang.png" width="80">](https://github.com/JungguKang) <br> 강정구|BackEnd|일정 기능<br>||https://github.com/JungguKang|
+|[<img src="https://github.com/JinJiyeon.png" width="80">](https://github.com/JinJiyeon) <br> 진지연|BackEnd|회원 기능<br>||https://github.com/JinJiyeon|
+|[<img src="https://github.com/deingvelop.png" width="80">](https://github.com/deingvelop) <br> 송민진|BackEnd|그룹 기능<br>|m_6595@naver.com|https://github.com/deingvelop|
 
