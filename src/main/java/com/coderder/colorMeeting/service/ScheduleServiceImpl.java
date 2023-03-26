@@ -6,10 +6,7 @@ import com.coderder.colorMeeting.dto.request.TeamTimeDto;
 import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.exception.ErrorCode;
 import com.coderder.colorMeeting.exception.NotFoundException;
-import com.coderder.colorMeeting.model.Member;
-import com.coderder.colorMeeting.model.PersonalSchedule;
-import com.coderder.colorMeeting.model.Team;
-import com.coderder.colorMeeting.model.TeamSchedule;
+import com.coderder.colorMeeting.model.*;
 import com.coderder.colorMeeting.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService{
@@ -32,6 +31,9 @@ public class ScheduleServiceImpl implements ScheduleService{
 
     @Autowired
     private TeamScheduleRepository teamScheduleRepository;
+
+    @Autowired
+    private TeamMemberRepository teamMemberRepository;
 
     @Override
     public void insertScheduleBlock(Member member, ScheduleRequestDto scheduleRequestDto) {
@@ -61,6 +63,29 @@ public class ScheduleServiceImpl implements ScheduleService{
             PersonalScheduleDto tmpBlock = PersonalScheduleDto.builder()
                     .id(block.getId())
                     .memberId(block.getMember().getUsername())
+                    .nickname(member.getNickname())
+                    .title(block.getName())
+                    .start(block.getWeekday() + "+"
+                            + block.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
+                    .end(block.getWeekday() + "+"
+                            + block.getFinishTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")))
+                    .memo(block.getMemo())
+                    .build();
+            blockDtoList.add(tmpBlock);
+        }
+
+        List<Long> joinedTeamIds = teamMemberRepository.getAllByMember(member).stream()
+                .map(TeamMember::getTeam)
+                .map(Team::getId)
+                .collect(toList());
+
+        List<TeamSchedule> teamScheduleList = teamScheduleRepository.findAllByTeamIdIn(joinedTeamIds);
+
+
+        for(TeamSchedule block : teamScheduleList){
+            PersonalScheduleDto tmpBlock = PersonalScheduleDto.builder()
+                    .id(block.getId())
+                    .memberId(member.getUsername())
                     .nickname(member.getNickname())
                     .title(block.getName())
                     .start(block.getWeekday() + "+"

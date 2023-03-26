@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface TeamScheduleRepository extends JpaRepository<TeamSchedule, Long> {
     List<TeamSchedule> findAllByTeamId(Long teamId);
+
+    List<TeamSchedule> findAllByTeamIdIn(List<Long> teamIds);
 }
