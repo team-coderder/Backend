@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService{
@@ -324,5 +321,31 @@ public class ScheduleServiceImpl implements ScheduleService{
     @Override
     public void deleteGroupSchedule(Long scheduleId) {
         teamScheduleRepository.deleteById(scheduleId);
+    }
+
+    @Override
+    public RandomRecommendationDto getRandomRecommandation(Long teamId, Integer spanTime) {
+        List<ScheduleBlockDto> teamEmptyTimes = getMaxAvailableList(teamId, spanTime)
+
+        Random random = new Random();
+        ScheduleBlockDto randomSchedule = teamEmptyTimes.get(random.nextInt(teamEmptyTimes.size()));
+
+        List<String> availableMembers = getAvailableMembers(teamId, randomSchedule);
+
+        RandomRecommendationDto randomRecommendationDto = RandomRecommendationDto.builder()
+                .start(randomSchedule.getStart())
+                .end(randomSchedule.getEnd())
+                .memberNickNames(availableMembers)
+                .build();
+
+        return randomRecommendationDto;
+    }
+
+    private List<ScheduleBlockDto> getMaxAvailableList(Long teamId, Integer spanTime) {
+        List<Member> members = memberRepository.findAllWithTeamId(teamId);
+        List<PersonalSchedule> teamSchedules = personalScheduleRepository.findAllByMemberIn(members);
+
+        List<ScheduleBlockDto> recommendationDtos = getMostEmptyTime(teamSchedules, spanTime, 2);
+        return recommendationDtos;
     }
 }
