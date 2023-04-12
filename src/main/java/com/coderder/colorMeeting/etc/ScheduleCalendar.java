@@ -58,18 +58,99 @@ public class ScheduleCalendar {
         return blockIndex;
     }
 
+    private String convertToWeekday(int weekday){
+        if(weekday == 0) return "mon";
+        else if(weekday == 1) return "tue";
+        else if(weekday == 2) return "wed";
+        else if(weekday == 3) return "thu";
+        else if(weekday == 4) return "fri";
+        else if(weekday == 5) return "sat";
+        else if(weekday == 6) return "sun";
+        else return "";
+    }
+    private LocalTime convertToTime(int timeBlock, int timeInterval){
+        return LocalTime.of(timeBlock/timeInterval
+                , (timeBlock%timeInterval)*(60/timeInterval));
+    }
+
+
     public List<AvailableScheduleDto> getMostAvailableList(Integer spanTime, Integer hourDividedBy) {
         Integer maxNum = 0;
         Integer requiredBlockNum = spanTime / (60/hourDividedBy);
         //then, start,end time would be start only by "hourDividedBy"
 
-        Map<Long, Integer> memberCount = new HashMap<>();
-        for(Member member : teamMembers){
-            memberCount.put()
+        //count continuous blocks(value) per member(key)
+        Map<Member, Integer> memberCounter = new HashMap<>();
+
+        initializeCounter(memberCounter, teamMembers);
+        List<AvailableScheduleDto> availableScheduleDtoList = new ArrayList<>();
+        for(int i=0; i< calendar.size(); i++){
+            List<Set<Member>> day = calendar.get(i);
+            for(int blockIndex=0; blockIndex<day.size(); blockIndex++){
+                Set<Member> oneBlock = day.get(blockIndex);
+                setCounter(memberCounter, oneBlock, requiredBlockNum);
+
+                Set<Member> availableMems = new HashSet<>();
+                for(Member member : memberCounter.keySet()){
+                    if(memberCounter.get(member) == requiredBlockNum) availableMems.add(member);
+                }
+
+                if(maxNum < availableMems.size()){
+                    maxNum = availableMems.size();
+                    availableScheduleDtoList.clear();
+                    String start = convertBlockToTime(blockIndex-requiredBlockNum+1, hourDividedBy);
+                    String end = convertBlockToTime(blockIndex, hourDividedBy);
+                    insertAvailableSchedule(availableScheduleDtoList, availableMems, start, end, convertToWeekday(i));
+
+                }else if(maxNum == availableMems.size()){
+                    String start = convertBlockToTime(blockIndex-requiredBlockNum+1, hourDividedBy);
+                    String end = convertBlockToTime(blockIndex, hourDividedBy);
+                    insertAvailableSchedule(availableScheduleDtoList, availableMems, start, end, convertToWeekday(i));
+                }
+            }
         }
+        return availableScheduleDtoList;
+    }
 
-        for(List<Set<Member>> day : calendar){
+    private String convertBlockToTime(Integer blockIndex, Integer hourDividedBy) {
+        int hour = blockIndex / hourDividedBy;
+        int minute = (blockIndex % hourDividedBy) * (60/hourDividedBy);
 
+        String time = String.format("%02d",hour)+":"+String.format("%02d",minute);
+        return time;
+    }
+
+    private void setCounter(Map<Member, Integer> memberCounter, Set<Member> oneBlock, Integer requiredBlockNum) {
+        for(Member mem : memberCounter.keySet()){
+            if(oneBlock.contains(mem)) memberCounter.put(mem, 0);
+            else {
+                Integer continuousCount = memberCounter.get(mem) == requiredBlockNum ?
+                        memberCounter.get(mem) : memberCounter.get(mem)+1;
+                memberCounter.put(mem, continuousCount);
+            }
+        }
+    }
+
+    private void insertAvailableSchedule(List<AvailableScheduleDto> availableScheduleDtoList,
+                                         Set<Member> availableMems,
+                                         String start,
+                                         String end,
+                                         String weekday) {
+        List<Member> templist = new ArrayList<>();
+        for(Member mem : availableMems){
+            templist.add(mem);
+        }
+        AvailableScheduleDto dto = AvailableScheduleDto.builder()
+                .availableMember(templist)
+                .start(weekday+"+"+start)
+                .end(weekday+"+"+end)
+                .build();
+        availableScheduleDtoList.add(dto);
+    }
+
+    private void initializeCounter(Map<Member, Integer> memberCounter, List<Member> teamMembers) {
+        for(Member member : teamMembers){
+            memberCounter.put(member, 0);
         }
     }
 }

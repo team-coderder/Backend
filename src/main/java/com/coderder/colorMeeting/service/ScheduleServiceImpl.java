@@ -122,7 +122,6 @@ public class ScheduleServiceImpl implements ScheduleService{
         return scheduleBlockDtoList;
     }
 
-    @Override
     public List<ScheduleBlockDto> getTeamEmptyTimes(TeamTimeDto teamTimeDto) {
         List<Member> members = memberRepository.findAllWithTeamId(teamTimeDto.getTeamId());
         List<PersonalSchedule> teamSchedules = personalScheduleRepository.findAllByMemberIn(members);
@@ -356,10 +355,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 
     private List<AvailableScheduleDto> getMostEmptyTime(List<PersonalSchedule> teamSchedules, List<Member> members, Integer spanTime, int hourDividedBy) {
         ScheduleCalendar calendar = ScheduleCalendar.createCalendar(teamSchedules, members, hourDividedBy);
-
-
-
-        List<AvailableScheduleDto> mostAvailableList = calendar.getMostAvailableList(spanTime);
+        List<AvailableScheduleDto> mostAvailableList = calendar.getMostAvailableList(spanTime, hourDividedBy);
         return mostAvailableList;
     }
 }
