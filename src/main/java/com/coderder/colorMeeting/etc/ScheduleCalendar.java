@@ -26,7 +26,7 @@ public class ScheduleCalendar {
         for(PersonalSchedule schedule : teamSchedules){
             List<Set<Member>> list = calendar.get(convertWeekday(schedule.getWeekday()));
             int startIndex = convertTime(schedule.getStartTime(), hourDividedBy);
-            int endIndex = convertTime(schedule.getFinishTime(), hourDividedBy);
+            int endIndex = convertTime(schedule.getFinishTime().minusMinutes(1), hourDividedBy);
             for(int i=startIndex; i<=endIndex; i++){
                 list.get(i).add(schedule.getMember());
             }
@@ -77,6 +77,7 @@ public class ScheduleCalendar {
     public List<AvailableScheduleDto> getMostAvailableList(Integer spanTime, Integer hourDividedBy) {
         Integer maxNum = 0;
         Integer requiredBlockNum = spanTime / (60/hourDividedBy);
+        System.out.println(requiredBlockNum);
         //then, start,end time would be start only by "hourDividedBy"
 
         //count continuous blocks(value) per member(key)
@@ -104,7 +105,7 @@ public class ScheduleCalendar {
 
                 }else if(maxNum == availableMems.size()){
                     String start = convertBlockToTime(blockIndex-requiredBlockNum+1, hourDividedBy);
-                    String end = convertBlockToTime(blockIndex, hourDividedBy);
+                    String end = convertBlockToTime(blockIndex+1, hourDividedBy);
                     insertAvailableSchedule(availableScheduleDtoList, availableMems, start, end, convertToWeekday(i));
                 }
             }
