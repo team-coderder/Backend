@@ -3,7 +3,6 @@ package com.coderder.colorMeeting.controller;
 import com.coderder.colorMeeting.config.auth.PrincipalDetails;
 import com.coderder.colorMeeting.dto.request.ScheduleRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamScheduleRequestDto;
-import com.coderder.colorMeeting.dto.request.TeamTimeDto;
 import com.coderder.colorMeeting.dto.response.*;
 import com.coderder.colorMeeting.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,11 +64,11 @@ public class ScheduleController {
         return ResponseEntity.ok().body(scheduleBlockDtoList);
     }
     @GetMapping("/api/schedule/recommendations")
-    public ResponseEntity<ScheduleListDto> getRecommendations(@RequestBody TeamTimeDto teamTimeDto){
-        List<ScheduleBlockDto> recommendationList = scheduleService.getTeamEmptyTimes(teamTimeDto);
-        ScheduleListDto scheduleListDto = ScheduleListDto.builder()
-                .schedule(recommendationList).build();
-        return ResponseEntity.ok().body(scheduleListDto);
+    public ResponseEntity<RandomRecommendationDto> getRecommendations(
+            @RequestParam Long teamId,
+            @RequestParam Integer spanTime){
+        RandomRecommendationDto randomRecommendationDto = scheduleService.getRandomRecommandation(teamId, spanTime);
+        return ResponseEntity.ok().body(randomRecommendationDto);
     }
     @PostMapping("/api/schedule/teamschedule")
     public ResponseEntity<ResponseMessage> makeTeamSchedule(@RequestParam Long teamId, @RequestBody TeamScheduleRequestDto teamScheduleDto){
