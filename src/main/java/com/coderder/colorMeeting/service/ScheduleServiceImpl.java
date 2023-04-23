@@ -4,6 +4,7 @@ import com.coderder.colorMeeting.dto.request.ScheduleRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamScheduleRequestDto;
 import com.coderder.colorMeeting.dto.request.TeamTimeDto;
 import com.coderder.colorMeeting.dto.response.*;
+import com.coderder.colorMeeting.etc.ScheduleCalendar;
 import com.coderder.colorMeeting.exception.ErrorCode;
 import com.coderder.colorMeeting.exception.NotFoundException;
 import com.coderder.colorMeeting.model.Member;
@@ -16,10 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService{
@@ -123,7 +122,6 @@ public class ScheduleServiceImpl implements ScheduleService{
         return scheduleBlockDtoList;
     }
 
-    @Override
     public List<ScheduleBlockDto> getTeamEmptyTimes(TeamTimeDto teamTimeDto) {
         List<Member> members = memberRepository.findAllWithTeamId(teamTimeDto.getTeamId());
         List<PersonalSchedule> teamSchedules = personalScheduleRepository.findAllByMemberIn(members);
@@ -324,5 +322,40 @@ public class ScheduleServiceImpl implements ScheduleService{
     @Override
     public void deleteGroupSchedule(Long scheduleId) {
         teamScheduleRepository.deleteById(scheduleId);
+    }
+
+    @Override
+    public RandomRecommendationDto getRandomRecommandation(Long teamId, Integer spanTime) {
+        List<AvailableScheduleDto> teamEmptyTimes = getMaxAvailableList(teamId, spanTime);
+
+        Random random = new Random();
+        AvailableScheduleDto randomSchedule = teamEmptyTimes.get(random.nextInt(teamEmptyTimes.size()));
+
+        List<String> availableMembers = randomSchedule.getAvailableMember()
+                .stream()
+                .map(Member::getNickname)
+                .collect(Collectors.toList());
+
+        RandomRecommendationDto randomRecommendationDto = RandomRecommendationDto.builder()
+                .start(randomSchedule.getStart())
+                .end(randomSchedule.getEnd())
+                .memberNickNames(availableMembers)
+                .build();
+
+        return randomRecommendationDto;
+    }
+
+    private List<AvailableScheduleDto> getMaxAvailableList(Long teamId, Integer spanTime) {
+        List<Member> members = memberRepository.findAllWithTeamId(teamId);
+        List<PersonalSchedule> teamSchedules = personalScheduleRepository.findAllByMemberIn(members);
+
+        List<AvailableScheduleDto> recommendationDtos = getMostEmptyTime(teamSchedules, members, spanTime, 2);
+        return recommendationDtos;
+    }
+
+    private List<AvailableScheduleDto> getMostEmptyTime(List<PersonalSchedule> teamSchedules, List<Member> members, Integer spanTime, int hourDividedBy) {
+        ScheduleCalendar calendar = ScheduleCalendar.createCalendar(teamSchedules, members, hourDividedBy);
+        List<AvailableScheduleDto> mostAvailableList = calendar.getMostAvailableList(spanTime, hourDividedBy);
+        return mostAvailableList;
     }
 }
