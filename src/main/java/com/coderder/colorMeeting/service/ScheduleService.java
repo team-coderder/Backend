@@ -16,6 +16,8 @@ public interface ScheduleService {
 
     List<ScheduleBlockDto> getBlockListByTeamIdWithoutOverlap(Long teamId);
 
+    List<ScheduleBlockDto> getTeamEmptyTimes(Long teamId);
+
 
     void insertGroupSchedule(TeamScheduleRequestDto teamScheduleDto);
 

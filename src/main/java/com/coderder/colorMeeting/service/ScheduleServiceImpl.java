@@ -22,15 +22,21 @@ import java.util.stream.Collectors;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService{
-    @Autowired
-    private PersonalScheduleRepository personalScheduleRepository;
-    @Autowired
-    private MemberRepository memberRepository;
-    @Autowired
-    private TeamRepository teamRepository;
+    private final PersonalScheduleRepository personalScheduleRepository;
+    private final MemberRepository memberRepository;
+    private final TeamRepository teamRepository;
 
-    @Autowired
-    private TeamScheduleRepository teamScheduleRepository;
+    private final TeamScheduleRepository teamScheduleRepository;
+
+    public ScheduleServiceImpl(PersonalScheduleRepository personalScheduleRepository,
+                               MemberRepository memberRepository,
+                               TeamRepository teamRepository,
+                               TeamScheduleRepository teamScheduleRepository) {
+        this.personalScheduleRepository = personalScheduleRepository;
+        this.memberRepository = memberRepository;
+        this.teamRepository = teamRepository;
+        this.teamScheduleRepository = teamScheduleRepository;
+    }
 
     @Override
     public void insertScheduleBlock(Member member, ScheduleRequestDto scheduleRequestDto) {
@@ -122,8 +128,8 @@ public class ScheduleServiceImpl implements ScheduleService{
         return scheduleBlockDtoList;
     }
 
-    public List<ScheduleBlockDto> getTeamEmptyTimes(TeamTimeDto teamTimeDto) {
-        List<Member> members = memberRepository.findAllWithTeamId(teamTimeDto.getTeamId());
+    public List<ScheduleBlockDto> getTeamEmptyTimes(Long teamId) {
+        List<Member> members = memberRepository.findAllWithTeamId(teamId);
         List<PersonalSchedule> teamSchedules = personalScheduleRepository.findAllByMemberIn(members);
 
         List<ScheduleBlockDto> recommendationDtos = calculateEmptyTimes(teamSchedules, 2);
@@ -143,13 +149,20 @@ public class ScheduleServiceImpl implements ScheduleService{
 
         List<ScheduleBlockDto> times = new ArrayList<>();
         for(int i=0; i<weekCalendar.length; i++){
+            boolean isContinuous = false;
+            int startBlockIndex = 0;
             for(int j=0; j< weekCalendar[0].length-1; j++){
-                if(weekCalendar[i][j]) continue;
-                ScheduleBlockDto time = ScheduleBlockDto.builder()
-                        .start(convertToTime(j, timeInterval).toString())
-                        .end(convertToTime(j+1, timeInterval).toString())
-                        .build();
-                times.add(time);
+                if(weekCalendar[i][j] && isContinuous) {
+                    ScheduleBlockDto time = ScheduleBlockDto.builder()
+                            .start(convertToWeekday(i) + "+" +convertToTime(startBlockIndex, timeInterval).toString())
+                            .end(convertToWeekday(i) + "+" + convertToTime(j+1, timeInterval).toString())
+                            .build();
+                    times.add(time);
+                    isContinuous = false;
+                } else if(!isContinuous) {
+                    startBlockIndex = j;
+                    isContinuous = true;
+                }
             }
         }
         return times;
@@ -171,13 +184,13 @@ public class ScheduleServiceImpl implements ScheduleService{
         return blockIndex;
     }
     private String convertToWeekday(int weekday){
-        if(weekday == 0) return "mon";
-        else if(weekday == 1) return "tue";
-        else if(weekday == 2) return "wed";
-        else if(weekday == 3) return "thu";
-        else if(weekday == 4) return "fri";
-        else if(weekday == 5) return "sat";
-        else if(weekday == 6) return "sun";
+        if(weekday == 0) return "MON";
+        else if(weekday == 1) return "TUE";
+        else if(weekday == 2) return "WED";
+        else if(weekday == 3) return "THU";
+        else if(weekday == 4) return "FRI";
+        else if(weekday == 5) return "SAT";
+        else if(weekday == 6) return "SUN";
         else return "";
     }
     private LocalTime convertToTime(int timeBlock, int timeInterval){
